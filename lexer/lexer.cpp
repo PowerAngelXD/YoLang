@@ -108,11 +108,9 @@ void yolexer::Lexer::generate(){
             if(!isKeyWord)
                 tokenGroup.push_back({content, yoTokType::Identifier, line, column});
         }
-        else if(input[i] == '/'){
-            if(input[i + 1] == '/'){
-                while(input[i] != '\n' && input[i] != '\0')
+        else if(input[i] == '#'){
+            while(input[i] != '\n' && input[i] != '\0')
                     i++;column++;
-            }
         }
         else {
             //是各种符号
@@ -152,7 +150,7 @@ void yolexer::Lexer::generate(){
                     column++;
                 }
                 else 
-                    tokenGroup.push_back({"+", yoTokType::Symbol, line, column});
+                    tokenGroup.push_back({"-", yoTokType::Symbol, line, column});
             }
             else if(input[i] == '>'){
                 if(input[i + 1] == '='){
