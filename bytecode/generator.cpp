@@ -69,7 +69,7 @@ void ygen::ByteCodeGenerator::visitStrCh(yolexer::yoToken* token){
             default: break;
             }
         }
-        normalCtor(btc::push, addPara(ret), paraHelper::charcter, token->line, token->column);
+        normalCtor(btc::push, addPara(ret), paraHelper::character, token->line, token->column);
     }
     else if(token->type == yolexer::yoTokType::String){
         std::string content = token->content;
@@ -200,6 +200,8 @@ void ygen::ByteCodeGenerator::visitCmpExpr(AST::CmpExprNode* node){
         visitAddExpr(node->cmpExpr);
         visitCmpOp(node->op);
     }
+    if(node->reverse != nullptr)
+        visitCmpOp(node->reverse);
 }
 void ygen::ByteCodeGenerator::visitBoolExpr(AST::BoolExprNode* node){
     visitCmpExpr(node->cmps[0]);
