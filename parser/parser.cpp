@@ -232,7 +232,7 @@ AST::ListExprNode* parser::Parser::parseListExprNode(){
 AST::MulExprNode* parser::Parser::parseMulExprNode(){
     AST::MulExprNode* node = new AST::MulExprNode;
     if(isPrim()) node->prims.push_back(parsePrimExprNode());
-    else;
+    else throw yoexception::YoError("SyntaxError", "Expect a primary expression!", tg[offset].line, tg[offset].column);
     while(true){
         if(!isMulOp()) break;
         node->ops.push_back(parseMulOpNode());
@@ -243,7 +243,7 @@ AST::MulExprNode* parser::Parser::parseMulExprNode(){
 AST::AddExprNode* parser::Parser::parseAddExprNode(){
     AST::AddExprNode* node = new AST::AddExprNode;
     if(isMulExpr()) node->muls.push_back(parseMulExprNode());
-    else;
+    else throw yoexception::YoError("SyntaxError", "Expect a mul expression!", tg[offset].line, tg[offset].column);
     while(true){
         if(!isAddOp()) break;
         node->ops.push_back(parseAddOpNode());
@@ -254,7 +254,7 @@ AST::AddExprNode* parser::Parser::parseAddExprNode(){
 AST::CmpExprNode* parser::Parser::parseCmpExprNode(){
     AST::CmpExprNode* node = new AST::CmpExprNode;
     if(peek()->content == "!") {
-        node->reverse = token();
+        node->reverse = parseCmpOpNode();
         if(isAddExpr()) node->expr = parseAddExprNode();
         else throw yoexception::YoError("SyntaxError", "An appropriate expression is required!", 
                 tg[offset].line,
@@ -278,7 +278,7 @@ AST::CmpExprNode* parser::Parser::parseCmpExprNode(){
 AST::BoolExprNode* parser::Parser::parseBoolExprNode(){
     AST::BoolExprNode* node = new AST::BoolExprNode;
     if(isCmpExpr()) node->cmps.push_back(parseCmpExprNode());
-    else;
+    else throw yoexception::YoError("SyntaxError", "Expect a compare expression!", tg[offset].line, tg[offset].column);
     while(true){
         if(!isBoolOp()) break;
         node->ops.push_back(parseBoolOpNode());
