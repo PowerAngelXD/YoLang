@@ -19,7 +19,7 @@ namespace ygen{
         // 说明：iden和iden_text
         // iden：标识符和它对应的值
         // iden_text：标识符本身，纯文字
-        enum typeHelper{ iden, iden_text, string, charcter, integer, decimal, null };
+        enum typeHelper{ iden, iden_text, string, boolean, character, integer, decimal, null };
     }
 
     struct byteCode{
