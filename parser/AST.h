@@ -96,7 +96,7 @@ namespace AST{
 
     class CmpExprNode{
     public:
-        yolexer::yoToken* reverse = nullptr;
+        CmpOpNode* reverse = nullptr;
         AddExprNode* expr = nullptr;
         CmpOpNode* op = nullptr;
         AddExprNode* cmpExpr = nullptr;
