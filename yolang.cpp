@@ -3,6 +3,7 @@
 
 int main(){
     std::string cmd;
+    std::cout<<"Yolang Shell "<<std::endl;
     while(true){
         try{
             std::cout<<">>";
