@@ -75,6 +75,10 @@ bool parser::Parser::isCmpExpr() {
             offset = temp; // 归位
             return true;
         }
+        else if(isBoolOp()) {
+            offset = temp;
+            return true;
+        }
         else {
             offset = temp; // 归位
             return false;
@@ -168,21 +172,33 @@ AST::IndexOpNode* parser::Parser::parseIndeOpNode(){
     return node;
 }
 AST::AddOpNode* parser::Parser::parseAddOpNode(){
+    if(!isAddOp()) throw yoexception::YoError("SyntaxError", "Expect '+' or '-'", 
+                        tg[offset].line,
+                        tg[offset].column);
     AST::AddOpNode* node = new AST::AddOpNode;
     node->op = token();
     return node;
 }
 AST::MulOpNode* parser::Parser::parseMulOpNode(){
+    if(!isMulOp()) throw yoexception::YoError("SyntaxError", "Expect '*', '%' or '/'", 
+                        tg[offset].line,
+                        tg[offset].column);
     AST::MulOpNode* node = new AST::MulOpNode;
     node->op = token();
     return node;
 }
 AST::CmpOpNode* parser::Parser::parseCmpOpNode(){
+    if(!isCmpOp()) throw yoexception::YoError("SyntaxError", "Expect '==', '!=', '>', '>=', '<' or '<='", 
+                        tg[offset].line,
+                        tg[offset].column);
     AST::CmpOpNode* node = new AST::CmpOpNode;
     node->op = token();
     return node;
 }
 AST::BoolOpNode* parser::Parser::parseBoolOpNode(){
+    if(!isBoolOp()) throw yoexception::YoError("SyntaxError", "Expect '||' or '&&'", 
+                        tg[offset].line,
+                        tg[offset].column);
     AST::BoolOpNode* node = new AST::BoolOpNode;
     node->op = token();
     return node;
@@ -195,6 +211,7 @@ AST::PrimExprNode* parser::Parser::parsePrimExprNode(){
     else if(peek()->type == yolexer::yoTokType::Character) node->character = token();
     else if(peek()->type == yolexer::yoTokType::String) node->string = token();
     else if(peek()->content == "null") node->null = token();
+    else if(peek()->content == "true" || peek()->content == "false") node->boolconst = token();
     else if(isIdentifier()) {
         node->iden = parseIdentifierNode();
         if(isIndexOp()) node->op = parseIndeOpNode();
