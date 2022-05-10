@@ -9,16 +9,13 @@ namespace yvm{
      */
     namespace var {
         class Value{
-            int intVal;
-            float deciVal;
-            std::string strVal;
-            std::string charVal;
-            int nullVal = 1; // nullVal默认值为1，当它为0则说明这个Value是一个null
-            std::vector<Value> list; // 列表结构，存放的是Value
+            int intValue;
+            std::vector<Value> list;
+            ygen::paraHelper::typeHelper type;
 
-            bool isList = false;
+            bool islist = false;
         public:
-
+            bool isList();
         };
     }
 

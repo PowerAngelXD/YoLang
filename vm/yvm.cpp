@@ -257,6 +257,16 @@ int yvm::YVM::run(std::string arg) {
             case ygen::btc::no:{
                 envPush(vmValue(vmVType::boolean, envPop().second == true?0:1));
             }
+            case ygen::btc::logicand:{
+                auto right = envPop();
+                auto left = envPop();
+                envPush(vmValue(vmVType::boolean, (bool)left.second==true && (bool)right.second==true));
+            }
+            case ygen::btc::logicor:{
+                auto right = envPop();
+                auto left = envPop();
+                envPush(vmValue(vmVType::boolean, (bool)left.second==true || (bool)right.second==true));
+            }
             default: break;
         }
     }
