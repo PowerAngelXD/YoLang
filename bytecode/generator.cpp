@@ -45,7 +45,12 @@ void ygen::ByteCodeGenerator::genFile() {
     file.close();
 }
 
-
+void ygen::ByteCodeGenerator::visitBoolean(yolexer::yoToken* token){
+    if(token->content == "false")
+        normalCtor(btc::push, 0, paraHelper::boolean, token->line, token->column);
+    else if(token->content == "true")
+        normalCtor(btc::push, 1, paraHelper::boolean, token->line, token->column);
+}
 void ygen::ByteCodeGenerator::visitNumber(yolexer::yoToken* token){
     if(token->type == yolexer::yoTokType::Integer)
         normalCtor(btc::push, atoi(token->content.c_str()), paraHelper::integer, token->line, token->column);
@@ -174,6 +179,7 @@ void ygen::ByteCodeGenerator::visitIndexOp(AST::IndexOpNode* node){
 void ygen::ByteCodeGenerator::visitPrimExpr(AST::PrimExprNode* node){
     if(node->number != nullptr) visitNumber(node->number);
     else if(node->string != nullptr) visitStrCh(node->string);
+    else if(node->boolconst != nullptr) visitBoolean(node->boolconst);
     else if(node->character != nullptr) visitStrCh(node->character);
     else if(node->null != nullptr) visitNull(node->null);
     else if(node->iden != nullptr) visitIdentifier(node->iden);
