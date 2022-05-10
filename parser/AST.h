@@ -36,6 +36,7 @@ namespace AST{
         yolexer::yoToken* string = nullptr;
         yolexer::yoToken* null = nullptr;
         yolexer::yoToken* character = nullptr;
+        yolexer::yoToken* boolconst = nullptr;
         IdentifierNode* iden = nullptr;
         FuncCallNode* fcall = nullptr;
         SiadExprNode* siad = nullptr;
