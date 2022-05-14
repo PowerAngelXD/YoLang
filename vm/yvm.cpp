@@ -259,6 +259,8 @@ int yvm::YVM::run(std::string arg) {
             case ygen::btc::div:{
                 auto right = envPop();
                 auto left = envPop();
+                if(right.second == 0)
+                    throw yoexception::YoError("CalculationError", "Divisor cannot be 0", codes[i].line, codes[i].column);
                 if(left.first == vmVType::integer || right.first == vmVType::integer){
                     if(left.first == vmVType::integer && right.first == vmVType::integer)
                         envPush(vmValue(vmVType::integer, left.second / right.second));
