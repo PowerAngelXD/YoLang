@@ -1,3 +1,5 @@
 build
 .vscode
 yolang
+.idea
+cmake-build-release-mingw
