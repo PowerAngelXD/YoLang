@@ -4,8 +4,7 @@ yoexception::YoError::YoError(std::string title, std::string content, int line, 
     std::string e = "An exception occurred while executing:\n{{" + 
                     title + "}}:\n    " + 
                     content + 
-                    "\nline: " + std::to_string(line) + 
-                    ", column: " + std::to_string(column);
+                    (line == -1 && column == -1?"\nline: " + std::to_string(line) + ", column: " + std::to_string(column):" ");
     message = e;
 }
 
