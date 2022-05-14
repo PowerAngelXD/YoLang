@@ -14,23 +14,26 @@ namespace yvm{
             class Scope{
             public:
                 class Value{
-                    int intvalue;
-                    float decivalue;
-                    std::string strvalue;
-                    char charvalue;
-                    bool boolvalue;
+                    int intvalue;   // 值
+                    float decivalue;   // 值
+                    std::string strvalue;   // 值
+                    char charvalue;   // 值
+                    bool boolvalue;   // 值
                     
-                    std::vector<Value> list;
+                    std::vector<Value> list; // 列表
 
-                    ygen::paraHelper::typeHelper type;
+                    ygen::paraHelper::type type; // 类型
+                    int line, column; // 行，列
 
                     bool isconst = false;
                     bool islist = false;
                 public:
-                    // 构造变量
-                    Value(int val); Value(float val); Value(std::string val); Value(char val); Value(bool val);
                     // 构造变量或者常量，isc用来检测是不是常量                 
-                    Value(int val, bool isc); Value(float val, bool isc); Value(std::string val, bool isc); Value(char val, bool isc); Value(bool val, bool isc);
+                    Value(int val, bool isc, int ln, int col);
+                    Value(float val, bool isc, int ln, int col);
+                    Value(std::string val, bool isc, int ln, int col);
+                    Value(char val, bool isc, int ln, int col);
+                    Value(bool val, bool isc, int ln, int col);
                     // 构造列表
                     Value(std::vector<Value> list);
                     // 构造列表，isc用来检测列表是不是常量                
@@ -38,13 +41,14 @@ namespace yvm{
 
                     bool isList();   // 判断当前Value是否为列表
                     bool isConst();  // 判断当前Value是否为Constant
-                    ygen::paraHelper::typeHelper getType(); // 获得Value的type
+                    ygen::paraHelper::type getType(); // 获得Value的type
 
                     template<class Type>
                     Type getValue();
 
                     template<class Type>
                     void assignValue(Type val);
+                    void assignValue(std::string name, std::vector<Value> value);
                 };
                 friend Value;
                 friend Space;
@@ -55,10 +59,17 @@ namespace yvm{
                 std::string idenname; // scope的标识名
             public:
                 Scope(std::string name);
-
-                bool findValue(std::string name);
-                Value getValue(std::string name);
-                int getPos(std::string name);
+                // 查找是否有名为name的identifier
+                bool findV(std::string name);
+                // 返回名为name的value
+                Value val(std::string name); 
+                // 赋值
+                template<class Type>
+                void assign(std::string name, Type value);  
+                // 获得名为name的value的position
+                int pos(std::string name); 
+                // 删除名为name的value
+                void remove(std::string name); 
 
                 std::string getName();
             };
