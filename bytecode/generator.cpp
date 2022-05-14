@@ -186,6 +186,8 @@ void ygen::ByteCodeGenerator::visitPrimExpr(AST::PrimExprNode* node){
     else if(node->iden != nullptr) visitIdentifier(node->iden);
     else if(node->siad != nullptr) visitSiadExpr(node->siad);
     else if(node->expr != nullptr) visitExpr(node->expr);
+    
+    if(node->op != nullptr) visitIndexOp(node->op);
 }
 void ygen::ByteCodeGenerator::visitMulExpr(AST::MulExprNode* node){
     visitPrimExpr(node->prims[0]);
