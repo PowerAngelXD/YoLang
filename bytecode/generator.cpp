@@ -74,6 +74,7 @@ void ygen::ByteCodeGenerator::visitStrCh(yolexer::yoToken* token){
             default: break;
             }
         }
+        else ret = content[0];
         normalCtor(btc::push, addPara(ret), paraHelper::character, token->line, token->column);
     }
     else if(token->type == yolexer::yoTokType::String){
