@@ -36,16 +36,18 @@ namespace yvm{
                     Value(char val, bool isc, int ln, int col);
                     Value(bool val, bool isc, int ln, int col);
                     // 构造列表
-                    Value(std::vector<Value> list);
+                    Value(std::vector<Value> list, int ln, int col);
                     // 构造列表，isc用来检测列表是不是常量                
-                    Value(std::vector<Value> list, bool isc);
+                    Value(std::vector<Value> list, bool isc, int ln, int col);
 
                     bool isList();   // 判断当前Value是否为列表
                     bool isConst();  // 判断当前Value是否为Constant
                     ygen::paraHelper::type getType(); // 获得Value的type
-
-                    template<class Type>
-                    Type getValue();
+                    int getIntValue();
+                    float getDeciValue();
+                    std::string getStrValue();
+                    char getCharValue();
+                    bool getBoolValue();
 
                     template<class Type>
                     void assignValue(Type val);
@@ -56,9 +58,9 @@ namespace yvm{
                 typedef std::pair<std::string, Value> storage;
             private:
                 std::vector<storage> values;
+            public:
                 std::vector<std::string> memberlist; // 成员名列表
                 std::string idenname; // scope的标识名
-            public:
                 Scope(std::string name);
                 // 查找是否有名为name的identifier
                 bool findV(std::string name);
@@ -71,14 +73,17 @@ namespace yvm{
                 int pos(std::string name); 
                 // 删除名为name的value
                 void remove(std::string name); 
-
-                std::string getName();
+                // 创建一个新的Value实例
+                void create(std::string name, Value value);
             };
             friend Scope;
         private:
             std::vector<Scope> scopestack; // scope栈
-            int deepcount; // 深度计数器
+            int deepcount = 0; // 深度计数器
         public:
+            // 初始化
+            Space();
+
             // 查找所有的Scope中是否有以“name”为名称的value，并返回这个Scope
             Scope getScope(std::string name);
             // 查找所有的Scope中是否有以“name”为名称的value，并返回这个Scope对应的索引值
@@ -89,9 +94,13 @@ namespace yvm{
             void removeScope();
             // 将当前Scope保存，先删除当前Scope，再返回到上一级Scope中，最后返回删除的Scope
             Scope PopScope(std::string name);
+            // 返回当前deepcount指向的scope
+            Scope& current();
 
             // 查找所有的scope（从当前scope一直回溯到globalScope）中是否有以“name”为名称的value
             bool find(std::string name);
+            // 在当前Scope下创建新的Value实例
+            void createValue(std::string name, Scope::Value value);
             // 查找所有的Scope中是否有以“name”为名称的value，并返回这个value
             Scope::Value getValue(std::string name);
             // 查找所有的Scope中是否有以“name”为名称的value，并返回这个value对应的索引值
@@ -131,11 +140,12 @@ namespace yvm{
         int runtimeTop = 0;
 
         int addString(std::string str);
+        int addChar(char ch);
         int addList(std::vector<vmValue> values);
     public:
         // 对每一个vm实例的初始化
         YVM(ygen::ByteCodeGenerator bcg);
-        YVM()=default;
+        YVM();
 
         std::string getVersion();
         void envPush(vmValue val);
@@ -145,5 +155,6 @@ namespace yvm{
         std::vector<std::string> getPool();
 
         int run(std::string arg);
+        void reload(std::vector<ygen::byteCode> _codes, std::vector<std::string> _constpool);
     };
 }

@@ -2,6 +2,10 @@
 using namespace yvm::var;
 
 // Space
+Space::Space(){
+    scopestack.push_back(Scope("YoGlobal"));
+}
+
 Space::Scope Space::getScope(std::string name){
     int temp = deepcount;
     while(temp > 0){
@@ -12,9 +16,12 @@ Space::Scope Space::getScope(std::string name){
     }
     throw yoexception::YoError("InsideError", "In: yvm::var::Space::getTargetScope:Cannot find the scope that name is '" + name + "'", -1, -1);
 }
+
+Space::Scope& Space::current() {return scopestack[deepcount];}
+
 int Space::getScopePos(std::string name){
     int temp = deepcount;
-    while(temp > 0){
+    while(temp >= 0){
         for(int i = 0; i < scopestack.size(); i++){
             if(scopestack[i].findV(name)) return i;
         }
@@ -27,8 +34,11 @@ void Space::createScope(std::string name){
     scopestack.push_back(Scope(name));
 }
 void Space::removeScope(){
-    deepcount --;
-    scopestack.erase(scopestack.begin() + scopestack.size() - 1);
+    if(scopestack[deepcount].idenname == "YoGlobal"); // 是全局Scope，不能删除
+    else{
+        deepcount --;
+        scopestack.erase(scopestack.begin() + scopestack.size() - 1);
+    }
 }
 Space::Scope Space::PopScope(std::string name){
     deepcount --;
@@ -39,7 +49,7 @@ Space::Scope Space::PopScope(std::string name){
 
 bool Space::find(std::string name){
     int temp = deepcount;
-    while(temp > 0){
+    while(temp >= 0){
         for(auto value: scopestack[temp].values){
             if(value.first == name) return true;
         }
@@ -49,7 +59,7 @@ bool Space::find(std::string name){
 }
 Space::Scope::Value Space::getValue(std::string name){
     int temp = deepcount;
-    while(temp > 0){
+    while(temp >= 0){
         for(auto value: scopestack[temp].values){
             if(value.first == name) return value.second;
         }
@@ -59,7 +69,7 @@ Space::Scope::Value Space::getValue(std::string name){
 }
 int Space::getValuePos(std::string name){
     int temp = deepcount;
-    while(temp > 0){
+    while(temp >= 0){
         for(int i = 0; i < scopestack[temp].values.size(); i++){
             if(scopestack[temp].findV(name)) return i;
         }
@@ -77,6 +87,9 @@ void Space::assignValue(std::string name, std::vector<Type> value){
 }
 void Space::deleteValue(std::string name) {
     scopestack[getScopePos(name)].remove(name);
+}
+void Space::createValue(std::string name, Scope::Value value) {
+    scopestack[deepcount].create(name, value);
 }
 int Space::getDeep(){
     return deepcount;
@@ -98,6 +111,9 @@ Space::Scope::Value Space::Scope::val(std::string name){
     }
     throw yoexception::YoError("InsideError", "In: yvm::var::Space::Scope::getValue:Cannot find the value that name is '" + name + "'", -1, -1);
 }
+void Space::Scope::create(std::string name, Value value){
+    values.push_back(storage(name, value));
+}
 
 template<class Type>
 void Space::Scope::assign(std::string name, Type value){
@@ -116,49 +132,53 @@ void Space::Scope::remove(std::string name) {
     else throw yoexception::YoError("NameError", "Identifier with '" + name + "' does not exist", -1, -1);
 }
 
-std::string Space::Scope::getName(){
-    return idenname;
-}
-
 
 // Value      
-yvm::var::Space::Scope::Value::Value(int val, bool isc, int ln, int col): 
+Space::Scope::Value::Value(int val, bool isc, int ln, int col): 
                 intvalue(val), isconst(isc), type(ygen::paraHelper::integer), line(ln), column(col) {}
-yvm::var::Space::Scope::Value::Value(float val, bool isc, int ln, int col): 
+Space::Scope::Value::Value(float val, bool isc, int ln, int col): 
                 decivalue(val), isconst(isc), type(ygen::paraHelper::decimal), line(ln), column(col) {}
-yvm::var::Space::Scope::Value::Value(std::string val, bool isc, int ln, int col): 
+Space::Scope::Value::Value(std::string val, bool isc, int ln, int col): 
                 strvalue(val), isconst(isc), type(ygen::paraHelper::string), line(ln), column(col) {}
-yvm::var::Space::Scope::Value::Value(char val, bool isc, int ln, int col): 
+Space::Scope::Value::Value(char val, bool isc, int ln, int col): 
                 charvalue(val), isconst(isc), type(ygen::paraHelper::character), line(ln), column(col) {}
-yvm::var::Space::Scope::Value::Value(bool val, bool isc, int ln, int col): 
+Space::Scope::Value::Value(bool val, bool isc, int ln, int col): 
                 boolvalue(val), isconst(isc), type(ygen::paraHelper::boolean), line(ln), column(col) {}
 
-yvm::var::Space::Scope::Value::Value(std::vector<Value> list): list(list), islist(true), type(list[0].getType()) {}
+Space::Scope::Value::Value(std::vector<Value> list, int ln, int col): 
+                list(list), islist(true), type(list[0].getType()), line(ln), column(col) {}
              
-yvm::var::Space::Scope::Value::Value(std::vector<Value> list, bool isc): list(list), isconst(isc), islist(true), type(list[0].getType()) {}
+Space::Scope::Value::Value(std::vector<Value> list, bool isc, int ln, int col): 
+                list(list), isconst(isc), islist(true), type(list[0].getType()), line(ln), column(col) {}
 
-bool yvm::var::Space::Scope::Value::isList(){
+bool Space::Scope::Value::isList(){
     return islist;
 }
-bool yvm::var::Space::Scope::Value::isConst(){
+bool Space::Scope::Value::isConst(){
     return isconst;
 }
-ygen::paraHelper::type yvm::var::Space::Scope::Value::getType(){
+ygen::paraHelper::type Space::Scope::Value::getType(){
     return type;
 }
 
-template<class Type>
-Type yvm::var::Space::Scope::Value::getValue(){
-    if(std::is_same<typename std::decay<Type>::type, int>::value && type == ygen::paraHelper::integer) return intvalue;
-    else if(std::is_same<typename std::decay<Type>::type, int>::valuet && type == ygen::paraHelper::decimal) return decivalue;
-    else if(std::is_same<typename std::decay<Type>::type, int>::value && type == ygen::paraHelper::string) return strvalue;
-    else if(std::is_same<typename std::decay<Type>::type, int>::value && type == ygen::paraHelper::character) return charvalue;
-    else if(std::is_same<typename std::decay<Type>::type, int>::value && type == ygen::paraHelper::boolean) return boolvalue;
-    else throw yoexception::YoError("TypeError", "There is no corresponding type for this operation", line, column);
+int Space::Scope::Value::getIntValue() {
+    return intvalue;
+}
+float Space::Scope::Value::getDeciValue() {
+    return decivalue;
+}
+std::string Space::Scope::Value::getStrValue() {
+    return strvalue;
+}
+char Space::Scope::Value::getCharValue() {
+    return charvalue;
+}
+bool Space::Scope::Value::getBoolValue() {
+    return boolvalue;
 }
 
 template<class Type>
-void yvm::var::Space::Scope::Value::assignValue(Type val){
+void Space::Scope::Value::assignValue(Type val){
     if(std::is_same<typename std::decay<Type>::type, int>::value && type == ygen::paraHelper::integer) intvalue = val;
     else if(std::is_same<typename std::decay<Type>::type, int>::value && type == ygen::paraHelper::decimal) decivalue = val;
     else if(std::is_same<typename std::decay<Type>::type, int>::value && type == ygen::paraHelper::string) strvalue = val;
@@ -167,7 +187,7 @@ void yvm::var::Space::Scope::Value::assignValue(Type val){
     else throw yoexception::YoError("TypeError", "Assignment type does not match variable type", line, column);
 }
 
-void yvm::var::Space::Scope::Value::assignValue(std::string name, std::vector<Value> value) {
+void Space::Scope::Value::assignValue(std::string name, std::vector<Value> value) {
     if(value[0].getType() == type){
         list = value;
     }
@@ -180,6 +200,8 @@ yvm::YVM::YVM(ygen::ByteCodeGenerator bcg) {
     this->constpool = bcg.getConstPool();
     this->codes = bcg.getCodes();
 }
+yvm::YVM::YVM() {}
+
 int yvm::YVM::addString(std::string str){
     constpool.push_back(str);
     return constpool.size()-1;
@@ -187,6 +209,11 @@ int yvm::YVM::addString(std::string str){
 int yvm::YVM::addList(std::vector<vmValue> values){
     listpool.push_back(values);
     return listpool.size()-1;
+}
+int yvm::YVM::addChar(char ch){
+    std::string str;
+    str.push_back(ch);
+    return constpool.size()-1;
 }
 
 
@@ -223,7 +250,29 @@ int yvm::YVM::run(std::string arg) {
         switch (codes[i].code)
         {
             case ygen::btc::push:{
-                envPush(vmValue((vmVType)codes[i].arg2, codes[i].arg1));
+                if(codes[i].arg2 == vmVType::iden){
+                    if(codes[i + 1].code == ygen::btc::idenend){
+                        // 单个identifier，直接push
+                        if(runtimeSpace.find(constpool[codes[i].arg1])){
+                            auto type = (vmVType)runtimeSpace.getValue(constpool[codes[i].arg1]).getType();
+                            envPush(vmValue(type, 
+                                type == vmVType::integer?runtimeSpace.getValue(constpool[codes[i].arg1]).getIntValue():
+                                    (type == vmVType::decimal?runtimeSpace.getValue(constpool[codes[i].arg1]).getDeciValue():
+                                        (type == vmVType::boolean?runtimeSpace.getValue(constpool[codes[i].arg1]).getBoolValue():
+                                            (type == vmVType::string?addString(runtimeSpace.getValue(constpool[codes[i].arg1]).getStrValue()):
+                                                (type == vmVType::character?addChar(runtimeSpace.getValue(constpool[codes[i].arg1]).getCharValue()):
+                                                    throw yoexception::YoError("TypeError","Unsupported type used",codes[i].line, codes[i].column))
+                                                )
+                                            )
+                                        )
+                                    )
+                                );
+                        }
+                        else throw yoexception::YoError("NameError", "Cannot find identifier named: '" + constpool[codes[i].arg1] + "'", codes[i].line, codes[i].column);
+                    }
+                    else ; // 多个identifier连接在一起
+                }
+                else envPush(vmValue((vmVType)codes[i].arg2, codes[i].arg1));
                 break;
             }
             case ygen::btc::listend:{
@@ -470,11 +519,13 @@ int yvm::YVM::run(std::string arg) {
                 auto right = envPop();
                 auto left = envPop();
                 envPush(vmValue(vmVType::boolean, (bool)left.second==true && (bool)right.second==true));
+                break;
             }
             case ygen::btc::logicor:{
                 auto right = envPop();
                 auto left = envPop();
                 envPush(vmValue(vmVType::boolean, (bool)left.second==true || (bool)right.second==true));
+                break;
             }
             case ygen::btc::out:{
                 auto content = envPop();
@@ -482,9 +533,57 @@ int yvm::YVM::run(std::string arg) {
                     std::cout<<constpool[content.second]<<std::endl;
                 else
                     std::cout<<content.second<<std::endl;
+                break;
+            }
+            case ygen::btc::define:{
+                if(runtimeSpace.find(constpool[codes[i].arg1])) // 检测是否有重复的标识符
+                    throw yoexception::YoError("NameError", "Duplicate identifier: '" + constpool[codes[i].arg1] + "'", codes[i].line, codes[i].column);
+                auto &current = runtimeSpace.current();
+                current.memberlist.push_back(constpool[codes[i].arg1]);
+                break;
+            }            
+            case ygen::btc::init:{
+                auto name = constpool[codes[i].arg1];
+                if(std::find(runtimeSpace.current().memberlist.begin(), runtimeSpace.current().memberlist.end(), name) != runtimeSpace.current().memberlist.end()){
+                    auto value = envPop();
+                    //type-checker
+                    if(codes[i].arg4 == 1.0){
+                        auto reqType = constpool[codes[i].arg3];
+                        if(reqType == "integer" && value.first == vmVType::integer);
+                        else if(reqType == "decimal" && value.first == vmVType::decimal);
+                        else if(reqType == "string" && value.first == vmVType::string);
+                        else if(reqType == "char" && value.first == vmVType::character);
+                        else if(reqType == "boolean" && value.first == vmVType::boolean);
+                        else {
+                            // 不允许创建该变量，于是删除对应memberlist中的元素
+                            auto &scope = runtimeSpace.current();
+                            for(int i = 0; i < scope.memberlist.size(); i++) {
+                                if(scope.memberlist[i] == name) 
+                                    scope.memberlist.erase(scope.memberlist.begin() + i);
+                            }
+                            throw yoexception::YoError("TypeError", "The expected type does not match the type given by the actual expression", codes[i].line, codes[i].column);
+                        }
+                    }
+                    //
+                    if(value.first == vmVType::integer)
+                        runtimeSpace.createValue(name, Space::Scope::Value((int)value.second, constpool[codes[i].arg2] == "var"?false:true, codes[i].line, codes[i].column));
+                    else if(value.first == vmVType::decimal)
+                        runtimeSpace.createValue(name, Space::Scope::Value((float)value.second, constpool[codes[i].arg2] == "var"?false:true, codes[i].line, codes[i].column));
+                    else if(value.first == vmVType::boolean)
+                        runtimeSpace.createValue(name, Space::Scope::Value((bool)value.second, constpool[codes[i].arg2] == "var"?false:true, codes[i].line, codes[i].column));
+                    else if(value.first == vmVType::string)
+                        runtimeSpace.createValue(name, Space::Scope::Value(constpool[value.second], constpool[codes[i].arg2] == "var"?false:true, codes[i].line, codes[i].column));
+                    else if(value.first == vmVType::character)
+                        runtimeSpace.createValue(name, Space::Scope::Value(constpool[value.second][0], constpool[codes[i].arg2] == "var"?false:true, codes[i].line, codes[i].column));
+                }
+                break;
             }
             default: break;
         }
     }
     return 0;
+}
+void yvm::YVM::reload(std::vector<ygen::byteCode> _codes, std::vector<std::string> _constpool){
+    codes = _codes;
+    constpool = _constpool;
 }
