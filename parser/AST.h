@@ -125,6 +125,10 @@ namespace AST{
         std::string toString();
     };
 
+    class AssignmentExprNode{
+
+    };
+
     class WholeExprNode{
     public:
         AddExprNode* addexpr = nullptr;
@@ -140,6 +144,37 @@ namespace AST{
         std::vector<WholeExprNode*> elements;
         std::vector<yolexer::yoToken*> dots;
         yolexer::yoToken* right = nullptr;
+
+        std::string toString();
+    };
+
+    // STMT
+    class OutStmtNode{
+    public:
+        yolexer::yoToken* mark = nullptr; // mark为语句的标识
+        WholeExprNode* expr = nullptr;
+        yolexer::yoToken* end = nullptr; // end为语句末尾符，也就是;
+
+        std::string toString();
+    };
+
+    class VorcStmtNode{
+    public:
+        yolexer::yoToken* mark = nullptr;
+        yolexer::yoToken* name = nullptr;
+        yolexer::yoToken* separate = nullptr;
+        yolexer::yoToken* type = nullptr;
+        yolexer::yoToken* equ = nullptr;
+        WholeExprNode* expr = nullptr;
+        yolexer::yoToken* end = nullptr;
+
+        std::string toString();
+    };
+
+    class StmtNode{
+    public:
+        OutStmtNode* outstmt = nullptr;
+        VorcStmtNode* vorcstmt = nullptr;
 
         std::string toString();
     };

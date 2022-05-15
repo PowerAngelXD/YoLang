@@ -127,6 +127,15 @@ bool parser::Parser::isListExpr() {
 bool parser::Parser::isExpr() {
     return isListExpr() || isAddExpr() || isBoolExpr();
 }
+bool parser::Parser::isOutStmt() {
+    return peek()->content == "out";
+}
+bool parser::Parser::isVorcStmt() {
+    return peek()->content == "var" || peek()->content == "const";
+}
+bool parser::Parser::isStmt() {
+    return isOutStmt() || isVorcStmt();
+}
 
 // EXPR
 
@@ -309,5 +318,54 @@ AST::WholeExprNode* parser::Parser::parseExpr(){
     if(isBoolExpr()) node->boolexpr = parseBoolExprNode();
     else if(isAddExpr()) node->addexpr = parseAddExprNode();
     else if(isListExpr()) node->listexpr = parseListExprNode();
+    return node;
+}
+
+// STNT
+
+std::vector<AST::StmtNode*> parser::Parser::parse(){
+    std::vector<AST::StmtNode*> stmts;
+    while(isStmt()){
+        AST::StmtNode* node = new AST::StmtNode;
+        if(isOutStmt()) node->outstmt = parseOutStmtNode();
+        else if(isVorcStmt()) node->vorcstmt = parseVorcStmtNode();
+        else throw yoexception::YoError("SyntaxError", "Not any statement", tg[offset].line, tg[offset].column);
+        stmts.push_back(node);
+    }
+    return stmts;
+}
+
+AST::OutStmtNode* parser::Parser::parseOutStmtNode(){
+    AST::OutStmtNode* node = new AST::OutStmtNode;
+    node->mark = token();
+    if(isExpr()) node->expr = parseExpr();
+    else throw yoexception::YoError("SyntaxError", "An expression is required here", tg[offset].line, tg[offset].column);
+    if(peek()->content == ";") node->end = token();
+    else throw yoexception::YoError("SyntaxError", "Expect ';'", tg[offset].line, tg[offset].column);
+    return node;
+}
+
+AST::VorcStmtNode* parser::Parser::parseVorcStmtNode(){
+    AST::VorcStmtNode* node = new AST::VorcStmtNode;
+    node->mark = token();
+    if(isIdentifier()) node->name = token();
+    else throw yoexception::YoError("SyntaxError", "Expect an identifier", tg[offset].line, tg[offset].column);
+    if(peek()->content == ":"){
+        node->separate = token();
+        if(peek()->type == yolexer::KeyWord) node->type = token();
+        else throw yoexception::YoError("SyntaxError", "Expect type specifier ", tg[offset].line, tg[offset].column);
+        if(peek()->content == "=") node->equ = token();
+        else throw yoexception::YoError("SyntaxError", "Expect '='", tg[offset].line, tg[offset].column);
+        if(isExpr()) node->expr = parseExpr();
+        else throw yoexception::YoError("SyntaxError", "Expect an expression", tg[offset].line, tg[offset].column);
+    }
+    else{
+        if(peek()->content == "=") node->equ = token();
+        else throw yoexception::YoError("SyntaxError", "Expect '='", tg[offset].line, tg[offset].column);
+        if(isExpr()) node->expr = parseExpr();
+        else throw yoexception::YoError("SyntaxError", "Expect an expression", tg[offset].line, tg[offset].column);
+    }
+    if(peek()->content == ";") node->end = token();
+    else throw yoexception::YoError("SyntaxError", "Expect ';'", tg[offset].line, tg[offset].column);
     return node;
 }

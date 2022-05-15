@@ -146,3 +146,21 @@ std::string AST::CmpOpNode::toString(){
 std::string AST::BoolOpNode::toString(){
     return op->toString();
 }
+
+// STMT
+
+std::string AST::OutStmtNode::toString() {
+    return "OutStmtNode: {" + mark->toString() + ", " + expr->toString() + "}";
+}
+
+std::string AST::VorcStmtNode::toString() {
+    return "VorcStmtNode: {" + mark->toString() + ", " + 
+            name->toString() + ", " + 
+            (type != nullptr?type->toString():"") + ", " + 
+            expr->toString() + "}";
+}
+
+std::string AST::StmtNode::toString() {
+    if(outstmt != nullptr) return outstmt->toString();
+    else if(vorcstmt != nullptr) return vorcstmt->toString();
+}
