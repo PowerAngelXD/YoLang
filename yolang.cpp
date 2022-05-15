@@ -20,6 +20,7 @@ int main(){
                 vm.reload(bcg.getCodes(), bcg.getConstPool());
                 vm.run("null");
             }
+            std::cout<<std::endl;
         }
         catch(yoexception::YoError e){
             std::cout<<e.what()<<std::endl;
