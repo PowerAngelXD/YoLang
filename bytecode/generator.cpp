@@ -242,7 +242,12 @@ void ygen::ByteCodeGenerator::visitOutStmt(AST::OutStmtNode* node) {
 void ygen::ByteCodeGenerator::visitVorcStmt(AST::VorcStmtNode* node) {
     normalCtor(btc::define, addPara(node->name->content), 0.0, node->mark->line, node->mark->column);
     visitExpr(node->expr);
-    normalCtor(btc::init, addPara(node->name->content), 0.0, node->mark->line, node->mark->column);
+    completeCtor(btc::init, 
+                addPara(node->name->content), 
+                addPara(node->mark->content), 
+                node->separate != nullptr?addPara(node->type->content):0.0, 
+                node->separate != nullptr?1.0:0.0, 
+                node->mark->line, node->mark->column);
 }
 
 void ygen::ByteCodeGenerator::visit(std::vector<AST::StmtNode*> stmts) {
