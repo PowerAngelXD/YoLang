@@ -222,6 +222,7 @@ void yolexer::Lexer::generate(){
             else if(input[i] == ']') tokenGroup.push_back({"]", yoTokType::Symbol, line, column});
             else if(input[i] == '{') tokenGroup.push_back({"{", yoTokType::Symbol, line, column});
             else if(input[i] == '}') tokenGroup.push_back({"}", yoTokType::Symbol, line, column});
+            else if(input[i] == ';') tokenGroup.push_back({";", yoTokType::Symbol, line, column});
             else {
                 std::string name;
                 name.push_back(input[i]);
