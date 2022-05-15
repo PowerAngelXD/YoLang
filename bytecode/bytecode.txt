@@ -1,8 +1,8 @@
 此文件用来列出所有 YoLang 中的 bytecode：
 在此之前，我们需要知道：
 YoLang中的bytecode集中的每一个bytecode对应的编号被称为“位”，“位”的起始值为0，例如：
-bytecodes = {push, push, pushi}
-则pushi在第二位
+bytecodes = {push, push, add}
+则add在第 2 位
 
 标志类：
 listend------标志着一个列表的结束
@@ -36,3 +36,9 @@ noequ------不等于
 logicand------逻辑且
 logicor------逻辑或
 no------取反
+
+功能类：
+out------输出
+define------定义标识符
+init------对一个标识符进行初始化
+assign------赋值操作
