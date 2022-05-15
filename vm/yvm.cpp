@@ -216,10 +216,6 @@ int yvm::YVM::addChar(char ch){
     return constpool.size()-1;
 }
 
-
-std::string yvm::YVM::getVersion() {
-    return version;
-}
 std::vector<std::string> yvm::YVM::getPool(){
     return constpool;
 }
