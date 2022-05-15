@@ -184,6 +184,10 @@ int yvm::YVM::addString(std::string str){
     constpool.push_back(str);
     return constpool.size()-1;
 }
+int yvm::YVM::addList(std::vector<vmValue> values){
+    listpool.push_back(values);
+    return listpool.size()-1;
+}
 
 
 std::string yvm::YVM::getVersion() {
@@ -200,7 +204,9 @@ void yvm::YVM::envPush(yvm::YVM::vmValue val) {
     runtimeStack[runtimeTop ++] = val;
 }
 yvm::YVM::vmValue yvm::YVM::envPop() {
-    return runtimeTop == 0?runtimeStack[0]:runtimeStack[-- runtimeTop];
+    auto ret = runtimeTop == 0?runtimeStack[0]:runtimeStack[-- runtimeTop];
+    runtimeStack.pop_back();
+    return ret;
 }
 yvm::YVM::vmValue yvm::YVM::envPeek() {
     auto ret = runtimeTop == 0?runtimeStack[0]:runtimeStack[-- runtimeTop];
@@ -218,6 +224,31 @@ int yvm::YVM::run(std::string arg) {
         {
             case ygen::btc::push:{
                 envPush(vmValue((vmVType)codes[i].arg2, codes[i].arg1));
+                break;
+            }
+            case ygen::btc::listend:{
+                envPush(vmValue(vmVType::flag, addString("LISTENDFLAG")));
+                break;
+            }
+            case ygen::btc::lst:{
+                std::vector<vmValue> list;
+                bool flag = false;
+                while(runtimeStack[runtimeTop].first != vmVType::flag){
+                    list.push_back(envPop());
+                }
+                list.erase(list.begin() + list.size() - 1);
+                std::reverse(list.begin(), list.end());
+                envPush(vmValue(vmVType::list, addList(list)));
+                break;
+            }
+            case ygen::btc::idx:{
+                auto index = envPop();
+                auto list = envPop();
+                if(list.first == vmVType::list){
+                    auto listnew = listpool[list.second];
+                    envPush(vmValue(listnew[0].first, listnew[index.second].second));
+                }   
+                else throw yoexception::YoError("SyntaxError", "Cannot index an object that is not a composite object", codes[i].line, codes[i].column);
                 break;
             }
             case ygen::btc::add:{
@@ -444,6 +475,13 @@ int yvm::YVM::run(std::string arg) {
                 auto right = envPop();
                 auto left = envPop();
                 envPush(vmValue(vmVType::boolean, (bool)left.second==true || (bool)right.second==true));
+            }
+            case ygen::btc::out:{
+                auto content = envPop();
+                if(content.first == vmVType::string || content.first == vmVType::character)
+                    std::cout<<constpool[content.second]<<std::endl;
+                else
+                    std::cout<<content.second<<std::endl;
             }
             default: break;
         }

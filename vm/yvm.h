@@ -1,6 +1,7 @@
 #include "../bytecode/generator.h"
 #include <map>
 #include <type_traits>
+#include <algorithm>
 
 namespace yvm{
     class YVM;
@@ -108,15 +109,13 @@ namespace yvm{
             int getDeep();
         };
     }
-
-
     /**
      * @brief Yolang的VM实例类
      */
     class YVM{
     public:
         // 值在YVM中的类型
-        enum vmVType {iden, iden_text, string, boolean, character, integer, decimal, null}; // 必须与generator中的保持一致
+        enum vmVType {iden, iden_text, string, boolean, character, integer, decimal, null, list, flag}; // 必须与generator中的保持一致
     private:
         // 描述一个YVM中的Value
         typedef std::pair<vmVType, float> vmValue;
@@ -124,15 +123,19 @@ namespace yvm{
         std::string version = "v 0.0.1"; // 版本定义
         std::vector<ygen::byteCode> codes;
         std::vector<std::string> constpool;
+        std::vector<std::vector<vmValue>> listpool;
 
         // 运行环境
         std::vector<vmValue> runtimeStack;
+        var::Space runtimeSpace;
         int runtimeTop = 0;
 
         int addString(std::string str);
+        int addList(std::vector<vmValue> values);
     public:
         // 对每一个vm实例的初始化
         YVM(ygen::ByteCodeGenerator bcg);
+        YVM()=default;
 
         std::string getVersion();
         void envPush(vmValue val);
