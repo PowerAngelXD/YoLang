@@ -128,8 +128,7 @@ namespace yvm{
     private:
         // 描述一个YVM中的Value
         typedef std::pair<vmVType, float> vmValue;
-        
-        std::string version = "v 0.0.1"; // 版本定义
+
         std::vector<ygen::byteCode> codes;
         std::vector<std::string> constpool;
         std::vector<std::vector<vmValue>> listpool;

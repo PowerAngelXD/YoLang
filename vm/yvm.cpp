@@ -575,6 +575,9 @@ int yvm::YVM::run(std::string arg) {
                         runtimeSpace.createValue(name, Space::Scope::Value(constpool[value.second], constpool[codes[i].arg2] == "var"?false:true, codes[i].line, codes[i].column));
                     else if(value.first == vmVType::character)
                         runtimeSpace.createValue(name, Space::Scope::Value(constpool[value.second][0], constpool[codes[i].arg2] == "var"?false:true, codes[i].line, codes[i].column));
+                    else if(value.first == vmVType::list) {
+                        
+                    }
                 }
                 break;
             }
