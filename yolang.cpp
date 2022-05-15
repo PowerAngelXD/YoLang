@@ -4,7 +4,7 @@
 int main(){
     yvm::YVM vm;
     std::string cmd;
-    std::cout<<"Yolang Shell [v0.0.1 (010)]"<<std::endl;
+    std::cout<<"Yolang Shell [Instable-2022-5-0001]"<<std::endl;
     while(true){
         try{
             std::cout<<">>";
