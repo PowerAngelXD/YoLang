@@ -1,8 +1,6 @@
 #include "generator.h"
 
-ygen::ByteCodeGenerator::ByteCodeGenerator(AST::WholeExprNode* expr) {
-    this->expr = *expr;
-}
+ygen::ByteCodeGenerator::ByteCodeGenerator(std::vector<AST::StmtNode*> _stmts): stmts(_stmts) {}
 std::string ygen::ByteCodeGenerator::removeZero(float content) {
     std::ostringstream oss;
     oss<<content;
@@ -224,7 +222,7 @@ void ygen::ByteCodeGenerator::visitListExpr(AST::ListExprNode* node){
     for(int i = 0; i < node->elements.size(); i++) {
         visitExpr(node->elements[i]);
     }
-    minCtor(btc::lst, node->left->line, node->left->column);
+    minCtor(btc::lst, node->right->line, node->right->column);
 }
 void ygen::ByteCodeGenerator::visitExpr(AST::WholeExprNode* node){
     if(node->addexpr != nullptr)
@@ -233,4 +231,23 @@ void ygen::ByteCodeGenerator::visitExpr(AST::WholeExprNode* node){
         visitBoolExpr(node->boolexpr);
     else if(node->listexpr != nullptr)
         visitListExpr(node->listexpr);
+}
+
+// STMT
+
+void ygen::ByteCodeGenerator::visitOutStmt(AST::OutStmtNode* node) {
+    visitExpr(node->expr);
+    minCtor(btc::out, node->mark->line, node->mark->column);
+}
+void ygen::ByteCodeGenerator::visitVorcStmt(AST::VorcStmtNode* node) {
+    normalCtor(btc::define, addPara(node->name->content), 0.0, node->mark->line, node->mark->column);
+    visitExpr(node->expr);
+    normalCtor(btc::init, addPara(node->name->content), 0.0, node->mark->line, node->mark->column);
+}
+
+void ygen::ByteCodeGenerator::visit(std::vector<AST::StmtNode*> stmts) {
+    for(auto stmt: stmts){
+        if(stmt->outstmt != nullptr) visitOutStmt(stmt->outstmt);
+        else if(stmt->vorcstmt != nullptr) visitVorcStmt(stmt->vorcstmt);
+    }
 }

@@ -10,7 +10,9 @@ namespace ygen{
         // 运算类
         selfadd, selfsub, add, sub, div, mul, tmo, idx, lst, logicand, logicor, no, lt, ltet, gt, gtet, equ, noequ, gmem, 
         // 标志类
-        listend, paraend, scopestart, scopeend, idenend
+        listend, paraend, scopestart, scopeend, idenend, 
+        // 功能类
+        out, define, init, assign
     };
 
     // ByteCode的参数帮助，可以快捷的写一些参数。内部均为枚举，以XXXXHelper的形式存在
@@ -19,7 +21,7 @@ namespace ygen{
         // 说明：iden和iden_text
         // iden：标识符和它对应的值
         // iden_text：标识符本身，纯文字
-        enum type{ iden, iden_text, string, boolean, character, integer, decimal, null };
+        enum type{ iden, iden_text, string, boolean, character, integer, decimal, null, list, flag};
     }
 
     struct byteCode{
@@ -29,18 +31,17 @@ namespace ygen{
     };
 
     class ByteCodeGenerator{
-        AST::WholeExprNode expr; // TODO: 暂时使用这个，等有了stmt之后就换成statNode
+        std::vector<AST::StmtNode*> stmts;
         std::vector<std::string> constpool; // 字符（串）池，根据索引取元素(也可以用来存放参数)
         std::vector<byteCode> codes; // 字节码集
 
         std::string removeZero(float content); // 功能性函数，去除字符串末尾的0
     public:
-        ByteCodeGenerator(AST::WholeExprNode* expr);
+        ByteCodeGenerator(std::vector<AST::StmtNode*> _stmts);
 
         std::vector<std::string> getConstPool(); // 获取字符（串）池
         std::vector<byteCode> getCodes(); // 获取字节码集
         int addPara(std::string para); // 在paras中加一个参数，并返回它所处的位置
-        int addConst(std::string con); // 在constpool中增加一个元素
         /**
          * @brief 最简ByteCode构造器，构造之后自动push进codes里面
          *
@@ -89,5 +90,9 @@ namespace ygen{
         void visitBoolExpr(AST::BoolExprNode* node);
         void visitListExpr(AST::ListExprNode* node);
         void visitExpr(AST::WholeExprNode* node); // 特殊的visitor，visit的是整个Expr
+
+        void visitOutStmt(AST::OutStmtNode* node);
+        void visitVorcStmt(AST::VorcStmtNode* node);
+        void visit(std::vector<AST::StmtNode*> stmts); // 特殊的visitor，visit的是整个stmts
     };
 }
