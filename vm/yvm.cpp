@@ -176,6 +176,9 @@ char Space::Scope::Value::getCharValue() {
 bool Space::Scope::Value::getBoolValue() {
     return boolvalue;
 }
+std::vector<Space::Scope::Value> Space::Scope::Value::getList(){
+    return list;
+}
 
 template<class Type>
 void Space::Scope::Value::assignValue(Type val){
@@ -210,9 +213,40 @@ int yvm::YVM::addList(std::vector<vmValue> values){
     listpool.push_back(values);
     return listpool.size()-1;
 }
+int yvm::YVM::addValueList(std::vector<Space::Scope::Value> list){
+    std::vector<vmValue> newlist;
+    if((vmVType)list[0].getType() == vmVType::integer){
+        for(int i = 0; i < list.size(); i++){
+            newlist.push_back(vmValue((vmVType)list[i].getType(), list[i].getIntValue()));
+        }
+    }
+    else if((vmVType)list[0].getType() == vmVType::decimal){
+        for(int i = 0; i < list.size(); i++){
+            newlist.push_back(vmValue((vmVType)list[i].getType(), list[i].getDeciValue()));
+        }
+    }
+    else if((vmVType)list[0].getType() == vmVType::boolean){
+        for(int i = 0; i < list.size(); i++){
+            newlist.push_back(vmValue((vmVType)list[i].getType(), list[i].getBoolValue()));
+        }
+    }
+    else if((vmVType)list[0].getType() == vmVType::string){
+        for(int i = 0; i < list.size(); i++){
+            newlist.push_back(vmValue((vmVType)list[i].getType(), addString(list[i].getStrValue())));
+        }
+    }
+    else if((vmVType)list[0].getType() == vmVType::character){
+        for(int i = 0; i < list.size(); i++){
+            newlist.push_back(vmValue((vmVType)list[i].getType(), addChar(list[i].getCharValue())));
+        }
+    }
+    listpool.push_back(newlist);
+    return listpool.size() - 1;
+}
 int yvm::YVM::addChar(char ch){
     std::string str;
     str.push_back(ch);
+    constpool.push_back(str);
     return constpool.size()-1;
 }
 
@@ -251,7 +285,8 @@ int yvm::YVM::run(std::string arg) {
                         // 单个identifier，直接push
                         if(runtimeSpace.find(constpool[codes[i].arg1])){
                             auto type = (vmVType)runtimeSpace.getValue(constpool[codes[i].arg1]).getType();
-                            envPush(vmValue(type, 
+                            if(!runtimeSpace.getValue(constpool[codes[i].arg1]).isList()){
+                                envPush(vmValue(type, 
                                 type == vmVType::integer?runtimeSpace.getValue(constpool[codes[i].arg1]).getIntValue():
                                     (type == vmVType::decimal?runtimeSpace.getValue(constpool[codes[i].arg1]).getDeciValue():
                                         (type == vmVType::boolean?runtimeSpace.getValue(constpool[codes[i].arg1]).getBoolValue():
@@ -263,6 +298,10 @@ int yvm::YVM::run(std::string arg) {
                                         )
                                     )
                                 );
+                            }
+                            else{
+                                envPush(vmValue(vmVType::list, addValueList(runtimeSpace.getValue(constpool[codes[i].arg1]).getList())));
+                            }
                         }
                         else throw yoexception::YoError("NameError", "Cannot find identifier named: '" + constpool[codes[i].arg1] + "'", codes[i].line, codes[i].column);
                     }
@@ -291,6 +330,8 @@ int yvm::YVM::run(std::string arg) {
                 auto list = envPop();
                 if(list.first == vmVType::list){
                     auto listnew = listpool[list.second];
+                    if(index.second > listnew.size() - 1)
+                        throw yoexception::YoError("ListError", "Index out of range of list", codes[i].line, codes[i].column);
                     envPush(vmValue(listnew[0].first, listnew[index.second].second));
                 }   
                 else throw yoexception::YoError("SyntaxError", "Cannot index an object that is not a composite object", codes[i].line, codes[i].column);
@@ -510,6 +551,7 @@ int yvm::YVM::run(std::string arg) {
             }
             case ygen::btc::no:{
                 envPush(vmValue(vmVType::boolean, envPop().second == true?0:1));
+                break;
             }
             case ygen::btc::logicand:{
                 auto right = envPop();
@@ -526,9 +568,19 @@ int yvm::YVM::run(std::string arg) {
             case ygen::btc::out:{
                 auto content = envPop();
                 if(content.first == vmVType::string || content.first == vmVType::character)
-                    std::cout<<constpool[content.second]<<std::endl;
+                    std::cout<<constpool[content.second];
+                else if(content.first == vmVType::list){
+                    auto list = listpool[content.second];
+                    for(int j = 0; j < list.size(); j++){
+                        auto elt = list[j];
+                        if(elt.first == vmVType::string || elt.first == vmVType::character)
+                            std::cout<<constpool[elt.second];
+                        else
+                            std::cout<<elt.second;
+                    }
+                }
                 else
-                    std::cout<<content.second<<std::endl;
+                    std::cout<<content.second;
                 break;
             }
             case ygen::btc::define:{
@@ -551,13 +603,25 @@ int yvm::YVM::run(std::string arg) {
                         else if(reqType == "char" && value.first == vmVType::character);
                         else if(reqType == "boolean" && value.first == vmVType::boolean);
                         else {
-                            // 不允许创建该变量，于是删除对应memberlist中的元素
-                            auto &scope = runtimeSpace.current();
-                            for(int i = 0; i < scope.memberlist.size(); i++) {
-                                if(scope.memberlist[i] == name) 
-                                    scope.memberlist.erase(scope.memberlist.begin() + i);
+                            if(value.first == vmVType::list){
+                                auto v = listpool[value.second];
+                                if(reqType == "integer" && v[0].first == vmVType::integer);
+                                else if(reqType == "decimal" && v[0].first == vmVType::decimal);
+                                else if(reqType == "string" && v[0].first == vmVType::string);
+                                else if(reqType == "char" && v[0].first == vmVType::character);
+                                else if(reqType == "boolean" && v[0].first == vmVType::boolean);
+                                else goto error_type;
                             }
-                            throw yoexception::YoError("TypeError", "The expected type does not match the type given by the actual expression", codes[i].line, codes[i].column);
+                            else{
+                                error_type:
+                                // 不允许创建该变量，于是删除对应memberlist中的元素
+                                auto &scope = runtimeSpace.current();
+                                for(int i = 0; i < scope.memberlist.size(); i++) {
+                                    if(scope.memberlist[i] == name) 
+                                        scope.memberlist.erase(scope.memberlist.begin() + i);
+                                }
+                                throw yoexception::YoError("TypeError", "The expected type does not match the type given by the actual expression", codes[i].line, codes[i].column);
+                            }
                         }
                     }
                     //
@@ -572,7 +636,44 @@ int yvm::YVM::run(std::string arg) {
                     else if(value.first == vmVType::character)
                         runtimeSpace.createValue(name, Space::Scope::Value(constpool[value.second][0], constpool[codes[i].arg2] == "var"?false:true, codes[i].line, codes[i].column));
                     else if(value.first == vmVType::list) {
-                        
+                        auto list = listpool[value.second];
+                        std::vector<Space::Scope::Value> newlist;
+                        if(list[0].first == vmVType::integer){
+                            for(int j = 0; j < list.size(); j++){
+                                if(list[j].first != list[j - 1].first && j > 0) // 当前后类型不一致时，报错
+                                    throw yoexception::YoError("TypeError", "All elements in the list must be of the same type", codes[i].line, codes[i].column);
+                                newlist.push_back(Space::Scope::Value((int)list[j].second, constpool[codes[i].arg2] == "var"?false:true, codes[i].line, codes[i].column));
+                            }
+                        }
+                        else if(list[0].first == vmVType::boolean){
+                            for(int j = 0; j < list.size(); j++){
+                                if(list[j].first != list[j - 1].first && j > 0) // 当前后类型不一致时，报错
+                                    throw yoexception::YoError("TypeError", "All elements in the list must be of the same type", codes[i].line, codes[i].column);
+                                newlist.push_back(Space::Scope::Value((bool)list[j].second, constpool[codes[i].arg2] == "var"?false:true, codes[i].line, codes[i].column));
+                            }
+                        }
+                        else if(list[0].first == vmVType::decimal){
+                            for(int j = 0; j < list.size(); j++){
+                                if(list[j].first != list[j - 1].first && j > 0) // 当前后类型不一致时，报错
+                                    throw yoexception::YoError("TypeError", "All elements in the list must be of the same type", codes[i].line, codes[i].column);
+                                newlist.push_back(Space::Scope::Value((float)list[j].second, constpool[codes[i].arg2] == "var"?false:true, codes[i].line, codes[i].column));
+                            }
+                        }
+                        else if(list[0].first == vmVType::string){
+                            for(int j = 0; j < list.size(); j++){
+                                if(list[j].first != list[j - 1].first && j > 0) // 当前后类型不一致时，报错
+                                    throw yoexception::YoError("TypeError", "All elements in the list must be of the same type", codes[i].line, codes[i].column);
+                                newlist.push_back(Space::Scope::Value(constpool[list[j].second], constpool[codes[i].arg2] == "var"?false:true, codes[i].line, codes[i].column));
+                            }
+                        }
+                        else if(list[0].first == vmVType::character){
+                            for(int j = 0; j < list.size(); j++){
+                                if(list[j].first != list[j - 1].first && j > 0) // 当前后类型不一致时，报错
+                                    throw yoexception::YoError("TypeError", "All elements in the list must be of the same type", codes[i].line, codes[i].column);
+                                newlist.push_back(Space::Scope::Value(constpool[list[j].second][0], constpool[codes[i].arg2] == "var"?false:true, codes[i].line, codes[i].column));
+                            }
+                        }
+                        runtimeSpace.createValue(name, Space::Scope::Value(newlist, constpool[codes[i].arg2] == "var"?false:true, codes[i].line, codes[i].column));
                     }
                 }
                 break;

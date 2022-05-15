@@ -48,6 +48,7 @@ namespace yvm{
                     std::string getStrValue();
                     char getCharValue();
                     bool getBoolValue();
+                    std::vector<Value> getList();
 
                     template<class Type>
                     void assignValue(Type val);
@@ -141,6 +142,7 @@ namespace yvm{
         int addString(std::string str);
         int addChar(char ch);
         int addList(std::vector<vmValue> values);
+        int addValueList(std::vector<var::Space::Scope::Value> list);
     public:
         // 对每一个vm实例的初始化
         YVM(ygen::ByteCodeGenerator bcg);
