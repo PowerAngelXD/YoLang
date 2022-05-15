@@ -11,14 +11,13 @@ int main(){
             std::getline(std::cin, cmd);
             if(cmd == "exit") break;
             else{
-                yolexer::Lexer lex(cmd); // 初始化lexer对象
-                lex.generate(); // 生成TokenGroup
-                parser::Parser p(lex.getTokenGroup()); // 初始化parser对象，传入tokenGroup
-                auto node = p.parse(); // 开始parse
-                //std::cout<<node->toString()<<std::endl;
+                yolexer::Lexer lex(cmd); // new lexer object
+                lex.generate(); // make TokenGroup
+                parser::Parser p(lex.getTokenGroup()); // new parser object，enter tokenGroup
+                auto node = p.parse(); // start parse
                 ygen::ByteCodeGenerator bcg(node);
                 bcg.visit(node);
-                vm = yvm::YVM(bcg);
+                vm.reload(bcg.getCodes(), bcg.getConstPool());
                 vm.run("null");
             }
         }
