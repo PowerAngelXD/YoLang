@@ -113,25 +113,34 @@ void ygen::ByteCodeGenerator::visitIdentifier(AST::IdentifierNode* node){
         minCtor(btc::idenend, node->idens[0]->line, node->idens[0]->column);
     }
 }
+void ygen::ByteCodeGenerator::visitIdentifierText(AST::IdentifierNode* node){
+    std::string text;
+    text += node->idens[0]->content;
+    for(int i = 0; i < node->dots.size(); i++) {
+        text += node->dots[i]->content;
+        text += node->idens[i + 1]->content;
+    }
+    normalCtor(btc::push, addPara(text), paraHelper::string, node->idens[0]->line, node->idens[0]->column);
+}
 void ygen::ByteCodeGenerator::visitSiadExpr(AST::SiadExprNode* node){
     if(node->isFront){
         // 是前置类型
         if(node->op->content == "++"){
-            visitIdentifier(node->iden);
+            visitIdentifierText(node->iden);
             normalCtor(btc::selfadd, 1.0, 0.0, node->op->line, node->op->column); // 前置第一个参数为1，否则为0
         }
         else if(node->op->content == "--"){
-            visitIdentifier(node->iden);
+            visitIdentifierText(node->iden);
             normalCtor(btc::selfsub, 1.0, 0.0, node->op->line, node->op->column);
         }
     }
     else{
         if(node->op->content == "++"){
-            visitIdentifier(node->iden);
+            visitIdentifierText(node->iden);
             normalCtor(btc::selfadd, 0.0, 0.0, node->op->line, node->op->column);
         }
         else if(node->op->content == "--"){
-            visitIdentifier(node->iden);
+            visitIdentifierText(node->iden);
             normalCtor(btc::selfsub, 0.0, 0.0, node->op->line, node->op->column);
         }
     }

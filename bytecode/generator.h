@@ -77,6 +77,7 @@ namespace ygen{
         void visitNull(yolexer::yoToken* token);
         void visitBoolean(yolexer::yoToken* token);
         void visitIdentifier(AST::IdentifierNode* node);
+        void visitIdentifierText(AST::IdentifierNode* node);
         void visitSiadExpr(AST::SiadExprNode* node);
         void visitAddOp(AST::AddOpNode* node);
         void visitMulOp(AST::MulOpNode* node);
