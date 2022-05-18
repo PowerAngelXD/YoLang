@@ -332,6 +332,8 @@ std::vector<AST::StmtNode*> parser::Parser::parse(){
         else throw yoexception::YoError("SyntaxError", "Not any statement", tg[offset].line, tg[offset].column);
         stmts.push_back(node);
     }
+    if(stmts.empty())
+        throw yoexception::YoError("SyntaxError", "Not any statement", tg[offset].line, tg[offset].column);
     return stmts;
 }
 
