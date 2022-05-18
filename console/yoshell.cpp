@@ -42,13 +42,45 @@ void ysh::insEVAL(std::vector<std::string> paras) {
     auto tg = lexer.getTokenGroup();
 
     parser::Parser p(tg);
-    auto stmts = p.parse();
+    if(tg[tg.size() - 2].content != ";") {
+        auto expr = p.parseExpr();
 
-    ygen::ByteCodeGenerator bcg(stmts);
-    bcg.visit(stmts);
+        ygen::ByteCodeGenerator bcg(expr);
+        bcg.visitExpr(expr);
 
-    yovm.reload(bcg.getCodes(), bcg.getConstPool());
-    yovm.run("null");
+        yovm.reload(bcg.getCodes(), bcg.getConstPool());
+        yovm.run("null");
+
+        if(yovm.envPeek().first == yovm.string || yovm.envPeek().first == yovm.character)
+            std::cout<<yovm.getConstPool()[yovm.envPop().second];
+        else if(yovm.envPeek().first == yovm.list) {
+            auto list = yovm.getListPool()[yovm.envPop().second];
+            std::cout<<"[";
+            for(int i = 0; i < list.size(); i ++){
+                auto elt = list[i];
+                if(elt.first == yovm.string || elt.first == yovm.character) {
+                    std::cout<<"\"";
+                    std::cout<<yovm.getConstPool()[elt.second];
+                    std::cout<<"\"";
+                }
+                else
+                    std::cout<<elt.second;
+                if(i != list.size() - 1) std::cout<<", ";
+            }
+            std::cout<<"]";
+        }
+        else
+            std::cout<<yovm.envPop().second;
+    }
+    else {
+        auto stmts = p.parse();
+
+        ygen::ByteCodeGenerator bcg(stmts);
+        bcg.visit(stmts);
+        
+        yovm.reload(bcg.getCodes(), bcg.getConstPool());
+        yovm.run("null");
+    }
 }
 
 void ysh::runYoShell() {
@@ -58,10 +90,11 @@ void ysh::runYoShell() {
                 "[current version] "<<ysh::version<<std::endl;
     std::string in; // 输入内容
     auto pool = insPool;
-    try{
-        while(true) {
-            std::cout<<">>";
-            std::getline(std::cin, in);
+
+    while(true) {
+        std::cout<<">>";
+        std::getline(std::cin, in);
+        try{
             // command parser
             auto tempField = tools::split(in, ' ')[0];
             bool flag = false;
@@ -74,10 +107,10 @@ void ysh::runYoShell() {
                 }
             }
             if(!flag) insEVAL({in});
-            std::cout<<std::endl;
         }
-    }
-    catch(yoexception::YoError yoerr){
-
+        catch(yoexception::YoError e) {
+            std::cout<<e.what();
+        }
+        std::cout<<std::endl;
     }
 }
