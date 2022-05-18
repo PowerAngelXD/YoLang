@@ -153,7 +153,8 @@ namespace yvm{
         vmValue envPop();
         vmValue envPeek();
         void envClear();
-        std::vector<std::string> getPool();
+        std::vector<std::string> getConstPool();
+        std::vector<std::vector<vmValue>> getListPool();
 
         int run(std::string arg);
         void reload(std::vector<ygen::byteCode> _codes, std::vector<std::string> _constpool);

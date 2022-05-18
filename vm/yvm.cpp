@@ -250,8 +250,11 @@ int yvm::YVM::addChar(char ch){
     return constpool.size()-1;
 }
 
-std::vector<std::string> yvm::YVM::getPool(){
+std::vector<std::string> yvm::YVM::getConstPool(){
     return constpool;
+}
+std::vector<std::vector<yvm::YVM::vmValue>> yvm::YVM::getListPool(){
+    return listpool;
 }
 void yvm::YVM::envPush(yvm::YVM::vmValue val) {
     if (runtimeStack.size() <= runtimeTop) {
