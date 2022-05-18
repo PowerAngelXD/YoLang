@@ -1,6 +1,7 @@
 #include "generator.h"
 
 ygen::ByteCodeGenerator::ByteCodeGenerator(std::vector<AST::StmtNode*> _stmts): stmts(_stmts) {}
+ygen::ByteCodeGenerator::ByteCodeGenerator(AST::WholeExprNode* _expr): expr(_expr) {}
 std::string ygen::ByteCodeGenerator::removeZero(float content) {
     std::ostringstream oss;
     oss<<content;

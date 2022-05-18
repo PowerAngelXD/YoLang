@@ -32,12 +32,14 @@ namespace ygen{
 
     class ByteCodeGenerator{
         std::vector<AST::StmtNode*> stmts;
+        AST::WholeExprNode* expr;
         std::vector<std::string> constpool; // 字符（串）池，根据索引取元素(也可以用来存放参数)
         std::vector<byteCode> codes; // 字节码集
 
         std::string removeZero(float content); // 功能性函数，去除字符串末尾的0
     public:
         ByteCodeGenerator(std::vector<AST::StmtNode*> _stmts);
+        ByteCodeGenerator(AST::WholeExprNode* _expr);
 
         std::vector<std::string> getConstPool(); // 获取字符（串）池
         std::vector<byteCode> getCodes(); // 获取字节码集
