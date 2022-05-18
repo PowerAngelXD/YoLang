@@ -52,7 +52,7 @@ namespace yvm{
 
                     template<class Type>
                     void assignValue(Type val);
-                    void assignValue(std::string name, std::vector<Value> value);
+                    void assignListValue(std::string name, std::vector<Value> value);
                 };
                 friend Value;
                 friend Space;

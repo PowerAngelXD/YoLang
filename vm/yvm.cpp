@@ -79,7 +79,7 @@ int Space::getValuePos(std::string name){
 }
 template<class Type>
 void Space::assignValue(std::string name, Type value){
-    scopestack[getScopePos(name)].assign(value);
+    scopestack[getScopePos(name)].assign(name, value);
 }
 template<class Type>
 void Space::assignValue(std::string name, std::vector<Type> value){
@@ -183,14 +183,14 @@ std::vector<Space::Scope::Value> Space::Scope::Value::getList(){
 template<class Type>
 void Space::Scope::Value::assignValue(Type val){
     if(std::is_same<typename std::decay<Type>::type, int>::value && type == ygen::paraHelper::integer) intvalue = val;
-    else if(std::is_same<typename std::decay<Type>::type, int>::value && type == ygen::paraHelper::decimal) decivalue = val;
-    else if(std::is_same<typename std::decay<Type>::type, int>::value && type == ygen::paraHelper::string) strvalue = val;
-    else if(std::is_same<typename std::decay<Type>::type, int>::value && type == ygen::paraHelper::character) charvalue = val;
-    else if(std::is_same<typename std::decay<Type>::type, int>::value && type == ygen::paraHelper::boolean) boolvalue = val;
+    else if(std::is_same<typename std::decay<Type>::type, float>::value && type == ygen::paraHelper::decimal) decivalue = val;
+    else if(std::is_same<typename std::decay<Type>::type, std::string>::value && type == ygen::paraHelper::string) strvalue = val;
+    else if(std::is_same<typename std::decay<Type>::type, char>::value && type == ygen::paraHelper::character) charvalue = val;
+    else if(std::is_same<typename std::decay<Type>::type, bool>::value && type == ygen::paraHelper::boolean) boolvalue = val;
     else throw yoexception::YoError("TypeError", "Assignment type does not match variable type", line, column);
 }
 
-void Space::Scope::Value::assignValue(std::string name, std::vector<Value> value) {
+void Space::Scope::Value::assignListValue(std::string name, std::vector<Value> value) {
     if(value[0].getType() == type){
         list = value;
     }
@@ -335,6 +335,48 @@ int yvm::YVM::run(std::string arg) {
                     envPush(vmValue(listnew[0].first, listnew[index.second].second));
                 }   
                 else throw yoexception::YoError("SyntaxError", "Cannot index an object that is not a composite object", codes[i].line, codes[i].column);
+                break;
+            }
+            case ygen::btc::selfadd:{
+                auto iden = envPop();
+                bool isFront = codes[i].arg1 == 1.0 ? true : false;
+                if(runtimeSpace.getValue(constpool[iden.second]).getType() != ygen::paraHelper::integer) 
+                    throw yoexception::YoError("TypeError", "This operator does not support this type of operation",codes[i].line, codes[i].column);
+                
+                if(isFront) {
+                    auto temp = runtimeSpace.getValue(constpool[iden.second]).getIntValue() + 1;
+                    runtimeSpace.assignValue(constpool[iden.second], 
+                        temp);
+                    envPush(vmValue(vmVType::integer, runtimeSpace.getValue(constpool[iden.second]).getIntValue()));
+                }
+                else {
+                    auto temp = runtimeSpace.getValue(constpool[iden.second]).getIntValue() + 1;
+                    envPush(vmValue(vmVType::integer, runtimeSpace.getValue(constpool[iden.second]).getIntValue()));
+                    runtimeSpace.assignValue(constpool[iden.second], 
+                        temp);
+                }
+
+                break;
+            }
+            case ygen::btc::selfsub:{
+                auto iden = envPop();
+                bool isFront = codes[i].arg1 == 1.0 ? true : false;
+                if(runtimeSpace.getValue(constpool[iden.second]).getType() != ygen::paraHelper::integer) 
+                    throw yoexception::YoError("TypeError", "This operator does not support this type of operation",codes[i].line, codes[i].column);
+                
+                if(isFront) {
+                    auto temp = runtimeSpace.getValue(constpool[iden.second]).getIntValue() - 1;
+                    runtimeSpace.assignValue(constpool[iden.second], 
+                        temp);
+                    envPush(vmValue(vmVType::integer, runtimeSpace.getValue(constpool[iden.second]).getIntValue()));
+                }
+                else {
+                    auto temp = runtimeSpace.getValue(constpool[iden.second]).getIntValue() - 1;
+                    envPush(vmValue(vmVType::integer, runtimeSpace.getValue(constpool[iden.second]).getIntValue()));
+                    runtimeSpace.assignValue(constpool[iden.second], 
+                        temp);
+                }
+
                 break;
             }
             case ygen::btc::add:{
