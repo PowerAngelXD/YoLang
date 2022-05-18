@@ -171,6 +171,15 @@ namespace AST{
         std::string toString();
     };
 
+    class SpExprStmtNode{
+    public:
+        SiadExprNode* siad = nullptr;
+        AssignmentExprNode* assign = nullptr;
+        yolexer::yoToken* end = nullptr;
+
+        std::string toString();
+    };
+
     class StmtNode{
     public:
         OutStmtNode* outstmt = nullptr;

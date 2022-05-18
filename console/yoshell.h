@@ -12,6 +12,15 @@ namespace ysh{
          * @return std::vector<std::string> 一个vector
          */
         std::vector<std::string> split(std::string str, char sp);
+        /**
+         * @brief 判断所给文件名是否符合某种格式的文件
+         * 
+         * @param name 文件名
+         * @param type 文件扩展名
+         * @return true 
+         * @return false 
+         */
+        bool compareFileType(std::string name, std::string type);
     }
 
     // 版本号

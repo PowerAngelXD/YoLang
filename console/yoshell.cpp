@@ -14,6 +14,10 @@ std::vector<std::string> ysh::tools::split(std::string str, char sp) {
     }
     return ret;
 }
+bool ysh::tools::compareFileType(std::string name, std::string type) {
+    std::size_t index = ((std::string)name).find(type, ((std::string)name).size() - ((std::string)type).size());
+    return !(index == std::string::npos);
+}
 
 // SHELL
 void ysh::insHelp(std::vector<std::string> paras) {
