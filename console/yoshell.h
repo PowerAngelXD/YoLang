@@ -24,9 +24,9 @@ namespace ysh{
     }
 
     // 版本号
-    static std::string version = "22.5.10";
+    static std::string version = "22.5.15";
     // 完整版本
-    static std::string completeVersion = "Instable-2022-5-0010";
+    static std::string completeVersion = "Build-2022-5-0015";
     // 指令方法类型
     typedef void (*insMethod)(std::vector<std::string>);
     // 指令定义
@@ -36,9 +36,10 @@ namespace ysh{
     void insHelp(std::vector<std::string> paras);
     void insInfo(std::vector<std::string> paras);
     void insExit(std::vector<std::string> paras);
+    void insRun(std::vector<std::string> paras);
     void insEVAL(std::vector<std::string> paras); // 用于执行输入语句的insMethod
 
-    static std::vector insPool = {ins("help", insHelp), ins("info", insInfo), ins("exit", insExit), ins("", insEVAL)};
+    static std::vector insPool = {ins("help", insHelp), ins("info", insInfo), ins("exit", insExit), ins("run", insRun), ins("", insEVAL)};
 
     // vm实例
     static yvm::YVM yovm;
