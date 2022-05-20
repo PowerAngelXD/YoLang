@@ -83,7 +83,7 @@ void Space::assignValue(std::string name, Type value){
 }
 template<class Type>
 void Space::assignValue(std::string name, std::vector<Type> value){
-    scopestack[getScopePos(name)].assign(value);
+    scopestack[getScopePos(name)].assign(name, value);
 }
 void Space::deleteValue(std::string name) {
     scopestack[getScopePos(name)].remove(name);
@@ -115,10 +115,25 @@ void Space::Scope::create(std::string name, Value value){
     values.push_back(storage(name, value));
 }
 
-template<class Type>
-void Space::Scope::assign(std::string name, Type value){
-    values[pos(name)].second.assignValue(value);
+void Space::Scope::assign(std::string name, int value) {
+    values[pos(name)].second.assignInt(value);
 }
+void Space::Scope::assign(std::string name, float value) {
+    values[pos(name)].second.assignDeci(value);
+}
+void Space::Scope::assign(std::string name, bool value) {
+    values[pos(name)].second.assignBool(value);
+}
+void Space::Scope::assign(std::string name, char value) {
+    values[pos(name)].second.assignChar(value);
+}
+void Space::Scope::assign(std::string name, std::string value) {
+    values[pos(name)].second.assignString(value);
+}
+void Space::Scope::assign(std::string name, std::vector<Value> value) {
+    values[pos(name)].second.assignListValue(value);
+}
+
 int Space::Scope::pos(std::string name){
     for(int i = 0; i < values.size(); i ++){
         if(values[i].first == name) return i;
@@ -180,17 +195,40 @@ std::vector<Space::Scope::Value> Space::Scope::Value::getList(){
     return list;
 }
 
-template<class Type>
-void Space::Scope::Value::assignValue(Type val){
-    if(std::is_same<typename std::decay<Type>::type, int>::value && type == ygen::paraHelper::integer) intvalue = val;
-    else if(std::is_same<typename std::decay<Type>::type, float>::value && type == ygen::paraHelper::decimal) decivalue = val;
-    else if(std::is_same<typename std::decay<Type>::type, std::string>::value && type == ygen::paraHelper::string) strvalue = val;
-    else if(std::is_same<typename std::decay<Type>::type, char>::value && type == ygen::paraHelper::character) charvalue = val;
-    else if(std::is_same<typename std::decay<Type>::type, bool>::value && type == ygen::paraHelper::boolean) boolvalue = val;
-    else throw yoexception::YoError("TypeError", "Assignment type does not match variable type", line, column);
+void Space::Scope::Value::assignInt(int value) {
+    if(isconst) throw yoexception::YoError("ConstantError", "A constant cannot be assigned", line, column);
+    intvalue = value;
+}
+void Space::Scope::Value::assignDeci(float value) {
+    if(isconst) throw yoexception::YoError("ConstantError", "A constant cannot be assigned", line, column);
+    decivalue = value;
+}
+void Space::Scope::Value::assignBool(bool value) {
+    if(isconst) throw yoexception::YoError("ConstantError", "A constant cannot be assigned", line, column);
+    boolvalue = value;
+}
+void Space::Scope::Value::assignString(std::string value) {
+    if(isconst) throw yoexception::YoError("ConstantError", "A constant cannot be assigned", line, column);
+    strvalue = value;
+}
+void Space::Scope::Value::assignChar(char value) {
+    if(isconst) throw yoexception::YoError("ConstantError", "A constant cannot be assigned", line, column);
+    charvalue = value;
+}
+void Space::Scope::Value::assignValue(Value value) {
+    if(isconst) throw yoexception::YoError("ConstantError", "A constant cannot be assigned", line, column);
+    this->boolvalue = value.boolvalue;
+    this->charvalue = value.charvalue;
+    this->intvalue = value.intvalue;
+    this->decivalue = value.decivalue;
+    this->strvalue = value.strvalue;
+    this->isconst = value.isconst;
+    this->islist = value.islist;
+    this->line = value.line;
+    this->column = value.column;
 }
 
-void Space::Scope::Value::assignListValue(std::string name, std::vector<Value> value) {
+void Space::Scope::Value::assignListValue(std::vector<Value> value) {
     if(value[0].getType() == type){
         list = value;
     }
@@ -248,6 +286,20 @@ int yvm::YVM::addChar(char ch){
     str.push_back(ch);
     constpool.push_back(str);
     return constpool.size()-1;
+}
+std::vector<std::string> yvm::YVM::split(std::string str, char sp) {
+    // 此处实现照抄console::tools
+    std::vector<std::string> ret;
+    int i = 0;
+    while(i < str.size()) {
+        std::string content;
+        for(; i < str.size(); i ++) {
+            if(str[i] == sp) {i++; break;}
+            content.push_back(str[i]);
+        }
+        ret.push_back(content);
+    }
+    return ret;
 }
 
 std::vector<std::string> yvm::YVM::getConstPool(){
@@ -634,7 +686,62 @@ int yvm::YVM::run(std::string arg) {
                 auto &current = runtimeSpace.current();
                 current.memberlist.push_back(constpool[codes[i].arg1]);
                 break;
-            }            
+            }
+            case ygen::btc::assign:{
+                auto value = envPop();
+                auto name = envPop();
+                if(!runtimeSpace.find(constpool[name.second]))
+                    throw yoexception::YoError("NameError", "There is no identifier named: '" + constpool[name.second] + "'", codes[i].line, codes[i].column);
+                if(envPeek().first == vmVType::integer) {
+                    // 是数组元素赋值
+                    auto index = envPop();
+                    if(value.first != vmVType::list)
+                        throw yoexception::YoError("TypeError", "Object does not support the operation of assigning values to members", codes[i].line, codes[i].column);
+                    auto list = runtimeSpace.getValue(constpool[name.second]).getList();
+                    switch (value.first)
+                    {
+                        case vmVType::integer: list[index.second] = Space::Scope::Value((int)value.second, true, codes[i].line, codes[i].column); break;
+                        case vmVType::decimal: list[index.second] = Space::Scope::Value((float)value.second, true, codes[i].line, codes[i].column); break;
+                        case vmVType::boolean: list[index.second] = Space::Scope::Value((bool)value.second, true, codes[i].line, codes[i].column); break;
+                        case vmVType::string: list[index.second] = Space::Scope::Value(constpool[value.second], true, codes[i].line, codes[i].column); break;
+                        case vmVType::character: list[index.second] = Space::Scope::Value(constpool[value.second][0], true, codes[i].line, codes[i].column); break;
+                        default: break;
+                    }
+                    runtimeSpace.assignValue(constpool[name.second], list);
+                }
+                else {
+                    // 普通赋值
+                    switch (value.first)
+                    {
+                        case vmVType::integer: runtimeSpace.assignValue(constpool[name.second], (int)value.second); break;
+                        case vmVType::decimal: runtimeSpace.assignValue(constpool[name.second], (float)value.second); break;
+                        case vmVType::boolean: runtimeSpace.assignValue(constpool[name.second], (bool)value.second); break;
+                        case vmVType::string: runtimeSpace.assignValue(constpool[name.second], constpool[value.second]); break;
+                        case vmVType::character: runtimeSpace.assignValue(constpool[name.second], constpool[value.second][0]); break;
+                        case vmVType::list: {
+                            auto list = listpool[value.second];
+                            if(list.size() > runtimeSpace.getValue(constpool[name.second]).getList().size())
+                                throw yoexception::YoError("AssignError", "An array cannot be resized at will", codes[i].line, codes[i].column);
+                            std::vector<Space::Scope::Value> retlist;
+                            for(auto elt: list) {
+                                switch (elt.first)
+                                {
+                                    case vmVType::integer: retlist.push_back(Space::Scope::Value((int)elt.second, false, codes[i].line, codes[i].column)); break;
+                                    case vmVType::decimal: retlist.push_back(Space::Scope::Value((float)elt.second, false, codes[i].line, codes[i].column)); break;
+                                    case vmVType::boolean: retlist.push_back(Space::Scope::Value((bool)elt.second, false, codes[i].line, codes[i].column)); break;
+                                    case vmVType::string: retlist.push_back(Space::Scope::Value(constpool[elt.second], false, codes[i].line, codes[i].column)); break;
+                                    case vmVType::character: retlist.push_back(Space::Scope::Value(constpool[elt.second][0], false, codes[i].line, codes[i].column)); break;
+                                    default: break;
+                                }
+                            }
+                            runtimeSpace.assignValue(constpool[name.second], retlist); break;
+                        }
+                    default: break;
+                    }
+                }
+                envPush(vmValue(vmVType::null, 0.0));
+                break;
+            }     
             case ygen::btc::init:{
                 auto name = constpool[codes[i].arg1];
                 if(std::find(runtimeSpace.current().memberlist.begin(), runtimeSpace.current().memberlist.end(), name) != runtimeSpace.current().memberlist.end()){
@@ -731,4 +838,29 @@ int yvm::YVM::run(std::string arg) {
 void yvm::YVM::reload(std::vector<ygen::byteCode> _codes, std::vector<std::string> _constpool){
     codes = _codes;
     constpool = _constpool;
+}
+void yvm::YVM::loadVMFile(std::string path){
+    std::ifstream file(path);
+    std::istreambuf_iterator<char> begin(file);
+    std::istreambuf_iterator<char> end;
+    std::string content = std::string(begin, end);
+    // Filter
+    std::string str;
+    for(int i = 0; i < content.size(); i++){
+        if(content[i] == '\n'); // 过滤回车符
+        else str.push_back(content[i]);
+    }
+    //
+    auto ins = split(split(str, '#')[0], ':');
+    auto cp = split(split(str, '#')[1], ',');
+    constpool = cp;
+
+    // 生成code
+    std::vector<ygen::byteCode> _codes;
+    for(int i = 0; i < ins.size(); i ++){
+        auto temp = split(ins[i], ',');
+        if(temp[0] == "INS_END") break;
+        _codes.push_back((ygen::byteCode){(ygen::btc)atoi(temp[0].c_str()), atof(temp[1].c_str()), atof(temp[2].c_str()), atof(temp[3].c_str()), atof(temp[4].c_str()), atoi(temp[5].c_str()), atoi(temp[6].c_str())});
+    }
+    codes = _codes;
 }

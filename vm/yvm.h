@@ -57,7 +57,7 @@ namespace yvm{
                     void assignString(std::string value);
                     void assignChar(char value);
                     void assignValue(Value value);
-                    void assignListValue(std::string name, std::vector<Value> value);
+                    void assignListValue(std::vector<Value> value);
                 };
                 friend Value;
                 friend Space;
