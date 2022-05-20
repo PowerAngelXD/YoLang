@@ -34,6 +34,18 @@ void ysh::insInfo(std::vector<std::string> paras) {
     std::cout<<"Yolang version: " << ysh::version << std::endl;
     std::cout<<"Copyright (c) ITCDT Team."<< std::endl;
 }
+void ysh::insRun(std::vector<std::string> paras) {
+    if(paras.size() > 1)
+        throw yoexception::YoError("ConsoleParaError", "Incomplete command parameters", -1, -1);
+    else {
+        auto name = paras[0];
+        if(tools::compareFileType(name, ".yvmc")) {
+            // 是vm文件
+            yovm.loadVMFile(name);
+            yovm.run("null");
+        }
+    }
+}
 void ysh::insEVAL(std::vector<std::string> paras) {
     auto eval = paras[0];
 
@@ -53,6 +65,8 @@ void ysh::insEVAL(std::vector<std::string> paras) {
 
         if(yovm.envPeek().first == yovm.string || yovm.envPeek().first == yovm.character)
             std::cout<<yovm.getConstPool()[yovm.envPop().second];
+        else if(yovm.envPeek().first == yovm.null)
+            std::cout<<"null";
         else if(yovm.envPeek().first == yovm.list) {
             auto list = yovm.getListPool()[yovm.envPop().second];
             std::cout<<"[";
@@ -63,6 +77,8 @@ void ysh::insEVAL(std::vector<std::string> paras) {
                     std::cout<<yovm.getConstPool()[elt.second];
                     std::cout<<"\"";
                 }
+                else if(elt.first == yovm.null)
+                    std::cout<<"null";
                 else
                     std::cout<<elt.second;
                 if(i != list.size() - 1) std::cout<<", ";
@@ -77,6 +93,7 @@ void ysh::insEVAL(std::vector<std::string> paras) {
 
         ygen::ByteCodeGenerator bcg(stmts);
         bcg.visit(stmts);
+        bcg.genFile();
         
         yovm.reload(bcg.getCodes(), bcg.getConstPool());
         yovm.run("null");
