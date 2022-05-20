@@ -13,13 +13,13 @@ namespace parser{
         bool isPrim(); bool isIdentifier(); bool isSiadExpr(); bool isMulExpr();
         bool isAddExpr(); bool isCmpExpr(); bool isBoolExpr(); bool isFnCallExpr();
         bool isAddOp(); bool isMulOp(); bool isCmpOp(); bool isBoolOp(); bool isIndexOp();
-        bool isListExpr(); bool isExpr();
+        bool isListExpr(); bool isAssignmentExpr(); bool isExpr();
 
         bool isStmt(); bool isOutStmt(); bool isVorcStmt();
         // 生成区: parseXXX ---> 生成XXXNode
         AST::SiadExprNode* parseSiadExprNode();
         AST::IdentifierNode* parseIdentifierNode();
-        AST::IndexOpNode* parseIndeOpNode();
+        AST::IndexOpNode* parseIndexOpNode();
         AST::AddOpNode* parseAddOpNode();
         AST::MulOpNode* parseMulOpNode();
         AST::CmpOpNode* parseCmpOpNode();
@@ -31,6 +31,7 @@ namespace parser{
         AST::AddExprNode* parseAddExprNode();
         AST::CmpExprNode* parseCmpExprNode();
         AST::BoolExprNode* parseBoolExprNode();
+        AST::AssignmentExprNode* parseAssignmentExprNode();
 
         AST::OutStmtNode* parseOutStmtNode();
         AST::VorcStmtNode* parseVorcStmtNode();

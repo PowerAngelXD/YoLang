@@ -124,6 +124,34 @@ bool parser::Parser::isIndexOp() {
 bool parser::Parser::isListExpr() {
     return peek()->content == "[";
 }
+bool parser::Parser::isAssignmentExpr() {
+    if(isIdentifier()){
+        int temp = offset; // 存档记位
+        parseIdentifierNode(); // 生成identifier，看后面是不是括号
+        if(isIndexOp()){
+            parseIndexOpNode();
+            if(peek()->content == "=") {
+                offset = temp; // 归位
+                return true;
+            }
+            else {
+                offset = temp; // 归位
+                return false;
+            }
+        }
+        else {
+            if(peek()->content == "=") {
+                offset = temp; // 归位
+                return true;
+            }
+            else {
+                offset = temp; // 归位
+                return false;
+            }
+        }
+    }
+    else return false;
+}
 bool parser::Parser::isExpr() {
     return isListExpr() || isAddExpr() || isBoolExpr();
 }
@@ -167,7 +195,7 @@ AST::IdentifierNode* parser::Parser::parseIdentifierNode(){
     }
     return node;
 }
-AST::IndexOpNode* parser::Parser::parseIndeOpNode(){
+AST::IndexOpNode* parser::Parser::parseIndexOpNode(){
     AST::IndexOpNode* node = new AST::IndexOpNode;
     node->left = token();
     if(isAddExpr()) node->index = parseAddExprNode();
@@ -223,7 +251,7 @@ AST::PrimExprNode* parser::Parser::parsePrimExprNode(){
     else if(peek()->content == "true" || peek()->content == "false") node->boolconst = token();
     else if(isIdentifier()) {
         node->iden = parseIdentifierNode();
-        if(isIndexOp()) node->op = parseIndeOpNode();
+        if(isIndexOp()) node->op = parseIndexOpNode();
     }
     else if(isSiadExpr()) node->siad = parseSiadExprNode();
     else if(peek()->content == "("){
@@ -313,9 +341,19 @@ AST::BoolExprNode* parser::Parser::parseBoolExprNode(){
     return node;
     return node;
 }
+AST::AssignmentExprNode* parser::Parser::parseAssignmentExprNode() {
+    AST::AssignmentExprNode* node = new AST::AssignmentExprNode;
+    node->iden = parseIdentifierNode();
+    if(isIndexOp()) node->idx = parseIndexOpNode();
+    node->equ = token();
+    if(isExpr()) node->expr = parseExpr();
+    else throw yoexception::YoError("SyntaxError", "An expression is required here", tg[offset].line, tg[offset].column);
+    return node;
+}
 AST::WholeExprNode* parser::Parser::parseExpr(){
     AST::WholeExprNode* node = new AST::WholeExprNode;
-    if(isBoolExpr()) node->boolexpr = parseBoolExprNode();
+    if(isAssignmentExpr()) node->assign = parseAssignmentExprNode();
+    else if(isBoolExpr()) node->boolexpr = parseBoolExprNode();
     else if(isAddExpr()) node->addexpr = parseAddExprNode();
     else if(isListExpr()) node->listexpr = parseListExprNode();
     return node;
