@@ -44,14 +44,19 @@ namespace yvm{
                     bool isConst();  // 判断当前Value是否为Constant
                     ygen::paraHelper::type getType(); // 获得Value的type
                     int getIntValue();
+                    std::vector<Value> getList();
+
                     float getDeciValue();
                     std::string getStrValue();
                     char getCharValue();
                     bool getBoolValue();
-                    std::vector<Value> getList();
 
-                    template<class Type>
-                    void assignValue(Type val);
+                    void assignInt(int value);
+                    void assignDeci(float value);
+                    void assignBool(bool value);
+                    void assignString(std::string value);
+                    void assignChar(char value);
+                    void assignValue(Value value);
                     void assignListValue(std::string name, std::vector<Value> value);
                 };
                 friend Value;
@@ -68,8 +73,12 @@ namespace yvm{
                 // 返回名为name的value
                 Value val(std::string name); 
                 // 赋值
-                template<class Type>
-                void assign(std::string name, Type value);  
+                void assign(std::string name, int value);  
+                void assign(std::string name, float value);  
+                void assign(std::string name, bool value);  
+                void assign(std::string name, char value);  
+                void assign(std::string name, std::string value);  
+                void assign(std::string name, std::vector<Value> value);  
                 // 获得名为name的value的position
                 int pos(std::string name); 
                 // 删除名为name的value
@@ -143,6 +152,8 @@ namespace yvm{
         int addChar(char ch);
         int addList(std::vector<vmValue> values);
         int addValueList(std::vector<var::Space::Scope::Value> list);
+
+        std::vector<std::string> split(std::string str, char sp);
     public:
         // 对每一个vm实例的初始化
         YVM(ygen::ByteCodeGenerator bcg);
@@ -158,5 +169,6 @@ namespace yvm{
 
         int run(std::string arg);
         void reload(std::vector<ygen::byteCode> _codes, std::vector<std::string> _constpool);
+        void loadVMFile(std::string path);
     };
 }
