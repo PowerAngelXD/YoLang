@@ -2,7 +2,7 @@
 #include "../lexer/lexer.h"
 
 namespace AST{
-    class AddExprNode; class FuncCallNode; class ListExprNode; class WholeExprNode;
+    class AddExprNode; class FuncCallNode; class ListExprNode; class WholeExprNode; class StmtNode;
 
     class IdentifierNode{
     public:
@@ -126,7 +126,13 @@ namespace AST{
     };
 
     class AssignmentExprNode{
+    public:
+        IdentifierNode* iden = nullptr;
+        IndexOpNode* idx = nullptr;
+        yolexer::yoToken* equ = nullptr;
+        WholeExprNode* expr = nullptr;
 
+        std::string toString();
     };
 
     class WholeExprNode{
@@ -134,6 +140,7 @@ namespace AST{
         AddExprNode* addexpr = nullptr;
         BoolExprNode* boolexpr = nullptr;
         ListExprNode* listexpr = nullptr;
+        AssignmentExprNode* assign = nullptr;
 
         std::string toString();
     };
@@ -180,10 +187,37 @@ namespace AST{
         std::string toString();
     };
 
+    class BloackStmtNode {
+    public:
+        yolexer::yoToken* left = nullptr;
+        std::vector<StmtNode*> stmts;
+        yolexer::yoToken* right = nullptr;
+
+        std::string toString();
+    };
+
+    class IfStmtNode {
+
+    };
+
+    class ElifStmtNode {
+
+    };
+
+    class ElseStmtNode {
+
+    };
+
+    class WhileStmtNode {
+
+    };
+
     class StmtNode{
     public:
         OutStmtNode* outstmt = nullptr;
         VorcStmtNode* vorcstmt = nullptr;
+        BloackStmtNode* blockstmt = nullptr;
+        SpExprStmtNode* spexprstmt = nullptr;
 
         std::string toString();
     };

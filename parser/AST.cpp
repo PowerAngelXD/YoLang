@@ -120,7 +120,12 @@ std::string AST::WholeExprNode::toString() {
     if(addexpr != nullptr) return "WholeExprNode: {" + addexpr->toString() + "}";
     else if(boolexpr != nullptr) return "WholeExprNode: {" + boolexpr->toString() + "}";
     else if(listexpr != nullptr) return "WholeExprNode: {" + listexpr->toString() + "}";
+    else if(assign != nullptr) return "WholeExprNode: {" + assign->toString() + "}";
     else return "null";
+}
+
+std::string AST::AssignmentExprNode::toString() {
+    return "AssignmentExprNode: {" + iden->toString() + ", " + expr->toString() + (idx != nullptr? ", " + idx->toString():"") + "}";
 }
 
 std::string AST::SiadExprNode::toString(){
@@ -163,4 +168,5 @@ std::string AST::VorcStmtNode::toString() {
 std::string AST::StmtNode::toString() {
     if(outstmt != nullptr) return outstmt->toString();
     else if(vorcstmt != nullptr) return vorcstmt->toString();
+    return "null";
 }
