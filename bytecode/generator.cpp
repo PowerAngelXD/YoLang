@@ -27,7 +27,7 @@ void ygen::ByteCodeGenerator::completeCtor(ygen::btc code, float arg1, float arg
     codes.push_back({code, arg1, arg2, arg3, arg4, ln, col});
 }
 void ygen::ByteCodeGenerator::genFile() {
-    std::ofstream file("yo.ybtc");
+    std::ofstream file("yo.yvmc", std::ios::binary|std::ios::out);
     
     std::string paraArea;
     for(int i = 0; i < codes.size(); i++) {
@@ -35,12 +35,17 @@ void ygen::ByteCodeGenerator::genFile() {
         file<<removeZero(codes[i].arg1)<<",";
         file<<removeZero(codes[i].arg2)<<",";
         file<<removeZero(codes[i].arg3)<<",";
-        file<<removeZero(codes[i].arg4)<<"\n";
+        file<<removeZero(codes[i].arg4)<<",";
+        file<<removeZero(codes[i].line)<<",";
+        file<<removeZero(codes[i].column)<<":\n";
     }
-    file<<"9,9,9,9,9\n#"; // 字节码终止为9999
+    file<<"INS_END\n";
+    file<<"#\n";
     for(auto para: constpool) {
         file<<para<<",";
+        // file.write(strcat(para.data(), ","), sizeof(std::string));
     }
+    file<<"CONST_POOL_END";
     file.close();
 }
 
@@ -234,11 +239,19 @@ void ygen::ByteCodeGenerator::visitListExpr(AST::ListExprNode* node){
     }
     minCtor(btc::lst, node->right->line, node->right->column);
 }
+void ygen::ByteCodeGenerator::visitAssignmentExpr(AST::AssignmentExprNode* node){
+    if (node->idx != nullptr) visitAddExpr(node->idx->index);
+    visitIdentifierText(node->iden);
+    visitExpr(node->expr);
+    minCtor(btc::assign, node->equ->line, node->equ->column);
+}
 void ygen::ByteCodeGenerator::visitExpr(AST::WholeExprNode* node){
     if(node->addexpr != nullptr)
         visitAddExpr(node->addexpr);
     else if(node->boolexpr != nullptr)
         visitBoolExpr(node->boolexpr);
+    else if(node->assign != nullptr)
+        visitAssignmentExpr(node->assign);
     else if(node->listexpr != nullptr)
         visitListExpr(node->listexpr);
 }

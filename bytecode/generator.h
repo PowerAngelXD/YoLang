@@ -1,6 +1,7 @@
 #include "../parser/parser.h"
 #include <fstream>
 #include <sstream>
+#include <cstring>
 
 namespace ygen{
     // ByteCode 集合
@@ -92,6 +93,7 @@ namespace ygen{
         void visitCmpExpr(AST::CmpExprNode* node);
         void visitBoolExpr(AST::BoolExprNode* node);
         void visitListExpr(AST::ListExprNode* node);
+        void visitAssignmentExpr(AST::AssignmentExprNode* node);
         void visitExpr(AST::WholeExprNode* node); // 特殊的visitor，visit的是整个Expr
 
         void visitOutStmt(AST::OutStmtNode* node);
