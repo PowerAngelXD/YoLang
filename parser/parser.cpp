@@ -161,11 +161,14 @@ bool parser::Parser::isOutStmt() {
 bool parser::Parser::isVorcStmt() {
     return peek()->content == "var" || peek()->content == "const";
 }
+bool parser::Parser::isBlockStmt() {
+    return peek()->content == "{";
+}
 bool parser::Parser::isSpExprStmt() {
     return isSiadExpr() || isAssignmentExpr();
 }
 bool parser::Parser::isStmt() {
-    return isOutStmt() || isVorcStmt() || isSpExprStmt();
+    return isOutStmt() || isVorcStmt() || isSpExprStmt() || isBlockStmt();
 }
 
 // EXPR
@@ -369,6 +372,7 @@ std::vector<AST::StmtNode*> parser::Parser::parse(){
     while(isStmt()){
         AST::StmtNode* node = new AST::StmtNode;
         if(isOutStmt()) node->outstmt = parseOutStmtNode();
+        else if(isBlockStmt()) node->blockstmt = parseBlockStmtNode();
         else if(isVorcStmt()) node->vorcstmt = parseVorcStmtNode();
         else if(isSpExprStmt()) node->spexprstmt = parseSpExprStmtNode();
         else throw yoexception::YoError("SyntaxError", "Not any statement", tg[offset].line, tg[offset].column);
@@ -420,5 +424,14 @@ AST::SpExprStmtNode* parser::Parser::parseSpExprStmtNode() {
     else if(isAssignmentExpr()) node->assign = parseAssignmentExprNode();
     if(peek()->content == ";") node->end = token();
     else throw yoexception::YoError("SyntaxError", "Expect ';'", tg[offset].line, tg[offset].column);
+    return node;
+}
+
+AST::BlockStmtNode* parser::Parser::parseBlockStmtNode() {
+    AST::BlockStmtNode* node = new AST::BlockStmtNode;
+    node->left = token();
+    if(isStmt()) node->stmts = parse();
+    if(peek()->content == "}") node->right = token();
+    else throw yoexception::YoError("SyntaxError", "Expect '}'", tg[offset].line, tg[offset].column);
     return node;
 }

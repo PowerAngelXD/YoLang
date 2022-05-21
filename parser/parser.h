@@ -15,7 +15,7 @@ namespace parser{
         bool isAddOp(); bool isMulOp(); bool isCmpOp(); bool isBoolOp(); bool isIndexOp();
         bool isListExpr(); bool isAssignmentExpr(); bool isExpr();
 
-        bool isStmt(); bool isOutStmt(); bool isVorcStmt(); bool isSpExprStmt();
+        bool isStmt(); bool isOutStmt(); bool isVorcStmt(); bool isSpExprStmt(); bool isBlockStmt();
         // 生成区: parseXXX ---> 生成XXXNode
         AST::SiadExprNode* parseSiadExprNode();
         AST::IdentifierNode* parseIdentifierNode();
@@ -36,6 +36,8 @@ namespace parser{
         AST::OutStmtNode* parseOutStmtNode();
         AST::VorcStmtNode* parseVorcStmtNode();
         AST::SpExprStmtNode* parseSpExprStmtNode();
+        AST::BlockStmtNode* parseBlockStmtNode();
+
         // 特例：不是以自己的Node命名的函数，因为它有特殊的用途：用于解析所有Expression
         AST::WholeExprNode* parseExpr(); 
         // 特里：不是以自己的Node命名的函数，因为它有特殊的用途，用于解析所有Statement
