@@ -187,7 +187,7 @@ namespace AST{
         std::string toString();
     };
 
-    class BloackStmtNode {
+    class BlockStmtNode {
     public:
         yolexer::yoToken* left = nullptr;
         std::vector<StmtNode*> stmts;
@@ -197,7 +197,14 @@ namespace AST{
     };
 
     class IfStmtNode {
+    public:
+        yolexer::yoToken* mark = nullptr;
+        yolexer::yoToken* left = nullptr;
+        BoolExprNode* cond = nullptr;
+        yolexer::yoToken* right = nullptr;
+        BlockStmtNode* body = nullptr;
 
+        std::string toString();
     };
 
     class ElifStmtNode {
@@ -216,7 +223,7 @@ namespace AST{
     public:
         OutStmtNode* outstmt = nullptr;
         VorcStmtNode* vorcstmt = nullptr;
-        BloackStmtNode* blockstmt = nullptr;
+        BlockStmtNode* blockstmt = nullptr;
         SpExprStmtNode* spexprstmt = nullptr;
 
         std::string toString();
