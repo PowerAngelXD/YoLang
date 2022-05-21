@@ -15,7 +15,7 @@ yolexer::yoToken* parser::Parser::token(){
 bool parser::Parser::isPrim() {
     return peek()->type == yolexer::yoTokType::Character || peek()->type == yolexer::yoTokType::String ||
             peek()->type == yolexer::yoTokType::Integer || peek()->type == yolexer::yoTokType::Decimal ||
-            peek()->type == yolexer::yoTokType::Identifier || 
+            peek()->type == yolexer::yoTokType::Identifier || isStfOp() || 
             peek()->content == "null" || peek()->content == "true" || peek()->content == "false" ||
             peek()->content == "++" || peek()->content == "--" || peek()->content == "(";
 }
@@ -121,6 +121,9 @@ bool parser::Parser::isBoolOp() {
 bool parser::Parser::isIndexOp() {
     return peek()->content == "[";
 }
+bool parser::Parser::isStfOp() {
+    return peek()->type == yolexer::yoTokType::KeyWord && peek(1)->content == "(";
+}
 bool parser::Parser::isListExpr() {
     return peek()->content == "[";
 }
@@ -222,6 +225,16 @@ AST::AddOpNode* parser::Parser::parseAddOpNode(){
     node->op = token();
     return node;
 }
+AST::StfOpNode* parser::Parser::parseStfOpNode(){
+    AST::StfOpNode* node = new AST::StfOpNode;
+    node->name = token();
+    if(peek()->content == "(") node->left = token();
+    else throw yoexception::YoError("SynaxError", "Expect '('", tg[offset].line,tg[offset].column);
+    if(isExpr()) node->expr = parseExpr();
+    if(peek()->content == ")") node->right = token();
+    else throw yoexception::YoError("SynaxError", "Expect ')'", tg[offset].line,tg[offset].column);
+    return node;
+}
 AST::MulOpNode* parser::Parser::parseMulOpNode(){
     if(!isMulOp()) throw yoexception::YoError("SyntaxError", "Expect '*', '%' or '/'", 
                         tg[offset].line,
@@ -255,6 +268,7 @@ AST::PrimExprNode* parser::Parser::parsePrimExprNode(){
     else if(peek()->type == yolexer::yoTokType::String) node->string = token();
     else if(peek()->content == "null") node->null = token();
     else if(peek()->content == "true" || peek()->content == "false") node->boolconst = token();
+    else if(isStfOp()) node->stf = parseStfOpNode();
     else if(isIdentifier()) {
         node->iden = parseIdentifierNode();
         if(isIndexOp()) node->op = parseIndexOpNode();
