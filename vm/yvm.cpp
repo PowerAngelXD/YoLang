@@ -688,14 +688,32 @@ int yvm::YVM::run(std::string arg) {
                             throw yoexception::YoError("TypeError", "Only values of type '<string>' are accepted within this operator", codes[i].line, codes[i].column);
                         auto iname = constpool[para.second];
                         auto value = runtimeSpace.getValue(iname);
-                        switch ((vmVType)value.getType())
-                        {
-                            case vmVType::integer: envPush(vmValue(vmVType::integer, value.getIntValue())); break;
-                            case vmVType::decimal: envPush(vmValue(vmVType::decimal, value.getDeciValue())); break;
-                            case vmVType::boolean: envPush(vmValue(vmVType::boolean, value.getBoolValue())); break;
-                            case vmVType::string: envPush(vmValue(vmVType::string, addString(value.getStrValue()))); break;
-                            case vmVType::character: envPush(vmValue(vmVType::character, addChar(value.getCharValue()))); break;
-                            default: break;
+                        if(value.isList()){
+                            auto list = value.getList();
+                            std::vector<vmValue> retlist;
+                            for(int i = 0; i < list.size(); i ++) {
+                                switch ((vmVType)list[i].getType())
+                                {
+                                    case vmVType::integer: retlist.push_back(vmValue(vmVType::integer, list[i].getIntValue())); break;
+                                    case vmVType::decimal: retlist.push_back(vmValue(vmVType::decimal, list[i].getDeciValue())); break;
+                                    case vmVType::boolean: retlist.push_back(vmValue(vmVType::boolean, list[i].getBoolValue())); break;
+                                    case vmVType::string: retlist.push_back(vmValue(vmVType::string, addString(list[i].getStrValue()))); break;
+                                    case vmVType::character: retlist.push_back(vmValue(vmVType::character, addChar(list[i].getCharValue()))); break;
+                                    default: break;
+                                }
+                            }
+                            envPush(vmValue(vmVType::list, addList(retlist)));
+                        }
+                        else{
+                            switch ((vmVType)value.getType())
+                            {
+                                case vmVType::integer: envPush(vmValue(vmVType::integer, value.getIntValue())); break;
+                                case vmVType::decimal: envPush(vmValue(vmVType::decimal, value.getDeciValue())); break;
+                                case vmVType::boolean: envPush(vmValue(vmVType::boolean, value.getBoolValue())); break;
+                                case vmVType::string: envPush(vmValue(vmVType::string, addString(value.getStrValue()))); break;
+                                case vmVType::character: envPush(vmValue(vmVType::character, addChar(value.getCharValue()))); break;
+                                default: break;
+                            }
                         }
                     }
                 }
