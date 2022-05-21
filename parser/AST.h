@@ -2,7 +2,7 @@
 #include "../lexer/lexer.h"
 
 namespace AST{
-    class AddExprNode; class FuncCallNode; class ListExprNode; class WholeExprNode; class StmtNode;
+    class AddExprNode; class FuncCallNode; class ListExprNode; class WholeExprNode; class StmtNode; class StfOpNode;
 
     class IdentifierNode{
     public:
@@ -38,6 +38,7 @@ namespace AST{
         yolexer::yoToken* character = nullptr;
         yolexer::yoToken* boolconst = nullptr;
         IdentifierNode* iden = nullptr;
+        StfOpNode* stf = nullptr;
         FuncCallNode* fcall = nullptr;
         SiadExprNode* siad = nullptr;
 
@@ -145,6 +146,16 @@ namespace AST{
         std::string toString();
     };
 
+    class StfOpNode{ // 类似于函数的运算符
+    public:
+        yolexer::yoToken* name = nullptr;
+        yolexer::yoToken* left = nullptr;
+        WholeExprNode* expr = nullptr;
+        yolexer::yoToken* right = nullptr;
+
+        std::string toString();
+    };
+
     class ListExprNode{
     public:
         yolexer::yoToken* left = nullptr;
@@ -243,6 +254,10 @@ namespace AST{
         VorcStmtNode* vorcstmt = nullptr;
         BlockStmtNode* blockstmt = nullptr;
         SpExprStmtNode* spexprstmt = nullptr;
+        IfStmtNode* ifstmt = nullptr;
+        ElifStmtNode* elifstmt = nullptr;
+        ElseStmtNode* elsestmt = nullptr;
+        WhileStmtNode* whilestmt = nullptr;
 
         std::string toString();
     };

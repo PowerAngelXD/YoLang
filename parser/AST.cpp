@@ -14,6 +14,10 @@ std::string AST::FuncCallNode::toString() {
     }
 }
 
+std::string AST::StfOpNode::toString() {
+    return "StfOpNode: {" + expr->toString() + "}";
+}
+
 std::string AST::IdentifierNode::toString() {
     if(dots.empty()) return "IdentifierNode: {" + idens[0]->toString() + "}";
     else{
@@ -108,6 +112,7 @@ std::string AST::PrimExprNode::toString() {
         else if(iden != nullptr) ret += iden->toString() + ", ";
         else if(fcall != nullptr) ret += fcall->toString() + ", ";
         else if(siad != nullptr) ret += siad->toString() + ", ";
+        else if(stf != nullptr) ret += stf->toString() + ", ";
         else if(boolconst != nullptr) ret += boolconst->toString() + ", ";
 
         if(op != nullptr) ret += op->toString() + "}";
