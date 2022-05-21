@@ -325,10 +325,6 @@ yvm::YVM::vmValue yvm::YVM::envPeek() {
     runtimeTop ++;
     return ret;
 }
-void yvm::YVM::envClear(){
-    runtimeStack.clear();
-    runtimeTop = 0;
-}
 
 int yvm::YVM::run(std::string arg) {
     for(int i = 0; i < codes.size(); i++) {
@@ -692,7 +688,7 @@ int yvm::YVM::run(std::string arg) {
                 auto name = envPop();
                 if(!runtimeSpace.find(constpool[name.second]))
                     throw yoexception::YoError("NameError", "There is no identifier named: '" + constpool[name.second] + "'", codes[i].line, codes[i].column);
-                if(value.first != runtimeSpace.getValue(constpool[name.second]).getType())
+                if(value.first != (vmVType)runtimeSpace.getValue(constpool[name.second]).getType())
                     throw yoexception::YoError("TypeError", "The type before and after assignment is inconsistent!", codes[i].line, codes[i].column);
                 if(envPeek().first == vmVType::integer) {
                     // 是数组元素赋值
@@ -834,6 +830,14 @@ int yvm::YVM::run(std::string arg) {
                 }
                 break;
             }
+            case ygen::btc::scopestart: {
+                runtimeSpace.createScope("yscope:" + std::to_string(runtimeSpace.getDeep() + 1));
+                break;
+            }
+            case ygen::btc::scopeend: {
+                runtimeSpace.removeScope();
+                break;
+            }
             default: break;
         }
     }
@@ -842,6 +846,13 @@ int yvm::YVM::run(std::string arg) {
 void yvm::YVM::reload(std::vector<ygen::byteCode> _codes, std::vector<std::string> _constpool){
     codes = _codes;
     constpool = _constpool;
+}
+void yvm::YVM::clear() {
+    runtimeSpace = Space();
+    runtimeStack.clear();
+    runtimeTop = 0;
+    constpool.clear();
+    codes.clear();
 }
 void yvm::YVM::loadVMFile(std::string path){
     std::ifstream file(path);

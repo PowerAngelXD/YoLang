@@ -159,16 +159,15 @@ namespace yvm{
         YVM(ygen::ByteCodeGenerator bcg);
         YVM();
 
-        std::string getVersion();
         void envPush(vmValue val);
         vmValue envPop();
         vmValue envPeek();
-        void envClear();
         std::vector<std::string> getConstPool();
         std::vector<std::vector<vmValue>> getListPool();
 
         int run(std::string arg);
         void reload(std::vector<ygen::byteCode> _codes, std::vector<std::string> _constpool);
+        void clear(); // 清空环境
         void loadVMFile(std::string path);
     };
 }
