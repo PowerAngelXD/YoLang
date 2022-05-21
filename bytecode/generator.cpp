@@ -26,8 +26,8 @@ void ygen::ByteCodeGenerator::normalCtor(ygen::btc code, float arg1, float arg2,
 void ygen::ByteCodeGenerator::completeCtor(ygen::btc code, float arg1, float arg2, float arg3, float arg4, int ln, int col){
     codes.push_back({code, arg1, arg2, arg3, arg4, ln, col});
 }
-void ygen::ByteCodeGenerator::genFile() {
-    std::ofstream file("yo.yvmc", std::ios::binary|std::ios::out);
+void ygen::ByteCodeGenerator::genFile(std::string name) {
+    std::ofstream file(name, std::ios::binary|std::ios::out);
     
     std::string paraArea;
     for(int i = 0; i < codes.size(); i++) {
@@ -39,13 +39,11 @@ void ygen::ByteCodeGenerator::genFile() {
         file<<removeZero(codes[i].line)<<",";
         file<<removeZero(codes[i].column)<<":\n";
     }
-    file<<"INS_END\n";
     file<<"#\n";
     for(auto para: constpool) {
-        file<<para<<",";
+        file<<para<<"\"";
         // file.write(strcat(para.data(), ","), sizeof(std::string));
     }
-    file<<"CONST_POOL_END";
     file.close();
 }
 
@@ -272,10 +270,15 @@ void ygen::ByteCodeGenerator::visitVorcStmt(AST::VorcStmtNode* node) {
                 node->separate != nullptr?1.0:0.0, 
                 node->mark->line, node->mark->column);
 }
+void ygen::ByteCodeGenerator::visitSpExprStmt(AST::SpExprStmtNode* node) {
+    if(node->assign != nullptr) visitAssignmentExpr(node->assign);
+    else if(node->siad != nullptr) visitSiadExpr(node->siad);
+}
 
 void ygen::ByteCodeGenerator::visit(std::vector<AST::StmtNode*> stmts) {
     for(auto stmt: stmts){
         if(stmt->outstmt != nullptr) visitOutStmt(stmt->outstmt);
         else if(stmt->vorcstmt != nullptr) visitVorcStmt(stmt->vorcstmt);
+        else if(stmt->spexprstmt != nullptr) visitSpExprStmt(stmt->spexprstmt);
     }
 }
