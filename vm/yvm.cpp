@@ -666,6 +666,41 @@ int yvm::YVM::run(std::string arg) {
                 envPush(vmValue(vmVType::boolean, (bool)left.second==true || (bool)right.second==true));
                 break;
             }
+            case ygen::btc::stf:{
+                if(runtimeStack.empty());
+                else{
+                    auto para = envPop();
+                    auto name = constpool[codes[i].arg1];
+                    if(name == "typeof") {
+                        switch (para.first)
+                        {
+                            case vmVType::integer: envPush(vmValue(vmVType::string, addString("<integer>"))); break;
+                            case vmVType::decimal: envPush(vmValue(vmVType::string, addString("<decimal>"))); break;
+                            case vmVType::boolean: envPush(vmValue(vmVType::string, addString("<boolean>"))); break;
+                            case vmVType::string: envPush(vmValue(vmVType::string, addString("<string>"))); break;
+                            case vmVType::character: envPush(vmValue(vmVType::string, addString("<char>"))); break;
+                            case vmVType::null: envPush(vmValue(vmVType::string, addString("<null>"))); break;
+                            default: break;
+                        }
+                    }
+                    else if(name == "nameof") {
+                        if(para.first != vmVType::string)
+                            throw yoexception::YoError("TypeError", "Only values of type '<string>' are accepted within this operator", codes[i].line, codes[i].column);
+                        auto iname = constpool[para.second];
+                        auto value = runtimeSpace.getValue(iname);
+                        switch ((vmVType)value.getType())
+                        {
+                            case vmVType::integer: envPush(vmValue(vmVType::integer, value.getIntValue())); break;
+                            case vmVType::decimal: envPush(vmValue(vmVType::decimal, value.getDeciValue())); break;
+                            case vmVType::boolean: envPush(vmValue(vmVType::boolean, value.getBoolValue())); break;
+                            case vmVType::string: envPush(vmValue(vmVType::string, addString(value.getStrValue()))); break;
+                            case vmVType::character: envPush(vmValue(vmVType::character, addChar(value.getCharValue()))); break;
+                            default: break;
+                        }
+                    }
+                }
+                break;
+            }
             case ygen::btc::out:{
                 auto content = envPop();
                 if(content.first == vmVType::string || content.first == vmVType::character)
