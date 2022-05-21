@@ -695,9 +695,11 @@ int yvm::YVM::run(std::string arg) {
                 if(envPeek().first == vmVType::integer) {
                     // 是数组元素赋值
                     auto index = envPop();
-                    if(value.first != vmVType::list)
+                    if(!runtimeSpace.getValue(constpool[name.second]).isList())
                         throw yoexception::YoError("TypeError", "Object does not support the operation of assigning values to members", codes[i].line, codes[i].column);
                     auto list = runtimeSpace.getValue(constpool[name.second]).getList();
+                    if(index.second > list.size() - 1)
+                        throw yoexception::YoError("ListError", "Index out of range of list", codes[i].line, codes[i].column);
                     switch (value.first)
                     {
                         case vmVType::integer: list[index.second] = Space::Scope::Value((int)value.second, true, codes[i].line, codes[i].column); break;
@@ -744,7 +746,7 @@ int yvm::YVM::run(std::string arg) {
             }     
             case ygen::btc::init:{
                 auto name = constpool[codes[i].arg1];
-                if(std::find(runtimeSpace.current().memberlist.begin(), runtimeSpace.current().memberlist.end(), name) != runtimeSpace.current().memberlist.end()){
+                if(std::count(runtimeSpace.current().memberlist.begin(), runtimeSpace.current().memberlist.end(), name)){
                     auto value = envPop();
                     //type-checker
                     if(codes[i].arg4 == 1.0){
@@ -852,14 +854,13 @@ void yvm::YVM::loadVMFile(std::string path){
     }
     //
     auto ins = split(split(str, '#')[0], ':');
-    auto cp = split(split(str, '#')[1], ',');
+    auto cp = split(split(str, '#')[1], '\"');
     constpool = cp;
 
     // 生成code
     std::vector<ygen::byteCode> _codes;
     for(int i = 0; i < ins.size(); i ++){
         auto temp = split(ins[i], ',');
-        if(temp[0] == "INS_END") break;
         _codes.push_back((ygen::byteCode){(ygen::btc)atoi(temp[0].c_str()), atof(temp[1].c_str()), atof(temp[2].c_str()), atof(temp[3].c_str()), atof(temp[4].c_str()), atoi(temp[5].c_str()), atoi(temp[6].c_str())});
     }
     codes = _codes;
