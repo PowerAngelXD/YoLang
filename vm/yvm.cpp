@@ -445,6 +445,12 @@ int yvm::YVM::run(std::string arg) {
                     envPush(vmValue(vmVType::string, addString(constpool[left.second] + constpool[right.second])));
                 else if(left.first == vmVType::character && right.first == vmVType::character)
                     envPush(vmValue(vmVType::string, addString(constpool[left.second] + constpool[right.second])));
+                else if(left.first == vmVType::list && right.first == vmVType::list) {
+                    std::vector<vmValue> temp;
+                    temp.insert(temp.end(), listpool[left.second].begin(), listpool[left.second].end());
+                    temp.insert(temp.end(), listpool[right.second].begin(), listpool[right.second].end());
+                    envPush(vmValue(vmVType::list, addList(temp)));
+                }
                 else
                     throw yoexception::YoError("TypeError", "This operator does not support this type of operation",
                             codes[i].line, codes[i].column);
@@ -537,6 +543,8 @@ int yvm::YVM::run(std::string arg) {
                     envPush(vmValue(vmVType::boolean, constpool[left.second] == constpool[right.second]));
                 else if(left.first == vmVType::character && right.first == vmVType::character)
                     envPush(vmValue(vmVType::boolean, constpool[left.second] == constpool[right.second]));
+                else if(left.first == vmVType::list && right.first == vmVType::list) 
+                    envPush(vmValue(vmVType::boolean, listpool[left.second] == listpool[right.second]));
                 else
                     throw yoexception::YoError("TypeError", "This operator does not support this type of operation",
                             codes[i].line, codes[i].column);

@@ -128,6 +128,7 @@ namespace yvm{
             int getDeep();
         };
     }
+
     /**
      * @brief Yolang的VM实例类
      */
