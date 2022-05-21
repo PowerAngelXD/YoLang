@@ -102,7 +102,7 @@ void ysh::insEVAL(std::vector<std::string> paras) {
     auto tg = lexer.getTokenGroup();
 
     parser::Parser p(tg);
-    if(tg[tg.size() - 2].content != ";") {
+    if(tg[tg.size() - 2].content != ";" && tg[tg.size() - 2].content != "}") {
         auto expr = p.parseExpr();
 
         ygen::ByteCodeGenerator bcg(expr);
@@ -144,6 +144,18 @@ void ysh::insEVAL(std::vector<std::string> paras) {
         
         yovm.reload(bcg.getCodes(), bcg.getConstPool());
         yovm.run("null");
+    }
+}
+void ysh::insEnv(std::vector<std::string> paras) {
+    if(paras.empty()) std::cout<<"YVM (Yolang Virtual Machine)";
+    else {
+        if(paras.size() == 1) {
+            if(paras[0] == "clear") {
+                yovm.clear();
+                std::cout<<"[YVM SUCCESS] Operation execution completed";
+            }
+            else std::cout<<"[YVM ERROR] Unknown operation on virtual machine: '" + paras[0] + "'";
+        }
     }
 }
 
