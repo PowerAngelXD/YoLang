@@ -188,6 +188,10 @@ void ygen::ByteCodeGenerator::visitIndexOp(AST::IndexOpNode* node){
     visitAddExpr(node->index);
     minCtor(btc::idx, node->left->line, node->left->column);
 }
+void ygen::ByteCodeGenerator::visitStfOp(AST::StfOpNode* node){
+    if(node->expr != nullptr) visitExpr(node->expr);
+    normalCtor(btc::stf, addPara(node->name->content), 0.0, node->name->line, node->name->column);
+}
 void ygen::ByteCodeGenerator::visitPrimExpr(AST::PrimExprNode* node){
     if(node->number != nullptr) visitNumber(node->number);
     else if(node->string != nullptr) visitStrCh(node->string);
@@ -197,6 +201,7 @@ void ygen::ByteCodeGenerator::visitPrimExpr(AST::PrimExprNode* node){
     else if(node->iden != nullptr) visitIdentifier(node->iden);
     else if(node->siad != nullptr) visitSiadExpr(node->siad);
     else if(node->expr != nullptr) visitExpr(node->expr);
+    else if(node->stf != nullptr) visitStfOp(node->stf);
     
     if(node->op != nullptr) visitIndexOp(node->op);
 }

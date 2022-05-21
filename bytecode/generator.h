@@ -9,7 +9,7 @@ namespace ygen{
         // 栈操作类
         push = 0, gto, jmp,
         // 运算类
-        selfadd, selfsub, add, sub, div, mul, tmo, idx, lst, logicand, logicor, no, lt, ltet, gt, gtet, equ, noequ, gmem, 
+        selfadd, selfsub, add, sub, div, mul, tmo, idx, lst, logicand, logicor, no, lt, ltet, gt, gtet, equ, noequ, gmem, stf, 
         // 标志类
         listend, paraend, scopestart, scopeend, idenend, 
         // 功能类
@@ -87,6 +87,7 @@ namespace ygen{
         void visitCmpOp(AST::CmpOpNode* node);
         void visitBoolOp(AST::BoolOpNode* node);
         void visitIndexOp(AST::IndexOpNode* node);
+        void visitStfOp(AST::StfOpNode* node);
         void visitPrimExpr(AST::PrimExprNode* node);
         void visitMulExpr(AST::MulExprNode* node);
         void visitAddExpr(AST::AddExprNode* node);
