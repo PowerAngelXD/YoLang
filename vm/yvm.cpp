@@ -692,6 +692,8 @@ int yvm::YVM::run(std::string arg) {
                 auto name = envPop();
                 if(!runtimeSpace.find(constpool[name.second]))
                     throw yoexception::YoError("NameError", "There is no identifier named: '" + constpool[name.second] + "'", codes[i].line, codes[i].column);
+                if(value.first != runtimeSpace.getValue(constpool[name.second]).getType())
+                    throw yoexception::YoError("TypeError", "The type before and after assignment is inconsistent!", codes[i].line, codes[i].column);
                 if(envPeek().first == vmVType::integer) {
                     // 是数组元素赋值
                     auto index = envPop();
