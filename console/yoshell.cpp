@@ -21,10 +21,13 @@ bool ysh::tools::compareFileType(std::string name, std::string type) {
 
 // SHELL
 void ysh::insHelp(std::vector<std::string> paras) {
-    std::cout<<"Yoshell helper"<<std::endl;
-    std::cout<<"help       view the help document"<<std::endl;
-    std::cout<<"exit       exit the shell"<<std::endl;
-    std::cout<<"info       view the information of the Yolang"<<std::endl;
+    std::cout<<"Yo-Console Helper"<<std::endl;
+    std::cout<<"help....................view the help document"<<std::endl;
+    std::cout<<"exit....................exit the shell"<<std::endl;
+    std::cout<<"run (file)..............run a yolang source file or VM intermediate code file"<<std::endl;
+    std::cout<<"gen (file) (target).....generate a virtual machine file named 'target' from the file named 'file'"<<std::endl;
+    std::cout<<"env (opt).....          operate on virtual machines"<<std::endl;
+    std::cout<<"info....................view the information of the Yolang"<<std::endl;
 }
 void ysh::insExit(std::vector<std::string> paras) {
     exit(0);
@@ -161,7 +164,7 @@ void ysh::insEnv(std::vector<std::string> paras) {
 
 void ysh::runYoShell() {
     // 输出欢迎页面
-    std::cout<<"Yolang "<<ysh::completeVersion<<"("<<ysh::version<<"); gcc version 8.1.0 (x86_64-posix-seh-rev0, Built by MinGW-W64 project)"<<" \nWe recommend that you enter \"help\" for help"<<std::endl;
+    std::cout<<"Yolang "<<ysh::completeVersion<<"("<<ysh::version<<")\nGCC version: 8.1.0 (x86_64-posix-seh-rev0, Built by MinGW-W64 project)"<<" \nWe recommend that you enter \"help\" for help"<<std::endl;
     std::string in; // 输入内容
     auto pool = insPool;
 
