@@ -36,7 +36,9 @@ void ysh::insInfo(std::vector<std::string> paras) {
 }
 void ysh::insRun(std::vector<std::string> paras) {
     if(paras.size() > 1)
-        throw yoexception::YoError("ConsoleParaError", "Incomplete command parameters", -1, -1);
+        throw yoexception::YoError("ConsoleParaError", "Too many parameters", -1, -1);
+    if(paras.size() < 1)
+        throw yoexception::YoError("ConsoleParaError", "Too few parameters", -1, -1);
     else {
         auto name = paras[0];
         if(tools::compareFileType(name, ".yvmc")) {
@@ -44,7 +46,53 @@ void ysh::insRun(std::vector<std::string> paras) {
             yovm.loadVMFile(name);
             yovm.run("null");
         }
+        else if(tools::compareFileType(name, ".yo")) {
+            // 是源文件
+            std::ifstream file(name);
+            std::istreambuf_iterator<char> begin(file);
+            std::istreambuf_iterator<char> end;
+            std::string str(begin, end);
+
+            yolexer::Lexer lexer(str);
+            lexer.generate();
+            auto tg = lexer.getTokenGroup();
+
+            parser::Parser p(tg);
+            auto stmts = p.parse();
+
+            ygen::ByteCodeGenerator bcg(stmts);
+            bcg.visit(stmts);
+        
+            yovm.reload(bcg.getCodes(), bcg.getConstPool());
+            yovm.run("null");
+        }
     }
+}
+void ysh::insGen(std::vector<std::string> paras) {
+    if(paras.size() > 2)
+        throw yoexception::YoError("ConsoleParaError", "Too many parameters", -1, -1);
+    if(paras.size() < 2)
+        throw yoexception::YoError("ConsoleParaError", "Too few parameters", -1, -1);
+    auto targetName = paras[1];
+    auto name = paras[0];
+
+    std::ifstream file(name);
+    std::istreambuf_iterator<char> begin(file);
+    std::istreambuf_iterator<char> end;
+    std::string str(begin, end);
+
+    yolexer::Lexer lexer(str);
+    lexer.generate();
+    auto tg = lexer.getTokenGroup();
+
+    parser::Parser p(tg);
+    auto stmts = p.parse();
+
+    ygen::ByteCodeGenerator bcg(stmts);
+    bcg.visit(stmts);
+    bcg.genFile(targetName);
+    std::cout<<"File generation completed! File name: '"<<targetName<<"'";
+
 }
 void ysh::insEVAL(std::vector<std::string> paras) {
     auto eval = paras[0];
@@ -93,7 +141,6 @@ void ysh::insEVAL(std::vector<std::string> paras) {
 
         ygen::ByteCodeGenerator bcg(stmts);
         bcg.visit(stmts);
-        bcg.genFile();
         
         yovm.reload(bcg.getCodes(), bcg.getConstPool());
         yovm.run("null");
@@ -102,9 +149,7 @@ void ysh::insEVAL(std::vector<std::string> paras) {
 
 void ysh::runYoShell() {
     // 输出欢迎页面
-    std::cout<<"Welcome! This is YoLang's shell\n" 
-                "We recommend that you enter \"help\" for help\n" 
-                "[current version] "<<ysh::version<<std::endl;
+    std::cout<<"Yolang "<<ysh::completeVersion<<"("<<ysh::version<<"); gcc version 8.1.0 (x86_64-posix-seh-rev0, Built by MinGW-W64 project)"<<" \nWe recommend that you enter \"help\" for help"<<std::endl;
     std::string in; // 输入内容
     auto pool = insPool;
 
