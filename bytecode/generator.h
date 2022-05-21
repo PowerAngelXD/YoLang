@@ -99,6 +99,7 @@ namespace ygen{
         void visitOutStmt(AST::OutStmtNode* node);
         void visitVorcStmt(AST::VorcStmtNode* node);
         void visitSpExprStmt(AST::SpExprStmtNode* node);
+        void visitBlockStmt(AST::BlockStmtNode* node);
         void visit(std::vector<AST::StmtNode*> stmts); // 特殊的visitor，visit的是整个stmts
     };
 }

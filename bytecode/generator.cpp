@@ -274,10 +274,16 @@ void ygen::ByteCodeGenerator::visitSpExprStmt(AST::SpExprStmtNode* node) {
     if(node->assign != nullptr) visitAssignmentExpr(node->assign);
     else if(node->siad != nullptr) visitSiadExpr(node->siad);
 }
+void ygen::ByteCodeGenerator::visitBlockStmt(AST::BlockStmtNode* node) {
+    minCtor(btc::scopestart, node->left->line, node->left->column);
+    visit(node->stmts);
+    minCtor(btc::scopeend, node->right->line, node->right->column);
+}
 
 void ygen::ByteCodeGenerator::visit(std::vector<AST::StmtNode*> stmts) {
     for(auto stmt: stmts){
         if(stmt->outstmt != nullptr) visitOutStmt(stmt->outstmt);
+        else if(stmt->blockstmt != nullptr) visitBlockStmt(stmt->blockstmt);
         else if(stmt->vorcstmt != nullptr) visitVorcStmt(stmt->vorcstmt);
         else if(stmt->spexprstmt != nullptr) visitSpExprStmt(stmt->spexprstmt);
     }
