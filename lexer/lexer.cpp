@@ -46,7 +46,7 @@ void yolexer::Lexer::generate(){
         "var", "typeof", "nameof", "const", "out", "repeat", 
         "while", "for", "for_each", "return", "func", 
         "string", "integer", "decimal", "char", "boolean"
-    };
+    }; // 新增关键字都在这里
     for(int i = 0; i < input.size(); i++){
         if(input[i] == '\n'){
             line ++; column = 0;
