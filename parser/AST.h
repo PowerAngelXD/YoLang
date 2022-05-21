@@ -208,15 +208,33 @@ namespace AST{
     };
 
     class ElifStmtNode {
+    public:
+        yolexer::yoToken* mark = nullptr;
+        yolexer::yoToken* left = nullptr;
+        BoolExprNode* cond = nullptr;
+        yolexer::yoToken* right = nullptr;
+        BlockStmtNode* body = nullptr;
 
+        std::string toString();
     };
 
     class ElseStmtNode {
+    public:
+        yolexer::yoToken* mark = nullptr;
+        BlockStmtNode* body = nullptr;
 
+        std::string toString();
     };
 
     class WhileStmtNode {
+    public:
+        yolexer::yoToken* mark = nullptr;
+        yolexer::yoToken* left = nullptr;
+        BoolExprNode* cond = nullptr;
+        yolexer::yoToken* right = nullptr;
+        BlockStmtNode* body = nullptr;
 
+        std::string toString();
     };
 
     class StmtNode{
