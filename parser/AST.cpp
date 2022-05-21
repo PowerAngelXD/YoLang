@@ -165,6 +165,15 @@ std::string AST::VorcStmtNode::toString() {
             expr->toString() + "}";
 }
 
+std::string AST::BlockStmtNode::toString() {
+    std::string ret = "BlockStmt: {[";
+    for(auto stmt: stmts) {
+        ret += stmt->toString();
+    }
+    ret += "]}";
+    return ret;
+}
+
 std::string AST::SpExprStmtNode::toString() {
     if(siad != nullptr) return "SpExprStmtNode: {" + siad->toString() + "}";
     else if(assign != nullptr) return "SpExprStmtNode: {" + assign->toString() + "}";
@@ -173,6 +182,7 @@ std::string AST::SpExprStmtNode::toString() {
 std::string AST::StmtNode::toString() {
     if(outstmt != nullptr) return "StmtNode: {" + outstmt->toString() + "}";
     else if(vorcstmt != nullptr) return "StmtNode: {" + vorcstmt->toString() + "}";
+    else if(blockstmt != nullptr) return "StmtNode: {" + blockstmt->toString() + "}";
     else if(spexprstmt != nullptr) return "StmtNode: {" + spexprstmt->toString() + "}";
     return "null";
 }
