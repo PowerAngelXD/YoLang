@@ -167,11 +167,14 @@ bool parser::Parser::isVorcStmt() {
 bool parser::Parser::isBlockStmt() {
     return peek()->content == "{";
 }
+bool parser::Parser::isWhileStmt() {
+    return peek()->content == "while";
+}
 bool parser::Parser::isSpExprStmt() {
     return isSiadExpr() || isAssignmentExpr();
 }
 bool parser::Parser::isStmt() {
-    return isOutStmt() || isVorcStmt() || isSpExprStmt() || isBlockStmt();
+    return isOutStmt() || isVorcStmt() || isSpExprStmt() || isBlockStmt() || isWhileStmt();
 }
 
 // EXPR
@@ -389,6 +392,7 @@ std::vector<AST::StmtNode*> parser::Parser::parse(){
         else if(isBlockStmt()) node->blockstmt = parseBlockStmtNode();
         else if(isVorcStmt()) node->vorcstmt = parseVorcStmtNode();
         else if(isSpExprStmt()) node->spexprstmt = parseSpExprStmtNode();
+        else if(isWhileStmt()) node->whilestmt = parseWhileStmtNode();
         else throw yoexception::YoError("SyntaxError", "Not any statement", tg[offset].line, tg[offset].column);
         stmts.push_back(node);
     }
@@ -447,5 +451,19 @@ AST::BlockStmtNode* parser::Parser::parseBlockStmtNode() {
     if(isStmt()) node->stmts = parse();
     if(peek()->content == "}") node->right = token();
     else throw yoexception::YoError("SyntaxError", "Expect '}'", tg[offset].line, tg[offset].column);
+    return node;
+}
+
+AST::WhileStmtNode* parser::Parser::parseWhileStmtNode() {
+    AST::WhileStmtNode* node = new AST::WhileStmtNode;
+    node->mark = token();
+    if(peek()->content == "(") node->left = token();
+    else throw yoexception::YoError("SyntaxError", "Expect '('", tg[offset].line, tg[offset].column);
+    if(isBoolExpr() || peek()->content == "true" || peek()->content == "false") node->cond = parseBoolExprNode();
+    else throw yoexception::YoError("SyntaxError", "Expect a boolean expression", tg[offset].line, tg[offset].column);
+    if(peek()->content == ")") node->right = token();
+    else throw yoexception::YoError("SyntaxError", "Expect ')'", tg[offset].line, tg[offset].column);
+    if(isBlockStmt()) node->body = parseBlockStmtNode();
+    else throw yoexception::YoError("SyntaxError", "Expect a block statement", tg[offset].line, tg[offset].column);
     return node;
 }
