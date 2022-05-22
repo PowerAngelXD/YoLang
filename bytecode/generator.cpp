@@ -301,6 +301,20 @@ void ygen::ByteCodeGenerator::visitWhileStmt(AST::WhileStmtNode* node) {
     minCtor(btc::scopeend, node->right->line, node->right->column);
     normalCtor(btc::jmp, paraHelper::jmpt::reqTrue, paraHelper::jmpt::findSStart, node->mark->line, node->mark->column);
 }
+void ygen::ByteCodeGenerator::visitIfStmt(AST::IfStmtNode* node) {
+    visitBoolExpr(node->cond);
+    normalCtor(btc::jmp, paraHelper::reqTrue, paraHelper::jmpt::outIFscope, node->mark->line, node->mark->column);
+    visitBlockStmt(node->body);
+}
+void ygen::ByteCodeGenerator::visitElifStmt(AST::ElifStmtNode* node) {
+    visitBoolExpr(node->cond);
+    normalCtor(btc::jmp, paraHelper::reqTrue, paraHelper::jmpt::outElifscope, node->mark->line, node->mark->column);
+    visitBlockStmt(node->body);
+}
+void ygen::ByteCodeGenerator::visitElseStmt(AST::ElseStmtNode* node) {
+    normalCtor(btc::jmp, paraHelper::reqTrue, paraHelper::jmpt::outElsescope, node->mark->line, node->mark->column);
+    visitBlockStmt(node->body);
+}
 
 void ygen::ByteCodeGenerator::visit(std::vector<AST::StmtNode*> stmts) {
     for(auto stmt: stmts){
@@ -309,5 +323,8 @@ void ygen::ByteCodeGenerator::visit(std::vector<AST::StmtNode*> stmts) {
         else if(stmt->vorcstmt != nullptr) visitVorcStmt(stmt->vorcstmt);
         else if(stmt->spexprstmt != nullptr) visitSpExprStmt(stmt->spexprstmt);
         else if(stmt->whilestmt != nullptr) visitWhileStmt(stmt->whilestmt);
+        else if(stmt->ifstmt != nullptr) visitIfStmt(stmt->ifstmt);
+        else if(stmt->elifstmt != nullptr) visitElifStmt(stmt->elifstmt);
+        else if(stmt->elsestmt != nullptr) visitElseStmt(stmt->elsestmt);
     }
 }

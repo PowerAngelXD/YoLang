@@ -26,7 +26,7 @@ namespace ygen{
         // reqXXX代表jmp指令需要的条件以供跳转
         // outWscope指的是跳出while所属的scope外并向前偏移，如果没有则向前偏移一个单位
         // findSStart代表跳转到所属scope的scopestart处
-        enum jmpt{ reqTrue, reqFalse, findSStart, outWscope};
+        enum jmpt{ reqTrue, reqFalse, findSStart, outWscope, outIFscope, outElifscope, outElsescope};
     }
 
     struct byteCode{
@@ -106,6 +106,9 @@ namespace ygen{
         void visitSpExprStmt(AST::SpExprStmtNode* node);
         void visitBlockStmt(AST::BlockStmtNode* node);
         void visitWhileStmt(AST::WhileStmtNode* node);
+        void visitIfStmt(AST::IfStmtNode* node);
+        void visitElifStmt(AST::ElifStmtNode* node);
+        void visitElseStmt(AST::ElseStmtNode* node);
         void visit(std::vector<AST::StmtNode*> stmts); // 特殊的visitor，visit的是整个stmts
     };
 }
