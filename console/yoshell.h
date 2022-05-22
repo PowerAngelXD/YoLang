@@ -24,9 +24,9 @@ namespace ysh{
     }
 
     // 版本号
-    static std::string version = "22.5.29";
+    static std::string version = "22.5.33";
     // 完整版本
-    static std::string completeVersion = "Instable-2022-5-0029";
+    static std::string completeVersion = "Release-2022-5-0033";
     // 指令方法类型
     typedef void (*insMethod)(std::vector<std::string>);
     // 指令定义
