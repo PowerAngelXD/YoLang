@@ -69,6 +69,7 @@ bool parser::Parser::isAddExpr() {
 } 
 bool parser::Parser::isCmpExpr() {
     if(isAddExpr()){
+        if(peek()->content == "true" || peek()->content == "false") return true;
         int temp = offset; // 存档记位
         parseAddExprNode(); // 生成AddExpr，看后面是不是CmpOp
         if(isCmpOp()) {
@@ -173,8 +174,17 @@ bool parser::Parser::isWhileStmt() {
 bool parser::Parser::isSpExprStmt() {
     return isSiadExpr() || isAssignmentExpr();
 }
+bool parser::Parser::isIfStmt() {
+    return peek()->content == "if";
+}
+bool parser::Parser::isElifStmt() {
+    return peek()->content == "elif";
+}
+bool parser::Parser::isElseStmt() {
+    return peek()->content == "else";
+}
 bool parser::Parser::isStmt() {
-    return isOutStmt() || isVorcStmt() || isSpExprStmt() || isBlockStmt() || isWhileStmt();
+    return isOutStmt() || isVorcStmt() || isSpExprStmt() || isBlockStmt() || isWhileStmt() || isIfStmt() || isElifStmt() || isElseStmt();
 }
 
 // EXPR
@@ -393,6 +403,9 @@ std::vector<AST::StmtNode*> parser::Parser::parse(){
         else if(isVorcStmt()) node->vorcstmt = parseVorcStmtNode();
         else if(isSpExprStmt()) node->spexprstmt = parseSpExprStmtNode();
         else if(isWhileStmt()) node->whilestmt = parseWhileStmtNode();
+        else if(isIfStmt()) node->ifstmt = parseIfStmtNode();
+        else if(isElifStmt()) node->elifstmt = parseElifStmtNode();
+        else if(isElseStmt()) node->elsestmt = parseElseStmtNode();
         else throw yoexception::YoError("SyntaxError", "Not any statement", tg[offset].line, tg[offset].column);
         stmts.push_back(node);
     }
@@ -463,6 +476,42 @@ AST::WhileStmtNode* parser::Parser::parseWhileStmtNode() {
     else throw yoexception::YoError("SyntaxError", "Expect a boolean expression", tg[offset].line, tg[offset].column);
     if(peek()->content == ")") node->right = token();
     else throw yoexception::YoError("SyntaxError", "Expect ')'", tg[offset].line, tg[offset].column);
+    if(isBlockStmt()) node->body = parseBlockStmtNode();
+    else throw yoexception::YoError("SyntaxError", "Expect a block statement", tg[offset].line, tg[offset].column);
+    return node;
+}
+
+AST::IfStmtNode* parser::Parser::parseIfStmtNode() {
+    AST::IfStmtNode* node = new AST::IfStmtNode;
+    node->mark = token();
+    if(peek()->content == "(") node->left = token();
+    else throw yoexception::YoError("SyntaxError", "Expect '('", tg[offset].line, tg[offset].column);
+    if(isBoolExpr() || peek()->content == "true" || peek()->content == "false") node->cond = parseBoolExprNode();
+    else throw yoexception::YoError("SyntaxError", "Expect a boolean expression", tg[offset].line, tg[offset].column);
+    if(peek()->content == ")") node->right = token();
+    else throw yoexception::YoError("SyntaxError", "Expect ')'", tg[offset].line, tg[offset].column);
+    if(isBlockStmt()) node->body = parseBlockStmtNode();
+    else throw yoexception::YoError("SyntaxError", "Expect a block statement", tg[offset].line, tg[offset].column);
+    return node;
+}
+
+AST::ElifStmtNode* parser::Parser::parseElifStmtNode() {
+    AST::ElifStmtNode* node = new AST::ElifStmtNode;
+    node->mark = token();
+    if(peek()->content == "(") node->left = token();
+    else throw yoexception::YoError("SyntaxError", "Expect '('", tg[offset].line, tg[offset].column);
+    if(isBoolExpr() || peek()->content == "true" || peek()->content == "false") node->cond = parseBoolExprNode();
+    else throw yoexception::YoError("SyntaxError", "Expect a boolean expression", tg[offset].line, tg[offset].column);
+    if(peek()->content == ")") node->right = token();
+    else throw yoexception::YoError("SyntaxError", "Expect ')'", tg[offset].line, tg[offset].column);
+    if(isBlockStmt()) node->body = parseBlockStmtNode();
+    else throw yoexception::YoError("SyntaxError", "Expect a block statement", tg[offset].line, tg[offset].column);
+    return node;
+}
+
+AST::ElseStmtNode* parser::Parser::parseElseStmtNode() {
+    AST::ElseStmtNode* node = new AST::ElseStmtNode;
+    node->mark = token();
     if(isBlockStmt()) node->body = parseBlockStmtNode();
     else throw yoexception::YoError("SyntaxError", "Expect a block statement", tg[offset].line, tg[offset].column);
     return node;
