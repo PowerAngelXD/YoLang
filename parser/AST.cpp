@@ -184,10 +184,15 @@ std::string AST::SpExprStmtNode::toString() {
     else if(assign != nullptr) return "SpExprStmtNode: {" + assign->toString() + "}";
 }
 
+std::string AST::WhileStmtNode::toString() {
+    return "WhileStmt: {" + cond->toString() + ", " + body->toString() + "}";
+}
+
 std::string AST::StmtNode::toString() {
     if(outstmt != nullptr) return "StmtNode: {" + outstmt->toString() + "}";
     else if(vorcstmt != nullptr) return "StmtNode: {" + vorcstmt->toString() + "}";
     else if(blockstmt != nullptr) return "StmtNode: {" + blockstmt->toString() + "}";
     else if(spexprstmt != nullptr) return "StmtNode: {" + spexprstmt->toString() + "}";
+    else if(whilestmt != nullptr) return "StmtNode: {" + whilestmt->toString() + "}";
     return "null";
 }
