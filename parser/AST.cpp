@@ -188,11 +188,26 @@ std::string AST::WhileStmtNode::toString() {
     return "WhileStmt: {" + cond->toString() + ", " + body->toString() + "}";
 }
 
+std::string AST::IfStmtNode::toString() {
+    return "IfStmt: {" + cond->toString() + ", " + body->toString() + "}";
+}
+
+std::string AST::ElifStmtNode::toString() {
+    return "ElifStmt: {" + cond->toString() + ", " + body->toString() + "}";
+}
+
+std::string AST::ElseStmtNode::toString() {
+    return "ElseStmt: {" + body->toString() + "}";
+}
+
 std::string AST::StmtNode::toString() {
     if(outstmt != nullptr) return "StmtNode: {" + outstmt->toString() + "}";
     else if(vorcstmt != nullptr) return "StmtNode: {" + vorcstmt->toString() + "}";
     else if(blockstmt != nullptr) return "StmtNode: {" + blockstmt->toString() + "}";
     else if(spexprstmt != nullptr) return "StmtNode: {" + spexprstmt->toString() + "}";
     else if(whilestmt != nullptr) return "StmtNode: {" + whilestmt->toString() + "}";
+    else if(ifstmt != nullptr) return "StmtNode: {" + ifstmt->toString() + "}";
+    else if(elifstmt != nullptr) return "StmtNode: {" + elifstmt->toString() + "}";
+    else if(elsestmt != nullptr) return "StmtNode: {" + elifstmt->toString() + "}";
     return "null";
 }
