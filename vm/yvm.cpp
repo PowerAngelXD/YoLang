@@ -3,7 +3,7 @@ using namespace yvm::var;
 
 // Space
 Space::Space(){
-    scopestack.push_back(Scope("YoGlobal"));
+    scopestack.push_back(Scope("__global__"));
 }
 
 Space::Scope Space::getScope(std::string name){
@@ -34,7 +34,7 @@ void Space::createScope(std::string name){
     scopestack.push_back(Scope(name));
 }
 void Space::removeScope(){
-    if(scopestack[deepcount].idenname == "YoGlobal"); // 是全局Scope，不能删除
+    if(scopestack[deepcount].idenname == "__global__"); // 是全局Scope，不能删除
     else{
         deepcount --;
         scopestack.erase(scopestack.begin() + scopestack.size() - 1);
@@ -666,6 +666,50 @@ int yvm::YVM::run(std::string arg) {
                 envPush(vmValue(vmVType::boolean, (bool)left.second==true || (bool)right.second==true));
                 break;
             }
+            case ygen::btc::jmp:{
+                switch((ygen::paraHelper::jmpt)codes[i].arg1) {
+                    case ygen::paraHelper::jmpt::reqTrue: {
+                        switch((ygen::paraHelper::jmpt)codes[i].arg2) {
+                            case ygen::paraHelper::jmpt::outWscope: {
+                                auto cond = envPop();
+                                if((bool)cond.second == true); // 条件为真进入循环体
+                                else {
+                                    int state = 0;
+                                    while(true) {
+                                        i ++;
+                                        if(codes[i].code == ygen::scopestart) state ++;
+                                        else if(codes[i].code == ygen::scopeend) state --;
+
+                                        if(state == 0) break;
+                                    }
+                                    
+                                }
+                                break;
+                            }
+                            case ygen::paraHelper::jmpt::findSStart: {
+                                auto cond = envPop();
+                                if((bool)cond.second == true) {
+                                    int state = 0;
+                                    while(true) {
+                                        i --;
+                                        if(codes[i].code == ygen::scopestart) state --;
+                                        else if(codes[i].code == ygen::scopeend) state ++;
+
+                                        if(state == 0) break;
+                                    }
+                                    i--;
+                                }
+                                else ;
+                                break;
+                            }
+                            default: break;
+                        }
+                        break;
+                    }
+                    default: break;
+                }
+                break;
+            }
             case ygen::btc::stf:{
                 if(runtimeStack.empty());
                 else{
@@ -751,7 +795,7 @@ int yvm::YVM::run(std::string arg) {
                     throw yoexception::YoError("NameError", "There is no identifier named: '" + constpool[name.second] + "'", codes[i].line, codes[i].column);
                 if(value.first != (vmVType)runtimeSpace.getValue(constpool[name.second]).getType())
                     throw yoexception::YoError("TypeError", "The type before and after assignment is inconsistent!", codes[i].line, codes[i].column);
-                if(envPeek().first == vmVType::integer) {
+                if(codes[i].arg1 == 1.0) {
                     // 是数组元素赋值
                     auto index = envPop();
                     if(!runtimeSpace.getValue(constpool[name.second]).isList())
@@ -892,7 +936,7 @@ int yvm::YVM::run(std::string arg) {
                 break;
             }
             case ygen::btc::scopestart: {
-                runtimeSpace.createScope("yscope:" + std::to_string(runtimeSpace.getDeep() + 1));
+                runtimeSpace.createScope("__scope" + std::to_string(runtimeSpace.getDeep() + 1) + "__");
                 break;
             }
             case ygen::btc::scopeend: {
