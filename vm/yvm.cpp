@@ -686,6 +686,61 @@ int yvm::YVM::run(std::string arg) {
                                 }
                                 break;
                             }
+                            case ygen::paraHelper::jmpt::outIFscope: {
+                                auto cond = envPop();
+                                if((bool)cond.second == true) envPush(vmValue(vmVType::boolean, 1.0)); // 条件为真进入
+                                else {
+                                    int state = 0;
+                                    while(true) {
+                                        i ++;
+                                        if(codes[i].code == ygen::scopestart) state ++;
+                                        else if(codes[i].code == ygen::scopeend) state --;
+
+                                        if(state == 0) break;
+                                    }
+                                    envPush(vmValue(vmVType::boolean, 0));
+                                }
+                                break;
+                            }
+                            case ygen::paraHelper::jmpt::outElifscope: {
+                                auto cond = envPop();
+                                if(runtimeStack.empty()) 
+                                    throw yoexception::YoError("Syntax", "You cannot use elif statements directly without an if statement", codes[i].line, codes[i].column);
+                                else if(envPeek().first != vmVType::boolean)
+                                    throw yoexception::YoError("Syntax", "You cannot use elif statements directly without an if statement", codes[i].line, codes[i].column);
+                                if((bool)cond.second == true && (bool)envPop().second == false) envPush(vmValue(vmVType::boolean, 1.0)); // 条件为真进入
+                                else {
+                                    int state = 0;
+                                    while(true) {
+                                        i ++;
+                                        if(codes[i].code == ygen::scopestart) state ++;
+                                        else if(codes[i].code == ygen::scopeend) state --;
+
+                                        if(state == 0) break;
+                                    }
+                                    envPush(vmValue(vmVType::boolean, 0));
+                                }
+                                break;
+                            }
+                            case ygen::paraHelper::jmpt::outElsescope: {
+                                if(runtimeStack.empty()) 
+                                    throw yoexception::YoError("Syntax", "You cannot use else statements directly without an if statement", codes[i].line, codes[i].column);
+                                else if(envPeek().first != vmVType::boolean)
+                                    throw yoexception::YoError("Syntax", "You cannot use else statements directly without an if statement", codes[i].line, codes[i].column);
+                                if((bool)envPop().second == false) envPush(vmValue(vmVType::boolean, 1.0)); // 条件为真进入
+                                else {
+                                    int state = 0;
+                                    while(true) {
+                                        i ++;
+                                        if(codes[i].code == ygen::scopestart) state ++;
+                                        else if(codes[i].code == ygen::scopeend) state --;
+
+                                        if(state == 0) break;
+                                    }
+                                    envPush(vmValue(vmVType::boolean, 0));
+                                }
+                                break;
+                            }
                             case ygen::paraHelper::jmpt::findSStart: {
                                 auto cond = envPop();
                                 if((bool)cond.second == true) {
