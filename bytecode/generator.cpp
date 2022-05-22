@@ -243,10 +243,17 @@ void ygen::ByteCodeGenerator::visitListExpr(AST::ListExprNode* node){
     minCtor(btc::lst, node->right->line, node->right->column);
 }
 void ygen::ByteCodeGenerator::visitAssignmentExpr(AST::AssignmentExprNode* node){
-    if (node->idx != nullptr) visitAddExpr(node->idx->index);
-    visitIdentifierText(node->iden);
-    visitExpr(node->expr);
-    minCtor(btc::assign, node->equ->line, node->equ->column);
+    if (node->idx != nullptr) {
+        visitAddExpr(node->idx->index);
+        visitIdentifierText(node->iden);
+        visitExpr(node->expr);
+        normalCtor(btc::assign, 1.0, 0.0, node->equ->line, node->equ->column);
+    }
+    else {
+        visitIdentifierText(node->iden);
+        visitExpr(node->expr);
+        minCtor(btc::assign, node->equ->line, node->equ->column);
+    }
 }
 void ygen::ByteCodeGenerator::visitExpr(AST::WholeExprNode* node){
     if(node->addexpr != nullptr)
@@ -284,6 +291,16 @@ void ygen::ByteCodeGenerator::visitBlockStmt(AST::BlockStmtNode* node) {
     visit(node->stmts);
     minCtor(btc::scopeend, node->right->line, node->right->column);
 }
+void ygen::ByteCodeGenerator::visitWhileStmt(AST::WhileStmtNode* node) {
+    visitBoolExpr(node->cond);
+    normalCtor(btc::jmp, paraHelper::jmpt::reqTrue, paraHelper::jmpt::outWscope, node->mark->line, node->mark->column); // -1代表如果不满足jmp所需要的条件，则直接跳出scope，如果没有scope则向前偏移
+    minCtor(btc::scopestart, node->left->line, node->left->column);
+    visit(node->body->stmts);
+    // 下面的指令用于检测表达式是否还成立，成立则jmp到下一个循环，否则向前偏移
+    visitBoolExpr(node->cond);
+    minCtor(btc::scopeend, node->right->line, node->right->column);
+    normalCtor(btc::jmp, paraHelper::jmpt::reqTrue, paraHelper::jmpt::findSStart, node->mark->line, node->mark->column);
+}
 
 void ygen::ByteCodeGenerator::visit(std::vector<AST::StmtNode*> stmts) {
     for(auto stmt: stmts){
@@ -291,5 +308,6 @@ void ygen::ByteCodeGenerator::visit(std::vector<AST::StmtNode*> stmts) {
         else if(stmt->blockstmt != nullptr) visitBlockStmt(stmt->blockstmt);
         else if(stmt->vorcstmt != nullptr) visitVorcStmt(stmt->vorcstmt);
         else if(stmt->spexprstmt != nullptr) visitSpExprStmt(stmt->spexprstmt);
+        else if(stmt->whilestmt != nullptr) visitWhileStmt(stmt->whilestmt);
     }
 }
