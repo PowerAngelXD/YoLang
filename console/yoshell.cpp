@@ -33,8 +33,9 @@ void ysh::insExit(std::vector<std::string> paras) {
     exit(0);
 }
 void ysh::insInfo(std::vector<std::string> paras) {
-    std::cout<<"Yolang complete version: " << ysh::completeVersion << std::endl;
-    std::cout<<"Yolang version: " << ysh::version << std::endl;
+    std::cout<<"Yolang develop complete version: " << ysh::completeVersion << std::endl;
+    std::cout<<"Yolang develop version: " << ysh::version << std::endl;
+    std::cout<<"Yolang version: " << ysh::relVersion << std::endl;
     std::cout<<"Copyright (c) ITCDT Team."<< std::endl;
 }
 void ysh::insRun(std::vector<std::string> paras) {

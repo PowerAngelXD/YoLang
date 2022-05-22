@@ -25,6 +25,8 @@ namespace ysh{
 
     // 版本号
     static std::string version = "22.5.33";
+    // 发行版本号
+    static std::string relVersion = "Yolang 1.0.0";
     // 完整版本
     static std::string completeVersion = "Release-2022-5-0033";
     // 指令方法类型
