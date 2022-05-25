@@ -163,7 +163,7 @@ bool parser::Parser::isOutStmt() {
     return peek()->content == "out";
 }
 bool parser::Parser::isVorcStmt() {
-    return peek()->content == "var" || peek()->content == "const";
+    return peek()->content == "var" || peek()->content == "const"; // TODO： 支持ref后添加对ref的判断
 }
 bool parser::Parser::isBlockStmt() {
     return peek()->content == "{";
@@ -298,7 +298,13 @@ AST::PrimExprNode* parser::Parser::parsePrimExprNode(){
     return node;
 }
 AST::FuncCallNode* parser::Parser::parseFuncCallNode(){
-    return nullptr; // TODO: 实现它
+    AST::FuncCallNode* node = new AST::FuncCallNode;
+    node->iden = parseIdentifierNode();
+    if(peek()->content == "(") node->left = token();
+    else ;
+    if(isExpr()) {
+
+    }
 }
 AST::ListExprNode* parser::Parser::parseListExprNode(){
     AST::ListExprNode* node = new AST::ListExprNode;
