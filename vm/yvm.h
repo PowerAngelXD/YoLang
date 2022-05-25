@@ -20,6 +20,7 @@ namespace yvm{
                     std::string strvalue;   // 值
                     char charvalue;   // 值
                     bool boolvalue;   // 值
+                    Value *ref = nullptr; // 引用
                     
                     std::vector<Value> list; // 列表
 
@@ -27,6 +28,7 @@ namespace yvm{
                     int line, column; // 行，列
 
                     bool isconst = false;
+                    bool isref = false;
                     bool islist = false;
                 public:
                     // 构造变量或者常量，isc用来检测是不是常量                 
@@ -35,21 +37,28 @@ namespace yvm{
                     Value(std::string val, bool isc, int ln, int col);
                     Value(char val, bool isc, int ln, int col);
                     Value(bool val, bool isc, int ln, int col);
+                    Value(Value* _ref, bool isc, int ln, int col);
                     // 构造列表
                     Value(std::vector<Value> list, int ln, int col);
                     // 构造列表，isc用来检测列表是不是常量                
                     Value(std::vector<Value> list, bool isc, int ln, int col);
 
+                    Value()=default;
+
                     bool isList();   // 判断当前Value是否为列表
                     bool isConst();  // 判断当前Value是否为Constant
+                    bool isRef();    // 判断当前Value是否为引用
                     ygen::paraHelper::type getType(); // 获得Value的type
-                    int getIntValue();
-                    std::vector<Value> getList();
 
+                    std::vector<Value> getList();
+                    int getIntValue();
                     float getDeciValue();
                     std::string getStrValue();
                     char getCharValue();
                     bool getBoolValue();
+                    Value* getRef();
+                    Value* getSelfRef();
+
 
                     void assignInt(int value);
                     void assignDeci(float value);
@@ -58,6 +67,7 @@ namespace yvm{
                     void assignChar(char value);
                     void assignValue(Value value);
                     void assignListValue(std::vector<Value> value);
+                    void refAnother(Value value); // 重新ref一个value
                 };
                 friend Value;
                 friend Space;
@@ -77,6 +87,7 @@ namespace yvm{
                 void assign(std::string name, float value);  
                 void assign(std::string name, bool value);  
                 void assign(std::string name, char value);  
+                void assign(std::string name, Value value);
                 void assign(std::string name, std::string value);  
                 void assign(std::string name, std::vector<Value> value);  
                 // 获得名为name的value的position
@@ -113,6 +124,10 @@ namespace yvm{
             void createValue(std::string name, Scope::Value value);
             // 查找所有的Scope中是否有以“name”为名称的value，并返回这个value
             Scope::Value getValue(std::string name);
+            // 查找所有的Scope中是否有以“name”为名称的value，并返回这个value指向的Value的地址
+            Scope::Value* getValueRef(std::string name);
+            // 查找所有的Scope中是否有以“name”为名称的value，并返回这个value的地址
+            Scope::Value* getValueSelfRef(std::string name);
             // 查找所有的Scope中是否有以“name”为名称的value，并返回这个value对应的索引值
             int getValuePos(std::string name);
             // 给名为“name”的value重新赋值
@@ -135,7 +150,7 @@ namespace yvm{
     class YVM{
     public:
         // 值在YVM中的类型
-        enum vmVType {iden, iden_text, string, boolean, character, integer, decimal, null, list, flag}; // 必须与generator中的保持一致
+        enum vmVType {iden, iden_text, string, boolean, character, integer, decimal, null, list, flag, ref}; // 必须与generator中的保持一致
     private:
         // 描述一个YVM中的Value
         typedef std::pair<vmVType, float> vmValue;

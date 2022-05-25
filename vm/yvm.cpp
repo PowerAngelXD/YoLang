@@ -67,6 +67,32 @@ Space::Scope::Value Space::getValue(std::string name){
     }
     throw yoexception::YoError("InsideError", "In: yvm::var::Space::Scope::getValue:Cannot find the value that name is '" + name + "'", -1, -1);
 }
+Space::Scope::Value* Space::getValueRef(std::string name) {
+    int temp = deepcount;
+    while(temp >= 0){
+        for(auto value: scopestack[temp].values){
+            if(value.first == name) {
+                return value.second.getRef();
+            }
+        }
+        temp --;
+    }
+    throw yoexception::YoError("InsideError", "In: yvm::var::Space::Scope::getValue:Cannot find the value that name is '" + name + "'", -1, -1);
+}
+Space::Scope::Value* Space::getValueSelfRef(std::string name) {
+    int temp = deepcount;
+    while(temp >= 0){
+        for(auto value: scopestack[temp].values){
+            if(value.first == name) {
+                auto ref = new Space::Scope::Value;
+                ref = &value.second;
+                return ref;
+            }
+        }
+        temp --;
+    }
+    throw yoexception::YoError("InsideError", "In: yvm::var::Space::Scope::getValue:Cannot find the value that name is '" + name + "'", -1, -1);
+}
 int Space::getValuePos(std::string name){
     int temp = deepcount;
     while(temp >= 0){
@@ -130,6 +156,9 @@ void Space::Scope::assign(std::string name, char value) {
 void Space::Scope::assign(std::string name, std::string value) {
     values[pos(name)].second.assignString(value);
 }
+void Space::Scope::assign(std::string name, Value value) {
+    values[pos(name)].second.refAnother(value);
+}
 void Space::Scope::assign(std::string name, std::vector<Value> value) {
     values[pos(name)].second.assignListValue(value);
 }
@@ -159,6 +188,11 @@ Space::Scope::Value::Value(char val, bool isc, int ln, int col):
                 charvalue(val), isconst(isc), type(ygen::paraHelper::character), line(ln), column(col) {}
 Space::Scope::Value::Value(bool val, bool isc, int ln, int col): 
                 boolvalue(val), isconst(isc), type(ygen::paraHelper::boolean), line(ln), column(col) {}
+Space::Scope::Value::Value(Value* _ref, bool isc, int ln, int col): 
+                isconst(isc), isref(true), type(ygen::paraHelper::ref), line(ln), column(col) {
+                    ref = new Value;
+                    ref = _ref;
+                }
 
 Space::Scope::Value::Value(std::vector<Value> list, int ln, int col): 
                 list(list), islist(true), type(list[0].getType()), line(ln), column(col) {}
@@ -171,6 +205,9 @@ bool Space::Scope::Value::isList(){
 }
 bool Space::Scope::Value::isConst(){
     return isconst;
+}
+bool Space::Scope::Value::isRef(){
+    return isref;
 }
 ygen::paraHelper::type Space::Scope::Value::getType(){
     return type;
@@ -190,6 +227,14 @@ char Space::Scope::Value::getCharValue() {
 }
 bool Space::Scope::Value::getBoolValue() {
     return boolvalue;
+}
+Space::Scope::Value* Space::Scope::Value::getRef() {
+    return ref;
+}
+Space::Scope::Value* Space::Scope::Value::getSelfRef() {
+    auto self = new Value;
+    self = this;
+    return self;
 }
 std::vector<Space::Scope::Value> Space::Scope::Value::getList(){
     return list;
@@ -214,6 +259,10 @@ void Space::Scope::Value::assignString(std::string value) {
 void Space::Scope::Value::assignChar(char value) {
     if(isconst) throw yoexception::YoError("ConstantError", "A constant cannot be assigned", line, column);
     charvalue = value;
+}
+void Space::Scope::Value::refAnother(Value value) {
+    if(isconst) throw yoexception::YoError("ConstantError", "A constant cannot be assigned", line, column);
+    ref = &value;
 }
 void Space::Scope::Value::assignValue(Value value) {
     if(isconst) throw yoexception::YoError("ConstantError", "A constant cannot be assigned", line, column);
@@ -334,30 +383,50 @@ int yvm::YVM::run(std::string arg) {
                 if(codes[i].arg2 == vmVType::iden){
                     if(codes[i + 1].code == ygen::btc::idenend){
                         // 单个identifier，直接push
-                        if(runtimeSpace.find(constpool[codes[i].arg1])){
-                            auto type = (vmVType)runtimeSpace.getValue(constpool[codes[i].arg1]).getType();
-                            if(!runtimeSpace.getValue(constpool[codes[i].arg1]).isList()){
-                                envPush(vmValue(type, 
-                                type == vmVType::integer?runtimeSpace.getValue(constpool[codes[i].arg1]).getIntValue():
-                                    (type == vmVType::decimal?runtimeSpace.getValue(constpool[codes[i].arg1]).getDeciValue():
-                                        (type == vmVType::boolean?runtimeSpace.getValue(constpool[codes[i].arg1]).getBoolValue():
-                                            (type == vmVType::string?addString(runtimeSpace.getValue(constpool[codes[i].arg1]).getStrValue()):
-                                                (type == vmVType::character?addChar(runtimeSpace.getValue(constpool[codes[i].arg1]).getCharValue()):
-                                                    throw yoexception::YoError("TypeError","Unsupported type used",codes[i].line, codes[i].column))
-                                                )
-                                            )
-                                        )
-                                    )
-                                );
+                        auto name = constpool[codes[i].arg1];
+                        if(runtimeSpace.find(name)){
+                            auto type = (vmVType)runtimeSpace.getValue(name).getType();
+                            if(!runtimeSpace.getValue(name).isList()){
+                                switch (type)
+                                {
+                                    case vmVType::integer: envPush(vmValue(type, runtimeSpace.getValue(name).getIntValue())); break;
+                                    case vmVType::decimal: envPush(vmValue(type, runtimeSpace.getValue(name).getDeciValue())); break;
+                                    case vmVType::boolean: envPush(vmValue(type, runtimeSpace.getValue(name).getBoolValue())); break;
+                                    case vmVType::string: envPush(vmValue(type, addString(runtimeSpace.getValue(name).getStrValue()))); break;
+                                    case vmVType::character: envPush(vmValue(type, addChar(runtimeSpace.getValue(name).getCharValue()))); break;
+                                    case vmVType::ref: {
+                                        // 嵌套处理
+                                        auto value = runtimeSpace.getValue(name).getRef();
+                                        auto refType = (vmVType)value->getType();
+                                        if(!value->isList()){
+                                            switch (refType)
+                                            {
+                                                case vmVType::integer: envPush(vmValue(refType, value->getIntValue())); break;
+                                                case vmVType::decimal: envPush(vmValue(refType, value->getDeciValue())); break;
+                                                case vmVType::boolean: envPush(vmValue(refType, value->getBoolValue())); break;
+                                                case vmVType::string: envPush(vmValue(refType, addString(value->getStrValue()))); break;
+                                                case vmVType::character: envPush(vmValue(refType, addChar(value->getCharValue()))); break;
+                                                default: throw yoexception::YoError("TypeError","Unsupported type used",codes[i].line, codes[i].column); break;
+                                            }
+                                        }
+                                        else{
+                                            envPush(vmValue(vmVType::list, addValueList(value->getList())));
+                                        }
+                                        break;
+                                    }
+                                    default: throw yoexception::YoError("TypeError","Unsupported type used",codes[i].line, codes[i].column); break;
+                                }
                             }
                             else{
-                                envPush(vmValue(vmVType::list, addValueList(runtimeSpace.getValue(constpool[codes[i].arg1]).getList())));
+                                envPush(vmValue(vmVType::list, addValueList(runtimeSpace.getValue(name).getList())));
                             }
                         }
                         else throw yoexception::YoError("NameError", "Cannot find identifier named: '" + constpool[codes[i].arg1] + "'", codes[i].line, codes[i].column);
                     }
                     else ; // 多个identifier连接在一起
                 }
+                else if(codes[i].arg2 == vmVType::ref)
+                    envPush(vmValue(vmVType::ref, codes[i].arg1));
                 else envPush(vmValue((vmVType)codes[i].arg2, codes[i].arg1));
                 break;
             }
@@ -947,6 +1016,10 @@ int yvm::YVM::run(std::string arg) {
                         runtimeSpace.createValue(name, Space::Scope::Value(constpool[value.second], constpool[codes[i].arg2] == "var"?false:true, codes[i].line, codes[i].column));
                     else if(value.first == vmVType::character)
                         runtimeSpace.createValue(name, Space::Scope::Value(constpool[value.second][0], constpool[codes[i].arg2] == "var"?false:true, codes[i].line, codes[i].column));
+                    else if(value.first == vmVType::ref){
+                        auto refName = constpool[value.second];
+                        runtimeSpace.createValue(name, Space::Scope::Value(runtimeSpace.getValueSelfRef(refName), constpool[codes[i].arg2] == "var"?false:true, codes[i].line, codes[i].column));
+                    }
                     else if(value.first == vmVType::list) {
                         auto list = listpool[value.second];
                         std::vector<Space::Scope::Value> newlist;
