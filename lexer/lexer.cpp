@@ -43,7 +43,7 @@ void yolexer::Lexer::generate(){
     int line = 1, column = 0;
     // yolang关键字表
     std::vector<std::string> yoKeyWords = {
-        "var", "typeof", "nameof", "const", "out", "repeat", 
+        "var", "ref", "typeof", "nameof", "const", "out", "repeat", 
         "while", "for", "for_each", "return", "func", 
         "string", "integer", "decimal", "char", "boolean"
     }; // 新增关键字都在这里
