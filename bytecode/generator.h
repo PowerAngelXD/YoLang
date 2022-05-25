@@ -22,7 +22,7 @@ namespace ygen{
         // 说明：iden和iden_text
         // iden：标识符和它对应的值
         // iden_text：标识符本身，纯文字
-        enum type{ iden, iden_text, string, boolean, character, integer, decimal, null, list, flag};
+        enum type{ iden, iden_text, string, boolean, character, integer, decimal, null, list, flag, ref};
         // reqXXX代表jmp指令需要的条件以供跳转
         // outWscope指的是跳出while所属的scope外并向前偏移，如果没有则向前偏移一个单位
         // findSStart代表跳转到所属scope的scopestart处
@@ -84,7 +84,7 @@ namespace ygen{
         void visitNull(yolexer::yoToken* token);
         void visitBoolean(yolexer::yoToken* token);
         void visitIdentifier(AST::IdentifierNode* node);
-        void visitIdentifierText(AST::IdentifierNode* node);
+        void visitIdentifierText(AST::IdentifierNode* node, bool isref = false);
         void visitSiadExpr(AST::SiadExprNode* node);
         void visitAddOp(AST::AddOpNode* node);
         void visitMulOp(AST::MulOpNode* node);

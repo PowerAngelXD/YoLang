@@ -117,14 +117,14 @@ void ygen::ByteCodeGenerator::visitIdentifier(AST::IdentifierNode* node){
         minCtor(btc::idenend, node->idens[0]->line, node->idens[0]->column);
     }
 }
-void ygen::ByteCodeGenerator::visitIdentifierText(AST::IdentifierNode* node){
+void ygen::ByteCodeGenerator::visitIdentifierText(AST::IdentifierNode* node, bool isref){
     std::string text;
     text += node->idens[0]->content;
     for(int i = 0; i < node->dots.size(); i++) {
         text += node->dots[i]->content;
         text += node->idens[i + 1]->content;
     }
-    normalCtor(btc::push, addPara(text), paraHelper::string, node->idens[0]->line, node->idens[0]->column);
+    normalCtor(btc::push, addPara(text), isref == true?paraHelper::ref:paraHelper::string, node->idens[0]->line, node->idens[0]->column);
 }
 void ygen::ByteCodeGenerator::visitSiadExpr(AST::SiadExprNode* node){
     if(node->isFront){
@@ -273,14 +273,30 @@ void ygen::ByteCodeGenerator::visitOutStmt(AST::OutStmtNode* node) {
     minCtor(btc::out, node->mark->line, node->mark->column);
 }
 void ygen::ByteCodeGenerator::visitVorcStmt(AST::VorcStmtNode* node) {
-    normalCtor(btc::define, addPara(node->name->content), 0.0, node->mark->line, node->mark->column);
-    visitExpr(node->expr);
-    completeCtor(btc::init, 
-                addPara(node->name->content), 
-                addPara(node->mark->content), 
-                node->separate != nullptr?addPara(node->type->content):0.0, 
-                node->separate != nullptr?1.0:0.0, 
-                node->mark->line, node->mark->column);
+    if(node->mark->content != "ref") {
+        normalCtor(btc::define, addPara(node->name->content), 0.0, node->mark->line, node->mark->column);
+        visitExpr(node->expr);
+        completeCtor(btc::init, 
+                    addPara(node->name->content), 
+                    addPara(node->mark->content), 
+                    node->separate != nullptr?addPara(node->type->content):0.0, 
+                    node->separate != nullptr?1.0:0.0, 
+                    node->mark->line, node->mark->column);
+    }
+    else {
+        if(node->expr->addexpr == nullptr || node->expr->addexpr->muls[0]->prims[0]->iden == nullptr)
+            throw yoexception::YoError("RefError", "Only identifiers can be referenced", 
+                                node->mark->line, 
+                                node->mark->column);
+        normalCtor(btc::define, addPara(node->name->content), 0.0, node->mark->line, node->mark->column);
+        visitIdentifierText(node->expr->addexpr->muls[0]->prims[0]->iden, true);
+        completeCtor(btc::init, 
+                    addPara(node->name->content), 
+                    addPara(node->mark->content), 
+                    node->separate != nullptr?addPara(node->type->content):0.0, 
+                    node->separate != nullptr?1.0:0.0, 
+                    node->mark->line, node->mark->column);
+    }
 }
 void ygen::ByteCodeGenerator::visitSpExprStmt(AST::SpExprStmtNode* node) {
     if(node->assign != nullptr) visitAssignmentExpr(node->assign);
