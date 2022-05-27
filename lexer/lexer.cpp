@@ -93,7 +93,7 @@ void yolexer::Lexer::generate(){
             }
             tokenGroup.push_back({content, yoTokType::String, line, column});
         }
-        else if(isalpha(input[i])){
+        else if(isalpha(input[i]) || input[i] == '_' || input[i] == '$'){
             //是标识符
             bool isKeyWord = false;
             std::string content;
