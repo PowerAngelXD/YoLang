@@ -502,89 +502,155 @@ int yvm::YVM::run(std::string arg) {
             case ygen::btc::add:{
                 auto right = envPop();
                 auto left = envPop();
-                if(left.first == vmVType::integer || right.first == vmVType::integer){
-                    if(left.first == vmVType::integer && right.first == vmVType::integer)
-                        envPush(vmValue(vmVType::integer, left.second + right.second));
-                    else if(left.first == vmVType::decimal || right.first == vmVType::decimal)
-                        envPush(vmValue(vmVType::decimal, left.second + right.second));
+                switch (left.first) {
+                    case vmVType::integer: {
+                        switch (right.first) {
+                            case vmVType::integer: envPush(vmValue(vmVType::integer, left.second + right.second)); break;
+                            case vmVType::decimal: envPush(vmValue(vmVType::decimal, left.second + right.second)); break;
+                            default: throw yoexception::YoError("TypeError", "This operator does not support this type of operation",codes[i].line, codes[i].column); break;
+                        }
+                        break;
+                    }
+                    case vmVType::decimal: {
+                        switch (right.first) {
+                            case vmVType::integer: envPush(vmValue(vmVType::integer, left.second + right.second)); break;
+                            case vmVType::decimal: envPush(vmValue(vmVType::decimal, left.second + right.second)); break;
+                            default: throw yoexception::YoError("TypeError", "This operator does not support this type of operation",codes[i].line, codes[i].column); break;
+                        }
+                        break;
+                    }
+                    case vmVType::string: {
+                        switch (right.first) {
+                            case vmVType::string: envPush(vmValue(vmVType::string, addString(constpool[left.second] + constpool[right.second]))); break;
+                            default: throw yoexception::YoError("TypeError", "This operator does not support this type of operation",codes[i].line, codes[i].column); break;
+                        }
+                        break;
+                    }
+                    case vmVType::character: {
+                        switch (right.first) {
+                            case vmVType::string: envPush(vmValue(vmVType::string, addString(constpool[left.second] + constpool[right.second]))); break;
+                            default: throw yoexception::YoError("TypeError", "This operator does not support this type of operation",codes[i].line, codes[i].column); break;
+                        }
+                        break;
+                    }
+                    default: break;
                 }
-                else if(left.first == vmVType::decimal && right.first == vmVType::decimal)
-                    envPush(vmValue(vmVType::decimal, left.second + right.second));
-                else if(left.first == vmVType::string && right.first == vmVType::string)
-                    envPush(vmValue(vmVType::string, addString(constpool[left.second] + constpool[right.second])));
-                else if(left.first == vmVType::character && right.first == vmVType::character)
-                    envPush(vmValue(vmVType::string, addString(constpool[left.second] + constpool[right.second])));
-                else if(left.first == vmVType::list && right.first == vmVType::list) {
-                    std::vector<vmValue> temp;
-                    temp.insert(temp.end(), listpool[left.second].begin(), listpool[left.second].end());
-                    temp.insert(temp.end(), listpool[right.second].begin(), listpool[right.second].end());
-                    envPush(vmValue(vmVType::list, addList(temp)));
-                }
-                else
-                    throw yoexception::YoError("TypeError", "This operator does not support this type of operation",
-                            codes[i].line, codes[i].column);
                 break;
             }
             case ygen::btc::sub:{
                 auto right = envPop();
                 auto left = envPop();
-                if(left.first == vmVType::integer || right.first == vmVType::integer){
-                    if(left.first == vmVType::integer && right.first == vmVType::integer)
-                        envPush(vmValue(vmVType::integer, left.second - right.second));
-                    else if(left.first == vmVType::decimal || right.first == vmVType::decimal)
-                        envPush(vmValue(vmVType::decimal, left.second - right.second));
+                switch (left.first) {
+                    case vmVType::integer: {
+                        switch (right.first) {
+                            case vmVType::integer: envPush(vmValue(vmVType::integer, left.second - right.second)); break;
+                            case vmVType::decimal: envPush(vmValue(vmVType::decimal, left.second - right.second)); break;
+                            default: throw yoexception::YoError("TypeError", "This operator does not support this type of operation",codes[i].line, codes[i].column); break;
+                        }
+                        break;
+                    }
+                    case vmVType::decimal: {
+                        switch (right.first) {
+                            case vmVType::integer: envPush(vmValue(vmVType::integer, left.second - right.second)); break;
+                            case vmVType::decimal: envPush(vmValue(vmVType::decimal, left.second - right.second)); break;
+                            default: throw yoexception::YoError("TypeError", "This operator does not support this type of operation",codes[i].line, codes[i].column); break;
+                        }
+                        break;
+                    }
+                    default: break;
                 }
-                else if(left.first == vmVType::decimal && right.first == vmVType::decimal)
-                    envPush(vmValue(vmVType::decimal, left.second - right.second));
-                else
-                    throw yoexception::YoError("TypeError", "This operator does not support this type of operation",
-                            codes[i].line, codes[i].column);
                 break;
             }
             case ygen::btc::div:{
                 auto right = envPop();
                 auto left = envPop();
-                if(right.second == 0)
-                    throw yoexception::YoError("CalculationError", "Divisor cannot be 0", codes[i].line, codes[i].column);
-                if(left.first == vmVType::integer || right.first == vmVType::integer){
-                    if(left.first == vmVType::integer && right.first == vmVType::integer)
-                        envPush(vmValue(vmVType::integer, left.second / right.second));
-                    else if(left.first == vmVType::decimal || right.first == vmVType::decimal)
-                        envPush(vmValue(vmVType::decimal, left.second / right.second));
+                switch (left.first) {
+                    case vmVType::integer: {
+                        switch (right.first) {
+                            case vmVType::integer: envPush(vmValue(vmVType::integer, left.second - right.second)); break;
+                            case vmVType::decimal: envPush(vmValue(vmVType::decimal, left.second - right.second)); break;
+                            default: throw yoexception::YoError("TypeError", "This operator does not support this type of operation",codes[i].line, codes[i].column); break;
+                        }
+                        break;
+                    }
+                    case vmVType::decimal: {
+                        switch (right.first) {
+                            case vmVType::integer: envPush(vmValue(vmVType::integer, left.second - right.second)); break;
+                            case vmVType::decimal: envPush(vmValue(vmVType::decimal, left.second - right.second)); break;
+                            default: throw yoexception::YoError("TypeError", "This operator does not support this type of operation",codes[i].line, codes[i].column); break;
+                        }
+                        break;
+                    }
+                    default: break;
                 }
-                else if(left.first == vmVType::decimal && right.first == vmVType::decimal)
-                    envPush(vmValue(vmVType::decimal, left.second / right.second));
-                else
-                    throw yoexception::YoError("TypeError", "This operator does not support this type of operation",
-                            codes[i].line, codes[i].column);
                 break;
             }
             case ygen::btc::mul:{
                 auto right = envPop();
                 auto left = envPop();
-                if(left.first == vmVType::integer || right.first == vmVType::integer){
-                    if(left.first == vmVType::integer && right.first == vmVType::integer)
-                        envPush(vmValue(vmVType::integer, left.second * right.second));
-                    else if(left.first == vmVType::decimal || right.first == vmVType::decimal)
-                        envPush(vmValue(vmVType::decimal, left.second * right.second));
-                    else if(left.first == vmVType::string || right.first == vmVType::string){
-                        std::string newstr;
-                        for(int i = 0; i < right.second; i++)
-                            newstr += constpool[left.second];
-                        envPush(vmValue(vmVType::string, addString(newstr)));
+                switch (left.first) {
+                    case vmVType::integer: {
+                        switch (right.first) {
+                            case vmVType::integer: envPush(vmValue(vmVType::integer, left.second * right.second)); break;
+                            case vmVType::decimal: envPush(vmValue(vmVType::decimal, left.second * right.second)); break;
+                            case vmVType::string: {
+                                auto str = constpool[right.second];
+                                for(int i = 1; i < left.second; i ++) {
+                                    str += str;
+                                }
+                                envPush(vmValue(vmVType::string, addString(str)));
+                                break;
+                            }
+                            case vmVType::character: {
+                                auto str = constpool[right.second];
+                                for(int i = 1; i < left.second; i ++) {
+                                    str += str;
+                                }
+                                envPush(vmValue(vmVType::string, addString(str)));
+                                break;
+                            }
+                            default: throw yoexception::YoError("TypeError", "This operator does not support this type of operation",codes[i].line, codes[i].column); break;
+                        }
+                        break;
                     }
-                    else if(left.first == vmVType::character || right.first == vmVType::character){
-                        std::string newstr;
-                        for(int i = 0; i < right.second; i++)
-                            newstr += constpool[left.second];
-                        envPush(vmValue(vmVType::string, addString(newstr)));
+                    case vmVType::decimal: {
+                        switch (right.first) {
+                            case vmVType::integer: envPush(vmValue(vmVType::integer, left.second * right.second)); break;
+                            case vmVType::decimal: envPush(vmValue(vmVType::decimal, left.second * right.second)); break;
+                            default: throw yoexception::YoError("TypeError", "This operator does not support this type of operation",codes[i].line, codes[i].column); break;
+                        }
+                        break;
                     }
+                    case vmVType::string: {
+                        switch (right.first) {
+                            case vmVType::integer: {
+                                auto str = constpool[left.second];
+                                for(int i = 1; i < right.second; i ++) {
+                                    str += str;
+                                }
+                                envPush(vmValue(vmVType::string, addString(str)));
+                                break;
+                            }
+                            default: throw yoexception::YoError("TypeError", "This operator does not support this type of operation",codes[i].line, codes[i].column); break;
+                        }
+                        break;
+                    }
+                    case vmVType::character: {
+                        switch (right.first) {
+                            case vmVType::integer: {
+                                auto str = constpool[left.second];
+                                for(int i = 1; i < right.second; i ++) {
+                                    str += str;
+                                }
+                                envPush(vmValue(vmVType::string, addString(str)));
+                                break;
+                            }
+                            default: throw yoexception::YoError("TypeError", "This operator does not support this type of operation",codes[i].line, codes[i].column); break;
+                        }
+                        break;
+                    }
+                    default: break;
                 }
-                else if(left.first == vmVType::decimal && right.first == vmVType::decimal)
-                    envPush(vmValue(vmVType::decimal, left.second * right.second));
-                else
-                    throw yoexception::YoError("TypeError", "This operator does not support this type of operation",
-                            codes[i].line, codes[i].column);
                 break;
             }
             case ygen::btc::tmo:{
@@ -600,123 +666,173 @@ int yvm::YVM::run(std::string arg) {
             case ygen::btc::equ:{
                 auto right = envPop();
                 auto left = envPop();
-                if(left.first == vmVType::integer || right.first == vmVType::integer){
-                    if(left.first == vmVType::integer && right.first == vmVType::integer)
-                        envPush(vmValue(vmVType::boolean, left.second == right.second));
-                    else if(left.first == vmVType::decimal || right.first == vmVType::decimal)
-                        envPush(vmValue(vmVType::boolean, left.second == right.second));
+                switch (left.first) {
+                    case vmVType::integer: {
+                        switch (right.first) {
+                            case vmVType::integer: envPush(vmValue(vmVType::boolean, left.second == right.second)); break;
+                            case vmVType::decimal: envPush(vmValue(vmVType::boolean, left.second == right.second)); break;
+                            default: throw yoexception::YoError("TypeError", "This operator does not support this type of operation",codes[i].line, codes[i].column); break;
+                        }
+                        break;
+                    }
+                    case vmVType::decimal: {
+                        switch (right.first) {
+                            case vmVType::integer: envPush(vmValue(vmVType::boolean, left.second == right.second)); break;
+                            case vmVType::decimal: envPush(vmValue(vmVType::boolean, left.second == right.second)); break;
+                            default: throw yoexception::YoError("TypeError", "This operator does not support this type of operation",codes[i].line, codes[i].column); break;
+                        }
+                        break;
+                    }
+                    case vmVType::string: {
+                        switch (right.first) {
+                            case vmVType::string: envPush(vmValue(vmVType::boolean, constpool[left.second] == constpool[right.second])); break;
+                            default: throw yoexception::YoError("TypeError", "This operator does not support this type of operation",codes[i].line, codes[i].column); break;
+                        }
+                        break;
+                    }
+                    case vmVType::character: {
+                        switch (right.first) {
+                            case vmVType::string: envPush(vmValue(vmVType::boolean, constpool[left.second] == constpool[right.second])); break;
+                            default: throw yoexception::YoError("TypeError", "This operator does not support this type of operation",codes[i].line, codes[i].column); break;
+                        }
+                        break;
+                    }
+                    default: break;
                 }
-                else if(left.first == vmVType::decimal && right.first == vmVType::decimal)
-                    envPush(vmValue(vmVType::boolean, left.second == right.second));
-                else if(left.first == vmVType::string && right.first == vmVType::string)
-                    envPush(vmValue(vmVType::boolean, constpool[left.second] == constpool[right.second]));
-                else if(left.first == vmVType::character && right.first == vmVType::character)
-                    envPush(vmValue(vmVType::boolean, constpool[left.second] == constpool[right.second]));
-                else if(left.first == vmVType::list && right.first == vmVType::list) 
-                    envPush(vmValue(vmVType::boolean, listpool[left.second] == listpool[right.second]));
-                else
-                    throw yoexception::YoError("TypeError", "This operator does not support this type of operation",
-                            codes[i].line, codes[i].column);
                 break;
             }
             case ygen::btc::noequ:{
                 auto right = envPop();
                 auto left = envPop();
-                if(left.first == vmVType::integer || right.first == vmVType::integer){
-                    if(left.first == vmVType::integer && right.first == vmVType::integer)
-                        envPush(vmValue(vmVType::boolean, left.second != right.second));
-                    else if(left.first == vmVType::decimal || right.first == vmVType::decimal)
-                        envPush(vmValue(vmVType::boolean, left.second != right.second));
+                switch (left.first) {
+                    case vmVType::integer: {
+                        switch (right.first) {
+                            case vmVType::integer: envPush(vmValue(vmVType::boolean, left.second != right.second)); break;
+                            case vmVType::decimal: envPush(vmValue(vmVType::boolean, left.second != right.second)); break;
+                            default: throw yoexception::YoError("TypeError", "This operator does not support this type of operation",codes[i].line, codes[i].column); break;
+                        }
+                        break;
+                    }
+                    case vmVType::decimal: {
+                        switch (right.first) {
+                            case vmVType::integer: envPush(vmValue(vmVType::boolean, left.second != right.second)); break;
+                            case vmVType::decimal: envPush(vmValue(vmVType::boolean, left.second != right.second)); break;
+                            default: throw yoexception::YoError("TypeError", "This operator does not support this type of operation",codes[i].line, codes[i].column); break;
+                        }
+                        break;
+                    }
+                    case vmVType::string: {
+                        switch (right.first) {
+                            case vmVType::string: envPush(vmValue(vmVType::boolean, constpool[left.second] != constpool[right.second])); break;
+                            default: throw yoexception::YoError("TypeError", "This operator does not support this type of operation",codes[i].line, codes[i].column); break;
+                        }
+                        break;
+                    }
+                    case vmVType::character: {
+                        switch (right.first) {
+                            case vmVType::string: envPush(vmValue(vmVType::boolean, constpool[left.second] != constpool[right.second])); break;
+                            default: throw yoexception::YoError("TypeError", "This operator does not support this type of operation",codes[i].line, codes[i].column); break;
+                        }
+                        break;
+                    }
+                    default: break;
                 }
-                else if(left.first == vmVType::decimal && right.first == vmVType::decimal)
-                    envPush(vmValue(vmVType::boolean, left.second != right.second));
-                else if(left.first == vmVType::string && right.first == vmVType::string)
-                    envPush(vmValue(vmVType::boolean, constpool[left.second] != constpool[right.second]));
-                else if(left.first == vmVType::character && right.first == vmVType::character)
-                    envPush(vmValue(vmVType::boolean, constpool[left.second] != constpool[right.second]));
-                else
-                    throw yoexception::YoError("TypeError", "This operator does not support this type of operation",
-                            codes[i].line, codes[i].column);
                 break;
             }
             case ygen::btc::gt:{
                 auto right = envPop();
                 auto left = envPop();
-                if(left.first == vmVType::integer || right.first == vmVType::integer){
-                    if(left.first == vmVType::integer && right.first == vmVType::integer)
-                        envPush(vmValue(vmVType::boolean, left.second > right.second));
-                    else if(left.first == vmVType::decimal || right.first == vmVType::decimal)
-                        envPush(vmValue(vmVType::boolean, left.second > right.second));
+                switch (left.first) {
+                    case vmVType::integer: {
+                        switch (right.first) {
+                            case vmVType::integer: envPush(vmValue(vmVType::boolean, left.second > right.second)); break;
+                            case vmVType::decimal: envPush(vmValue(vmVType::boolean, left.second > right.second)); break;
+                            default: throw yoexception::YoError("TypeError", "This operator does not support this type of operation",codes[i].line, codes[i].column); break;
+                        }
+                        break;
+                    }
+                    case vmVType::decimal: {
+                        switch (right.first) {
+                            case vmVType::integer: envPush(vmValue(vmVType::boolean, left.second > right.second)); break;
+                            case vmVType::decimal: envPush(vmValue(vmVType::boolean, left.second > right.second)); break;
+                            default: throw yoexception::YoError("TypeError", "This operator does not support this type of operation",codes[i].line, codes[i].column); break;
+                        }
+                        break;
+                    }
+                    default: break;
                 }
-                else if(left.first == vmVType::decimal && right.first == vmVType::decimal)
-                    envPush(vmValue(vmVType::boolean, left.second > right.second));
-                else if(left.first == vmVType::string && right.first == vmVType::string)
-                    envPush(vmValue(vmVType::boolean, constpool[left.second].size() > constpool[right.second].size()));
-                else if(left.first == vmVType::character && right.first == vmVType::character)
-                    envPush(vmValue(vmVType::boolean, constpool[left.second].size() > constpool[right.second].size()));
-                else
-                    throw yoexception::YoError("TypeError", "This operator does not support this type of operation",
-                            codes[i].line, codes[i].column);
                 break;
             }
             case ygen::btc::gtet:{
                 auto right = envPop();
                 auto left = envPop();
-                if(left.first == vmVType::integer || right.first == vmVType::integer){
-                    if(left.first == vmVType::integer && right.first == vmVType::integer)
-                        envPush(vmValue(vmVType::boolean, left.second >= right.second));
-                    else if(left.first == vmVType::decimal || right.first == vmVType::decimal)
-                        envPush(vmValue(vmVType::boolean, left.second >= right.second));
+                switch (left.first) {
+                    case vmVType::integer: {
+                        switch (right.first) {
+                            case vmVType::integer: envPush(vmValue(vmVType::boolean, left.second >= right.second)); break;
+                            case vmVType::decimal: envPush(vmValue(vmVType::boolean, left.second >= right.second)); break;
+                            default: throw yoexception::YoError("TypeError", "This operator does not support this type of operation",codes[i].line, codes[i].column); break;
+                        }
+                        break;
+                    }
+                    case vmVType::decimal: {
+                        switch (right.first) {
+                            case vmVType::integer: envPush(vmValue(vmVType::boolean, left.second >= right.second)); break;
+                            case vmVType::decimal: envPush(vmValue(vmVType::boolean, left.second >= right.second)); break;
+                            default: throw yoexception::YoError("TypeError", "This operator does not support this type of operation",codes[i].line, codes[i].column); break;
+                        }
+                        break;
+                    }
+                    default: break;
                 }
-                else if(left.first == vmVType::decimal && right.first == vmVType::decimal)
-                    envPush(vmValue(vmVType::boolean, left.second >= right.second));
-                else if(left.first == vmVType::string && right.first == vmVType::string)
-                    envPush(vmValue(vmVType::boolean, constpool[left.second].size() >= constpool[right.second].size()));
-                else if(left.first == vmVType::character && right.first == vmVType::character)
-                    envPush(vmValue(vmVType::boolean, constpool[left.second].size() >= constpool[right.second].size()));
-                else
-                    throw yoexception::YoError("TypeError", "This operator does not support this type of operation",
-                            codes[i].line, codes[i].column);
                 break;
             }
             case ygen::btc::lt:{
                 auto right = envPop();
                 auto left = envPop();
-                if(left.first == vmVType::integer || right.first == vmVType::integer){
-                    if(left.first == vmVType::integer && right.first == vmVType::integer)
-                        envPush(vmValue(vmVType::boolean, left.second < right.second));
-                    else if(left.first == vmVType::decimal || right.first == vmVType::decimal)
-                        envPush(vmValue(vmVType::boolean, left.second < right.second));
+                switch (left.first) {
+                    case vmVType::integer: {
+                        switch (right.first) {
+                            case vmVType::integer: envPush(vmValue(vmVType::boolean, left.second < right.second)); break;
+                            case vmVType::decimal: envPush(vmValue(vmVType::boolean, left.second < right.second)); break;
+                            default: throw yoexception::YoError("TypeError", "This operator does not support this type of operation",codes[i].line, codes[i].column); break;
+                        }
+                        break;
+                    }
+                    case vmVType::decimal: {
+                        switch (right.first) {
+                            case vmVType::integer: envPush(vmValue(vmVType::boolean, left.second < right.second)); break;
+                            case vmVType::decimal: envPush(vmValue(vmVType::boolean, left.second < right.second)); break;
+                            default: throw yoexception::YoError("TypeError", "This operator does not support this type of operation",codes[i].line, codes[i].column); break;
+                        }
+                        break;
+                    }
+                    default: break;
                 }
-                else if(left.first == vmVType::decimal && right.first == vmVType::decimal)
-                    envPush(vmValue(vmVType::boolean, left.second < right.second));
-                else if(left.first == vmVType::string && right.first == vmVType::string)
-                    envPush(vmValue(vmVType::boolean, constpool[left.second].size() < constpool[right.second].size()));
-                else if(left.first == vmVType::character && right.first == vmVType::character)
-                    envPush(vmValue(vmVType::boolean, constpool[left.second].size() < constpool[right.second].size()));
-                else
-                    throw yoexception::YoError("TypeError", "This operator does not support this type of operation",
-                            codes[i].line, codes[i].column);
                 break;
             }
             case ygen::btc::ltet:{
                 auto right = envPop();
                 auto left = envPop();
-                if(left.first == vmVType::integer || right.first == vmVType::integer){
-                    if(left.first == vmVType::integer && right.first == vmVType::integer)
-                        envPush(vmValue(vmVType::boolean, left.second <= right.second));
-                    else if(left.first == vmVType::decimal || right.first == vmVType::decimal)
-                        envPush(vmValue(vmVType::boolean, left.second <= right.second));
+                switch (left.first) {
+                    case vmVType::integer: {
+                        switch (right.first) {
+                            case vmVType::integer: envPush(vmValue(vmVType::boolean, left.second <= right.second)); break;
+                            case vmVType::decimal: envPush(vmValue(vmVType::boolean, left.second <= right.second)); break;
+                            default: throw yoexception::YoError("TypeError", "This operator does not support this type of operation",codes[i].line, codes[i].column); break;
+                        }
+                        break;
+                    }
+                    case vmVType::decimal: {
+                        switch (right.first) {
+                            case vmVType::integer: envPush(vmValue(vmVType::boolean, left.second <= right.second)); break;
+                            case vmVType::decimal: envPush(vmValue(vmVType::boolean, left.second <= right.second)); break;
+                            default: throw yoexception::YoError("TypeError", "This operator does not support this type of operation",codes[i].line, codes[i].column); break;
+                        }
+                        break;
+                    }
+                    default: break;
                 }
-                else if(left.first == vmVType::decimal && right.first == vmVType::decimal)
-                    envPush(vmValue(vmVType::boolean, left.second <= right.second));
-                else if(left.first == vmVType::string && right.first == vmVType::string)
-                    envPush(vmValue(vmVType::boolean, constpool[left.second].size() <= constpool[right.second].size()));
-                else if(left.first == vmVType::character && right.first == vmVType::character)
-                    envPush(vmValue(vmVType::boolean, constpool[left.second].size() <= constpool[right.second].size()));
-                else
-                    throw yoexception::YoError("TypeError", "This operator does not support this type of operation",
-                            codes[i].line, codes[i].column);
                 break;
             }
             case ygen::btc::no:{
@@ -1107,7 +1223,12 @@ void yvm::YVM::loadVMFile(std::string path){
     std::vector<ygen::byteCode> _codes;
     for(int i = 0; i < ins.size(); i ++){
         auto temp = split(ins[i], ',');
-        _codes.push_back((ygen::byteCode){(ygen::btc)atoi(temp[0].c_str()), atof(temp[1].c_str()), atof(temp[2].c_str()), atof(temp[3].c_str()), atof(temp[4].c_str()), atoi(temp[5].c_str()), atoi(temp[6].c_str())});
+        _codes.push_back((ygen::byteCode){(ygen::btc)atoi(temp[0].c_str()),
+                                          static_cast<float>(atof(temp[1].c_str())),
+                                          static_cast<float>(atof(temp[2].c_str())),
+                                          static_cast<float>(atof(temp[3].c_str())),
+                                          static_cast<float>(atof(temp[4].c_str())),
+                                          atoi(temp[5].c_str()), atoi(temp[6].c_str())});
     }
     codes = _codes;
 }
