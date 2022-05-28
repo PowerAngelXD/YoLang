@@ -932,6 +932,7 @@ int yvm::YVM::run(std::string arg) {
                                     int state = 0;
                                     while(true) {
                                         i --;
+                                        auto temp = codes[i].code;
                                         if(codes[i].code == ygen::scopestart) state --;
                                         else if(codes[i].code == ygen::scopeend) state ++;
 
@@ -1186,6 +1187,25 @@ int yvm::YVM::run(std::string arg) {
             case ygen::btc::scopeend: {
                 runtimeSpace.removeScope();
                 break;
+            }
+            case ygen::btc::del: {
+                if(codes[i].arg2 == 1.0) {
+                    // 判断是否启用了不传入push名称的模式
+                    auto name = constpool[codes[i].arg1];
+                    if(runtimeSpace.find(name)) {
+                        runtimeSpace.deleteValue(name);
+                    }
+                    else
+                        throw yoexception::YoError("NameError", "There is no identifier named: '" + name + "'", codes[i].line, codes[i].column);
+                }
+                else {
+                    auto name = constpool[envPop().second];
+                    if(runtimeSpace.find(name)) {
+                        runtimeSpace.deleteValue(name);
+                    }
+                    else
+                        throw yoexception::YoError("NameError", "There is no identifier named: '" + name + "'", codes[i].line, codes[i].column);
+                }
             }
             default: break;
         }
