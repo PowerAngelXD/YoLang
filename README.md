@@ -48,3 +48,7 @@ Yolang的发行版本号遵循以下规则：\
 - [ ] 多维数组
 - [ ] 三元运算符
 - [ ] Objects和对应操作
+
+### 鸣谢
+通过 Clion 开发 ![clion.png](clion.png)\
+感谢JetBrain的绝佳的IDE ![jb.png](jb.png)
