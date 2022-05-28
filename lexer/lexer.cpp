@@ -15,19 +15,19 @@ std::string yolexer::yoToken::toString(){
         break;
     case yolexer::yoTokType::String:
         ret += "String";
-        break;
+    break;
     case yolexer::yoTokType::Identifier:
         ret += "Identifier";
-        break;
+    break;
     case yolexer::yoTokType::KeyWord:
         ret += "KeyWord";
-        break;
+    break;
     case yolexer::yoTokType::Symbol:
         ret += "Symbol";
-        break;
-    }
-    ret += ", " + std::to_string(line) + ", " + std::to_string(column) + "}";
-    return ret;
+    break;
+}
+ret += ", " + std::to_string(line) + ", " + std::to_string(column) + "}";
+return ret;
 }
 
 
@@ -37,7 +37,7 @@ std::vector<yolexer::yoToken> yolexer::Lexer::getTokenGroup() {return tokenGroup
 
 /**
  * @brief 生成token
- * 
+ *
  */
 void yolexer::Lexer::generate(){
     int line = 1, column = 0;
@@ -45,7 +45,7 @@ void yolexer::Lexer::generate(){
     std::vector<std::string> yoKeyWords = {
         "var", "ref", "typeof", "nameof", "const", "out", "repeat", 
         "while", "for", "for_each", "return", "func", 
-        "string", "integer", "decimal", "char", "boolean"
+        "string", "integer", "decimal", "char", "boolean", "delete"
     }; // 新增关键字都在这里
     for(int i = 0; i < input.size(); i++){
         if(input[i] == '\n'){
