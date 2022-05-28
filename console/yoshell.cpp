@@ -51,7 +51,6 @@ void ysh::insRun(std::vector<std::string> paras) {
             yovm.run("null");
         }
         else if(tools::compareFileType(name, ".yo")) {
-            // 是源文件
             std::ifstream file(name);
             std::istreambuf_iterator<char> begin(file);
             std::istreambuf_iterator<char> end;
@@ -106,7 +105,7 @@ void ysh::insEVAL(std::vector<std::string> paras) {
     auto tg = lexer.getTokenGroup();
 
     parser::Parser p(tg);
-    if(tg[tg.size() - 2].content != ";" && tg[tg.size() - 2].content != "}") {
+    if(tg[tg.size() - 2].content != ";" && tg[tg.size() - 2].content != "}" && !p.isStmt()) {
         auto expr = p.parseExpr();
 
         ygen::ByteCodeGenerator bcg(expr);
