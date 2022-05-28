@@ -3,4 +3,5 @@ build
 .vscode
 yolang
 .idea
-cmake-build-release-mingw
+cmake-build-release
+cmake-build-debug
