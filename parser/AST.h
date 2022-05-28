@@ -237,11 +237,48 @@ namespace AST{
         std::string toString();
     };
 
+    class DeleteStmtNode {
+    public:
+        yolexer::yoToken* mark = nullptr;
+        IdentifierNode* iden = nullptr;
+        yolexer::yoToken* end = nullptr;
+
+        std::string toString();
+    };
+
     class WhileStmtNode {
     public:
         yolexer::yoToken* mark = nullptr;
         yolexer::yoToken* left = nullptr;
         BoolExprNode* cond = nullptr;
+        yolexer::yoToken* right = nullptr;
+        BlockStmtNode* body = nullptr;
+
+        std::string toString();
+    };
+
+    class RepeatStmtNode {
+    public:
+        yolexer::yoToken* mark = nullptr;
+        yolexer::yoToken* left = nullptr;
+        AddExprNode* times = nullptr;
+        yolexer::yoToken* right = nullptr;
+        BlockStmtNode* body = nullptr;
+
+        std::string toString();
+    };
+
+    class ForeachStmtNode {
+    public:
+        yolexer::yoToken* mark = nullptr;
+        yolexer::yoToken* left = nullptr;
+        yolexer::yoToken* var_mark = nullptr;
+        yolexer::yoToken* iden = nullptr;
+        yolexer::yoToken* separate = nullptr;
+
+        yolexer::yoToken* listiden = nullptr;
+        ListExprNode* list = nullptr;
+
         yolexer::yoToken* right = nullptr;
         BlockStmtNode* body = nullptr;
 
@@ -258,6 +295,9 @@ namespace AST{
         ElifStmtNode* elifstmt = nullptr;
         ElseStmtNode* elsestmt = nullptr;
         WhileStmtNode* whilestmt = nullptr;
+        ForeachStmtNode* foreachstmt = nullptr;
+        RepeatStmtNode* repeatstmt = nullptr;
+        DeleteStmtNode* delstmt = nullptr;
 
         std::string toString();
     };

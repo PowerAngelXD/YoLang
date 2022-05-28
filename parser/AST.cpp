@@ -182,6 +182,7 @@ std::string AST::BlockStmtNode::toString() {
 std::string AST::SpExprStmtNode::toString() {
     if(siad != nullptr) return "SpExprStmtNode: {" + siad->toString() + "}";
     else if(assign != nullptr) return "SpExprStmtNode: {" + assign->toString() + "}";
+    else return "null";
 }
 
 std::string AST::WhileStmtNode::toString() {
@@ -200,6 +201,18 @@ std::string AST::ElseStmtNode::toString() {
     return "ElseStmt: {" + body->toString() + "}";
 }
 
+std::string AST::ForeachStmtNode::toString() {
+    return "ForEachStmt: {" + iden->toString() + ", " + (list != nullptr? list->toString(): listiden->toString()) + ", " + body->toString() + "}";
+}
+
+std::string AST::DeleteStmtNode::toString() {
+    return "DeleteStmt: {" + iden->toString() + "}";
+}
+
+std::string AST::RepeatStmtNode::toString() {
+    return "RepeatStmt: {" + times->toString() + ", " + body->toString() + "}";
+}
+
 std::string AST::StmtNode::toString() {
     if(outstmt != nullptr) return "StmtNode: {" + outstmt->toString() + "}";
     else if(vorcstmt != nullptr) return "StmtNode: {" + vorcstmt->toString() + "}";
@@ -209,5 +222,8 @@ std::string AST::StmtNode::toString() {
     else if(ifstmt != nullptr) return "StmtNode: {" + ifstmt->toString() + "}";
     else if(elifstmt != nullptr) return "StmtNode: {" + elifstmt->toString() + "}";
     else if(elsestmt != nullptr) return "StmtNode: {" + elifstmt->toString() + "}";
+    else if(foreachstmt != nullptr) return "StmtNode: {" + foreachstmt->toString() + "}";
+    else if(repeatstmt != nullptr) return "StmtNode: {" + repeatstmt->toString() + "}";
+    else if(delstmt != nullptr) return "StmtNode: {" + delstmt->toString() + "}";
     return "null";
 }
