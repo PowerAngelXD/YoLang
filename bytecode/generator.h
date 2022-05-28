@@ -13,7 +13,7 @@ namespace ygen{
         // 标志类
         listend, paraend, scopestart, scopeend, idenend, 
         // 功能类
-        out, define, init, assign
+        out, define, init, assign, del
     };
 
     // ByteCode的参数帮助，可以快捷的写一些参数。内部均为枚举，以XXXXHelper的形式存在
@@ -40,6 +40,7 @@ namespace ygen{
         AST::WholeExprNode* expr;
         std::vector<std::string> constpool; // 字符（串）池，根据索引取元素(也可以用来存放参数)
         std::vector<byteCode> codes; // 字节码集
+        int repit = -1; // 累计repit的计数器，起始值为-1
 
         std::string removeZero(float content); // 功能性函数，去除字符串末尾的0
     public:
@@ -109,6 +110,8 @@ namespace ygen{
         void visitIfStmt(AST::IfStmtNode* node);
         void visitElifStmt(AST::ElifStmtNode* node);
         void visitElseStmt(AST::ElseStmtNode* node);
+        void visitRepeatStmt(AST::RepeatStmtNode* node);
+        void visitDeleteStmt(AST::DeleteStmtNode* node);
         void visit(std::vector<AST::StmtNode*> stmts); // 特殊的visitor，visit的是整个stmts
     };
 }
