@@ -11,9 +11,9 @@ namespace ygen{
         // 运算类
         selfadd, selfsub, add, sub, div, mul, tmo, idx, lst, logicand, logicor, no, lt, ltet, gt, gtet, equ, noequ, gmem, stf, 
         // 标志类
-        listend, paraend, scopestart, scopeend, idenend, 
+        listend, paraend, scopestart, scopeend, idenend,
         // 功能类
-        out, define, init, assign, del
+        out, define, init, assign, del, call
     };
 
     // ByteCode的参数帮助，可以快捷的写一些参数。内部均为枚举，以XXXXHelper的形式存在
@@ -29,6 +29,9 @@ namespace ygen{
         enum jmpt{ reqTrue, reqFalse, findSStart, outWscope, outIFscope, outElifscope, outElsescope};
     }
 
+    /**
+     * @brief 描述VM每一个code的结构体
+     */
     struct byteCode{
         btc code;
         float arg1=0.0, arg2=0.0, arg3=0.0, arg4=0.0;
