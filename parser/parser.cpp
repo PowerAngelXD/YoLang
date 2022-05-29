@@ -452,16 +452,18 @@ AST::VorcStmtNode* parser::Parser::parseVorcStmtNode(){
         node->separate = token();
         if(peek()->type == yolexer::KeyWord) node->type = token();
         else throw yoexception::YoError("SyntaxError", "Expect type specifier ", tg[offset].line, tg[offset].column);
-        if(peek()->content == "=") node->equ = token();
-        else throw yoexception::YoError("SyntaxError", "Expect '='", tg[offset].line, tg[offset].column);
-        if(isExpr()) node->expr = parseExpr();
-        else throw yoexception::YoError("SyntaxError", "Expect an expression", tg[offset].line, tg[offset].column);
+        if(peek()->content == "=") {
+            node->equ = token();
+            if(isExpr()) node->expr = parseExpr();
+            else throw yoexception::YoError("SyntaxError", "Expect an expression", tg[offset].line, tg[offset].column);
+        }
     }
     else{
-        if(peek()->content == "=") node->equ = token();
-        else throw yoexception::YoError("SyntaxError", "Expect '='", tg[offset].line, tg[offset].column);
-        if(isExpr()) node->expr = parseExpr();
-        else throw yoexception::YoError("SyntaxError", "Expect an expression", tg[offset].line, tg[offset].column);
+        if(peek()->content == "=") {
+            node->equ = token();
+            if (isExpr()) node->expr = parseExpr();
+            else throw yoexception::YoError("SyntaxError", "Expect an expression", tg[offset].line, tg[offset].column);
+        }
     }
     if(peek()->content == ";") node->end = token();
     else throw yoexception::YoError("SyntaxError", "Expect ';'", tg[offset].line, tg[offset].column);
