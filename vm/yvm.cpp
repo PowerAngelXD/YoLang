@@ -176,7 +176,34 @@ void Space::Scope::remove(std::string name) {
     else throw yoexception::YoError("NameError", "Identifier with '" + name + "' does not exist", -1, -1);
 }
 
+// Object
+Space::Scope::Object::Object(std::string name, objKind k, int ln, int col): objName(name), kind(k), line(ln), column(col) {}
+Space::Scope::Object::Object(std::string name, objKind k, std::vector<ygen::byteCode> c, std::vector<std::string> cp, int ln, int col):
+                            objName(name), kind(k), codes(c), constpool(cp), line(ln), column(col) {}
+Space::Scope::Object::Object(std::string name, std::vector<std::pair<ygen::paraHelper::type, std::string>> p, int ln, int col):
+                            objName(name), paras(p), kind(objKind::funcObj), line(ln), column(col) {}
+Space::Scope::Object::Object(std::string name, std::vector<ygen::byteCode> c, std::vector<std::string> cp, std::vector<std::pair<ygen::paraHelper::type, std::string>> p, int ln, int col):
+                            objName(name), paras(p), codes(c), constpool(cp), kind(objKind::funcObj), line(ln), column(col) {}
 
+Space::Scope::Value Space::Scope::Object::getMember(std::string name) {
+    if(objSpace->find(name))
+        return objSpace->getValue(name);
+    else
+        throw yoexception::YoError("NameError", "Cannot find identifier named: '" + name + "'", line, column);
+}
+
+yvm::YVM Space::Scope::Object::call() {
+    objVM->reload(codes, constpool);
+    objVM->run("null");
+    return *objVM;
+}
+
+bool Space::Scope::Object::isFuncObj() {
+    return kind == objKind::funcObj? true:false;
+}
+bool Space::Scope::Object::isTypableObj() {
+    return kind == objKind::typableObj? true:false;
+}
 // Value      
 Space::Scope::Value::Value(int val, bool isc, int ln, int col): 
                 intvalue(val), isconst(isc), type(ygen::paraHelper::integer), line(ln), column(col) {}
