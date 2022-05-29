@@ -1,5 +1,6 @@
 #pragma once
 #include "../vm/yvm.h"
+#define INSPARAS std::vector<std::string> paras
 
 namespace ysh{
     // Tools
@@ -21,8 +22,15 @@ namespace ysh{
          * @return false 
          */
         bool compareFileType(std::string name, std::string type);
+        /**
+         * @brief 用于给ast字符串格式化的函数
+         * @param aststr ast字符串
+         * @return
+         */
+        std::string formatAst(std::string aststr);
+        std::string mulStr(std::string str, int times);
+        std::string stmtsToString(std::vector<AST::StmtNode*> stmts);
     }
-
     // 版本号
     static std::string version = "22.5.43";
     // 发行版本号
@@ -35,15 +43,24 @@ namespace ysh{
     typedef std::pair<std::string, insMethod> ins;
     // 指令池
     // 指令方法命名规范：insXXX（XXX为指令名称，首字母大写）
-    void insHelp(std::vector<std::string> paras);
-    void insInfo(std::vector<std::string> paras);
-    void insExit(std::vector<std::string> paras);
-    void insRun(std::vector<std::string> paras);
-    void insGen(std::vector<std::string> paras);
-    void insEnv(std::vector<std::string> paras);
+    void insHelp(INSPARAS);
+    void insInfo(INSPARAS);
+    void insExit(INSPARAS);
+    void insRun(INSPARAS);
+    void insGen(INSPARAS);
+    void insEnv(INSPARAS);
+    void insView(INSPARAS);
     void insEVAL(std::vector<std::string> paras); // 用于执行输入语句的insMethod
 
-    static std::vector insPool = {ins("help", insHelp), ins("info", insInfo), ins("exit", insExit), ins("env", insEnv), ins("gen", insGen), ins("run", insRun), ins("", insEVAL)};
+    static std::vector insPool = {ins("", insEVAL),
+                                  ins("help", insHelp),
+                                  ins("info", insInfo),
+                                  ins("exit", insExit),
+                                  ins("env", insEnv),
+                                  ins("gen", insGen),
+                                  ins("run", insRun),
+                                  ins("view", insView)
+                                  };
 
     // vm实例
     static yvm::YVM yovm;
