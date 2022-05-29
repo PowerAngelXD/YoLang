@@ -14,12 +14,44 @@ namespace yvm{
         public:
             class Scope{
             public:
+                enum objKind{funcObj, typableObj}; // Object的类别
+
+                class Value;
+                class Object {
+                    int line=0, column=0;
+
+                    objKind kind; // Object的类别
+                    std::string objName; // Object名称，funcObj和typableObj都适用
+                    std::vector<ygen::byteCode> codes;
+                    std::vector<std::string> constpool;
+                    Space* objSpace = nullptr; // Object专用Space
+                    YVM* objVM = nullptr; // Object专用VM（仅限于funcObj）
+                    // Object参数对，first：参数类型，second：参数名称（仅限于funcObj）
+                    std::vector<std::pair<ygen::paraHelper::type, std::string>> paras;
+                public:
+                    Object()=default; // 为Value而生的默认构造函数
+                    Object(std::string name, objKind k, int ln, int col); // 最简Object构造器
+                    Object(std::string name, objKind k, std::vector<ygen::byteCode> c, std::vector<std::string> cp, int ln, int col); // 构造Object的同时传入codes
+                    Object(std::string name, std::vector<std::pair<ygen::paraHelper::type, std::string>> p, int ln, int col); // 构造FunctionObject，无codes
+                    Object(std::string name, std::vector<ygen::byteCode> c,
+                           std::vector<std::string> cp,
+                           std::vector<std::pair<ygen::paraHelper::type, std::string>> p,
+                           int ln, int col); // 构造完整的FunctionObject
+                    // 获取目标成员名称（仅限于typable）
+                    Value getMember(std::string name);
+                    // 运行Object（仅限于funcObj）
+                    YVM call();
+                    // 判断Object是什么类别的
+                    bool isFuncObj();
+                    bool isTypableObj();
+                };
                 class Value{
                     int intvalue;   // 值
                     float decivalue;   // 值
                     std::string strvalue;   // 值
                     char charvalue;   // 值
                     bool boolvalue;   // 值
+                    Object objvalue; // 值
                     Value *ref = nullptr; // 引用
                     
                     std::vector<Value> list; // 列表
@@ -30,6 +62,7 @@ namespace yvm{
                     bool isconst = false;
                     bool isref = false;
                     bool islist = false;
+                    bool isobj = false;
                 public:
                     // 构造变量或者常量，isc用来检测是不是常量                 
                     Value(int val, bool isc, int ln, int col);
@@ -38,6 +71,7 @@ namespace yvm{
                     Value(char val, bool isc, int ln, int col);
                     Value(bool val, bool isc, int ln, int col);
                     Value(Value* _ref, bool isc, int ln, int col);
+                    Value(Object obj, bool isc, int ln, int col);
                     // 构造列表
                     Value(std::vector<Value> list, int ln, int col);
                     // 构造列表，isc用来检测列表是不是常量                
@@ -48,6 +82,7 @@ namespace yvm{
                     bool isList();   // 判断当前Value是否为列表
                     bool isConst();  // 判断当前Value是否为Constant
                     bool isRef();    // 判断当前Value是否为引用
+                    bool isObj();
                     ygen::paraHelper::type getType(); // 获得Value的type
 
                     std::vector<Value> getList();
@@ -56,6 +91,7 @@ namespace yvm{
                     std::string getStrValue();
                     char getCharValue();
                     bool getBoolValue();
+                    Object getObjectValue();
                     Value* getRef();
                     Value* getSelfRef();
 
@@ -67,10 +103,12 @@ namespace yvm{
                     void assignChar(char value);
                     void assignValue(Value value);
                     void assignListValue(std::vector<Value> value);
+                    void assignObject(Object value);
                     void refAnother(Value value); // 重新ref一个value
                 };
                 friend Value;
                 friend Space;
+                friend Object;
                 typedef std::pair<std::string, Value> storage;
             private:
                 std::vector<storage> values;
@@ -89,7 +127,8 @@ namespace yvm{
                 void assign(std::string name, char value);  
                 void assign(std::string name, Value value);
                 void assign(std::string name, std::string value);  
-                void assign(std::string name, std::vector<Value> value);  
+                void assign(std::string name, std::vector<Value> value);
+                void assign(std::string name, Object value);
                 // 获得名为name的value的position
                 int pos(std::string name); 
                 // 删除名为name的value
@@ -98,6 +137,7 @@ namespace yvm{
                 void create(std::string name, Value value);
             };
             friend Scope;
+            friend Scope::Object;
         private:
             std::vector<Scope> scopestack; // scope栈
             int deepcount = 0; // 深度计数器
@@ -150,7 +190,7 @@ namespace yvm{
     class YVM{
     public:
         // 值在YVM中的类型
-        enum vmVType {iden, iden_text, string, boolean, character, integer, decimal, null, list, flag, ref}; // 必须与generator中的保持一致
+        enum vmVType {iden, iden_text, string, boolean, character, integer, decimal, null, list, flag, ref, obj}; // 必须与generator中的保持一致
     private:
         // 描述一个YVM中的Value
         typedef std::pair<vmVType, float> vmValue;
