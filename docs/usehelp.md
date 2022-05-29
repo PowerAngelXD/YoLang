@@ -49,6 +49,7 @@ var b:bool = true;    # 变量声明且规定类型
 const c="hello";      # 常量声明方式
 const d:char = '\n';  # 常量声明且规定类型
 ```
+而在Yolang中，不能以关键字为变量/常量名称，同时，标识符开头只能为：“_”，“$”或者字母\
 其中，冒号后面接的是类型说明符，均为关键字，用于规定变量类型；如果传入的值不是规定的类型，Yolang解释器会报错：
 ```
 An exception is thrown when the program is running:
@@ -77,3 +78,39 @@ An exception is thrown when the program is running:
 line: X, column: X
 
 ```
+#### 4，列表操作
+在Yolang中，您可以按照如下方式声明并初始化一个列表：
+```go
+var list = [1,2,3,4,5];
+var listA: string = ["hello", "world"];
+```
+上面两种代码都是合法的，下面阐述它们的区别：\
+第一行代码声明了一个类型为整型的列表，类型由YVM自动推导\
+第二行代码声明了一个类型为字符串的列表，类型由用户给出（关于类型说明符，可以看上一节的介绍）\
+需要注意的是，Yolang中的列表每一个元素必须类型一致，否则会出现以下错误:
+```
+An exception is thrown when the program is running:
+{{TypeError}}:
+    All elements in the list must be of the same type
+line: X, column: X
+```
+下面讲述如何利用列表（承接上文代码）
+```go
+list[0] = 9;
+listA = ["opo", "lll"];
+```
+第一行代码是对列表对应索引的元素赋值，如果索引超出列表范围，会出现下面的错误：
+```
+An exception is thrown when the program is running:
+{{ListError}}:
+    Index out of range of list
+line: X, column: X
+```
+第二行代码，是将整个列表重新赋值，需要注意的是，新的列表长度必须和旧列表长度一致，否则会产生以下报错：
+```
+An exception is thrown when the program is running:
+{{TypeError}}:
+    The type before and after assignment is inconsistent!
+line: X, column: X
+```
+而如果将一个不是列表的变量赋值为一个列表或者将一个列表赋值为一个不是列表的量也会产生如上报错
