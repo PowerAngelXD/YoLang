@@ -311,10 +311,19 @@ AST::FuncCallNode* parser::Parser::parseFuncCallNode(){
     AST::FuncCallNode* node = new AST::FuncCallNode;
     node->iden = parseIdentifierNode();
     if(peek()->content == "(") node->left = token();
-    else ;
+    else throw yoexception::YoError("SyntaxError", "Expect '('",
+                                    tg[offset].line,
+                                    tg[offset].column);
     if(isExpr()) {
-        // TODO: 实现它
+        while(isExpr()) {
+            node->paras.push_back(parseExpr());
+            node->dots.push_back(token());
+        }
     }
+    if(peek()->content == ")") node->left = token();
+    else throw yoexception::YoError("SyntaxError", "Expect ')'",
+                                    tg[offset].line,
+                                    tg[offset].column);
     return node;
 }
 AST::ListExprNode* parser::Parser::parseListExprNode(){
