@@ -275,7 +275,10 @@ void ygen::ByteCodeGenerator::visitOutStmt(AST::OutStmtNode* node) {
 void ygen::ByteCodeGenerator::visitVorcStmt(AST::VorcStmtNode* node) {
     if(node->mark->content != "ref") {
         normalCtor(btc::define, addPara(node->name->content), 0.0, node->mark->line, node->mark->column);
-        visitExpr(node->expr);
+        if(node->expr == nullptr)
+            normalCtor(btc::push, 0.0, paraHelper::null, node->mark->line, node->mark->column);
+        else
+            visitExpr(node->expr);
         completeCtor(btc::init, 
                     addPara(node->name->content), 
                     addPara(node->mark->content), 
