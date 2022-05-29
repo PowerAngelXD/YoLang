@@ -63,8 +63,10 @@ namespace yvm{
                     bool isref = false;
                     bool islist = false;
                     bool isobj = false;
+                    bool isnull = false;
                 public:
-                    // 构造变量或者常量，isc用来检测是不是常量                 
+                    // 构造变量或者常量，isc用来检测是不是常量
+                    Value(bool isc, int ln, int col); // 构造null值
                     Value(int val, bool isc, int ln, int col);
                     Value(float val, bool isc, int ln, int col);
                     Value(std::string val, bool isc, int ln, int col);
@@ -83,6 +85,8 @@ namespace yvm{
                     bool isConst();  // 判断当前Value是否为Constant
                     bool isRef();    // 判断当前Value是否为引用
                     bool isObj();    // 判断当前Value是否为Object
+                    bool isNull();   // 判断当前Value是否为Null
+                    void removeNull(); // 取消Value的null状态
                     ygen::paraHelper::type getType(); // 获得Value的type
 
                     std::vector<Value> getList();
@@ -105,6 +109,8 @@ namespace yvm{
                     void assignListValue(std::vector<Value> value);
                     void assignObject(Object value);
                     void refAnother(Value value); // 重新ref一个value
+
+                    friend Scope;
                 };
                 friend Value;
                 friend Space;
@@ -135,6 +141,12 @@ namespace yvm{
                 void remove(std::string name); 
                 // 创建一个新的Value实例
                 void create(std::string name, Value value);
+                // 删除指定名称的value的null状态
+                void rmNull(std::string name);
+                // 更改指定value的类型
+                void rewriteType(std::string name, ygen::paraHelper::type t);
+                // 更改指定Value的列表类型
+                void changeList(std::string name);
             };
             friend Scope;
             friend Scope::Object;
@@ -178,6 +190,12 @@ namespace yvm{
             void assignValue(std::string name, std::vector<Type> values);
             // 删除名为“name”的value
             void deleteValue(std::string name);
+            // 移除名为“name”的value的null状态
+            void rmValueNull(std::string name);
+            // 改变指定标识符的列表类型
+            void toggleList(std::string name);
+            // 更改指定Value的类型
+            void reWriteType(std::string name, ygen::paraHelper::type t);
 
             // 获得当前对应的深度值
             int getDeep();
