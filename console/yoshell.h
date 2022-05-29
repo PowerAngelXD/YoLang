@@ -24,11 +24,11 @@ namespace ysh{
     }
 
     // 版本号
-    static std::string version = "22.5.40";
+    static std::string version = "22.5.43";
     // 发行版本号
-    static std::string relVersion = "Yolang 1.0.8";
+    static std::string relVersion = "Yolang 1.1.0";
     // 完整版本
-    static std::string completeVersion = "Release-2022-5-0040";
+    static std::string completeVersion = "Release-2022-5-0043";
     // 指令方法类型
     typedef void (*insMethod)(std::vector<std::string>);
     // 指令定义
