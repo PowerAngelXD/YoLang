@@ -82,7 +82,7 @@ namespace yvm{
                     bool isList();   // 判断当前Value是否为列表
                     bool isConst();  // 判断当前Value是否为Constant
                     bool isRef();    // 判断当前Value是否为引用
-                    bool isObj();
+                    bool isObj();    // 判断当前Value是否为Object
                     ygen::paraHelper::type getType(); // 获得Value的type
 
                     std::vector<Value> getList();

@@ -150,6 +150,9 @@ void Space::Scope::assign(std::string name, float value) {
 void Space::Scope::assign(std::string name, bool value) {
     values[pos(name)].second.assignBool(value);
 }
+void Space::Scope::assign(std::string name, Object value) {
+    values[pos(name)].second.assignObject(value);
+}
 void Space::Scope::assign(std::string name, char value) {
     values[pos(name)].second.assignChar(value);
 }
@@ -213,8 +216,10 @@ Space::Scope::Value::Value(std::string val, bool isc, int ln, int col):
                 strvalue(val), isconst(isc), type(ygen::paraHelper::string), line(ln), column(col) {}
 Space::Scope::Value::Value(char val, bool isc, int ln, int col): 
                 charvalue(val), isconst(isc), type(ygen::paraHelper::character), line(ln), column(col) {}
-Space::Scope::Value::Value(bool val, bool isc, int ln, int col): 
+Space::Scope::Value::Value(bool val, bool isc, int ln, int col):
                 boolvalue(val), isconst(isc), type(ygen::paraHelper::boolean), line(ln), column(col) {}
+Space::Scope::Value::Value(Object val, bool isc, int ln, int col):
+                objvalue(val), isconst(isc), type(ygen::paraHelper::boolean), line(ln), column(col), isobj(true) {}
 Space::Scope::Value::Value(Value* _ref, bool isc, int ln, int col): 
                 isconst(isc), isref(true), type(ygen::paraHelper::ref), line(ln), column(col) {
                     ref = new Value;
@@ -236,6 +241,9 @@ bool Space::Scope::Value::isConst(){
 bool Space::Scope::Value::isRef(){
     return isref;
 }
+bool Space::Scope::Value::isObj(){
+    return isobj;
+}
 ygen::paraHelper::type Space::Scope::Value::getType(){
     return type;
 }
@@ -254,6 +262,9 @@ char Space::Scope::Value::getCharValue() {
 }
 bool Space::Scope::Value::getBoolValue() {
     return boolvalue;
+}
+Space::Scope::Object Space::Scope::Value::getObjectValue() {
+    return objvalue;
 }
 Space::Scope::Value* Space::Scope::Value::getRef() {
     return ref;
@@ -282,6 +293,10 @@ void Space::Scope::Value::assignBool(bool value) {
 void Space::Scope::Value::assignString(std::string value) {
     if(isconst) throw yoexception::YoError("ConstantError", "A constant cannot be assigned", line, column);
     strvalue = value;
+}
+void Space::Scope::Value::assignObject(Object value) {
+    if(isconst) throw yoexception::YoError("ConstantError", "A constant cannot be assigned", line, column);
+    objvalue = value;
 }
 void Space::Scope::Value::assignChar(char value) {
     if(isconst) throw yoexception::YoError("ConstantError", "A constant cannot be assigned", line, column);
