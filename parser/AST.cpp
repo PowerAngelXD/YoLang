@@ -4,12 +4,12 @@ std::string AST::FuncCallNode::toString() {
     std::string ret = "FuncCallNode: {";
     if(dots.empty()) return "FuncCallNode: {" + iden->toString() + (paras.empty()?"}":paras[0]->toString() + "}");
     else{
-        ret += paras[0]->toString() + ", ";
+        ret += "[" + paras[0]->toString() + ", ";
         for(int i = 1; i < dots.size(); i++){
-            ret += paras[i]->toString();
-            ret += ",";
+            if(i == dots.size() - 1) break;
+            else ret += ", ";
         }
-        ret.erase(ret.end()-1); // 删去最后面的逗号
+        ret += "] }";
         return ret;
     }
 }
@@ -21,13 +21,14 @@ std::string AST::StfOpNode::toString() {
 std::string AST::IdentifierNode::toString() {
     if(dots.empty()) return "IdentifierNode: {" + idens[0]->toString() + "}";
     else{
-        std::string ret = "IdentifierNode: {[";
+        std::string ret = "IdentifierNode: { [";
         ret += idens[0]->toString() + ", ";
         for(int i = 0; i < dots.size(); i++){
             ret += idens[i + 1]->toString();
-            ret += ",";
+            if(i == dots.size() - 1)break;
+            else ret += ", ";
         }
-        ret.erase(ret.end()-1); // 删去最后面的逗号
+        ret += "] }";
         return ret;
     }
 }
@@ -35,15 +36,16 @@ std::string AST::IdentifierNode::toString() {
 std::string AST::MulExprNode::toString() {
     if(ops.empty()) return "MulExprNode: {" + prims[0]->toString() + "}";
     else{
-        std::string ret = "MulExprNode: {[";
+        std::string ret = "MulExprNode: { [";
         ret += prims[0]->toString() + ", ";
         for(int i = 0; i < ops.size(); i++){
             ret += ops[i]->toString();
             ret += ", ";
             ret += prims[i + 1]->toString();
-            ret += ", ";
+            if(i == ops.size() - 1)break;
+            else ret += ", ";
         }
-        ret.erase(ret.end()-1); // 删去最后面的逗号
+        ret += "] }";
         return ret;
     }
 }
@@ -51,15 +53,16 @@ std::string AST::MulExprNode::toString() {
 std::string AST::AddExprNode::toString() {
     if(ops.empty()) return "AddExprNode: {" + muls[0]->toString() + "}";
     else{
-        std::string ret = "AddExprNode: {[";
+        std::string ret = "AddExprNode: { [";
         ret += muls[0]->toString() + ", ";
         for(int i = 0; i < ops.size(); i++){
             ret += ops[i]->toString();
             ret += ", ";
             ret += muls[i + 1]->toString();
-            ret += ", ";
+            if(i == ops.size() - 1) break;
+            else ret += ", ";
         }
-        ret.erase(ret.end()-1); // 删去最后面的逗号
+        ret += "] }";
         return ret;
     }
 }
@@ -67,15 +70,16 @@ std::string AST::AddExprNode::toString() {
 std::string AST::BoolExprNode::toString() {
     if(ops.empty()) return "BoolExprNode: {" + cmps[0]->toString() + "}";
     else{
-        std::string ret = "BoolExprNode: {[";
+        std::string ret = "BoolExprNode: { [";
         ret += cmps[0]->toString() + ", ";
         for(int i = 0; i < ops.size(); i++){
             ret += ops[i]->toString();
             ret += ", ";
             ret += cmps[i + 1]->toString();
-            ret += ", ";
+            if(i == ops.size() - 1) break;
+            else ret += ", ";
         }
-        ret.erase(ret.end()-1); // 删去最后面的逗号
+        ret += "] }";
         return ret;
     }
 }
@@ -83,13 +87,14 @@ std::string AST::BoolExprNode::toString() {
 std::string AST::ListExprNode::toString() {
     if(dots.empty()) return "ListExprNode: {" + elements[0]->toString() + "}";
     else{
-        std::string ret = "ListExprNode: {[";
+        std::string ret = "ListExprNode: { [";
         ret += elements[0]->toString() + ", ";
         for(int i = 0; i < dots.size(); i++){
             ret += elements[i + 1]->toString();
-            ret += ",";
+            if(i == dots.size() - 1) break;
+            else ret += ", ";
         }
-        ret.erase(ret.end()-1); // 删去最后面的逗号
+        ret += "] }";
         return ret;
     }
 }
