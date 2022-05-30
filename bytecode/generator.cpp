@@ -265,6 +265,9 @@ void ygen::ByteCodeGenerator::visitExpr(AST::WholeExprNode* node){
     else if(node->listexpr != nullptr)
         visitListExpr(node->listexpr);
 }
+void ygen::ByteCodeGenerator::visitFuncCallExpr(AST::FuncCallNode *node) {
+
+}
 
 // STMT
 
