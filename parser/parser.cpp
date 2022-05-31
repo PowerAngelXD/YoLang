@@ -315,9 +315,10 @@ AST::FuncCallNode* parser::Parser::parseFuncCallNode(){
                                     tg[offset].line,
                                     tg[offset].column);
     if(isExpr()) {
-        while(node->paras.empty() || peek()->content == ",") {
-            node->paras.push_back(parseExpr());
+        node->paras.push_back(parseExpr());
+        while(peek()->content == ",") {
             node->dots.push_back(token());
+            node->paras.push_back(parseExpr());
         }
     }
     if(peek()->content == ")") node->right = token();
