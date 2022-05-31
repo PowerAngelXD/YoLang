@@ -202,6 +202,7 @@ void ygen::ByteCodeGenerator::visitPrimExpr(AST::PrimExprNode* node){
     else if(node->siad != nullptr) visitSiadExpr(node->siad);
     else if(node->expr != nullptr) visitExpr(node->expr);
     else if(node->stf != nullptr) visitStfOp(node->stf);
+    else if(node->fcall != nullptr) visitFuncCallExpr(node->fcall);
     
     if(node->op != nullptr) visitIndexOp(node->op);
 }
@@ -265,8 +266,17 @@ void ygen::ByteCodeGenerator::visitExpr(AST::WholeExprNode* node){
     else if(node->listexpr != nullptr)
         visitListExpr(node->listexpr);
 }
-void ygen::ByteCodeGenerator::visitFuncCallExpr(AST::FuncCallNode *node) {
-
+void ygen::ByteCodeGenerator::visitFuncCallExpr(AST::FuncCallNode* node) {
+    minCtor(btc::paraend, node->right->line, node->left->column);
+    if(!node->paras.empty()) {
+        // 函数调用有参数，生成参数指令
+        for(int i = 0; i < node->paras.size(); i ++) {
+            visitExpr(node->paras[i]);
+        }
+        minCtor(btc::paraend, node->right->line, node->left->column);
+    }
+    visitIdentifierText(node->iden); // push一个iden的text用于调用函数
+    minCtor(btc::call, node->left->line, node->left->column);
 }
 
 // STMT
