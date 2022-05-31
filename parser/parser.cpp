@@ -315,12 +315,12 @@ AST::FuncCallNode* parser::Parser::parseFuncCallNode(){
                                     tg[offset].line,
                                     tg[offset].column);
     if(isExpr()) {
-        while(isExpr()) {
+        while(node->paras.empty() || peek()->content == ",") {
             node->paras.push_back(parseExpr());
             node->dots.push_back(token());
         }
     }
-    if(peek()->content == ")") node->left = token();
+    if(peek()->content == ")") node->right = token();
     else throw yoexception::YoError("SyntaxError", "Expect ')'",
                                     tg[offset].line,
                                     tg[offset].column);
