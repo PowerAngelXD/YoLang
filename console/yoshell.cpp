@@ -195,7 +195,7 @@ void ysh::insEVAL(std::vector<std::string> paras) {
     auto tg = lexer.getTokenGroup();
 
     parser::Parser p(tg);
-    if(tg[tg.size() - 2].content != ";" && tg[tg.size() - 2].content != "}" && !p.isStmt()) {
+    if(tg[tg.size() - 2].content != ";" && tg[tg.size() - 2].content != "}" && !(p.isStmt() && !p.isSpExprStmt())) {
         auto expr = p.parseExpr();
 
         ygen::ByteCodeGenerator bcg(expr);
@@ -204,6 +204,8 @@ void ysh::insEVAL(std::vector<std::string> paras) {
         yovm.reload(bcg.getCodes(), bcg.getConstPool());
         yovm.run("null");
 
+        // 返回值输出
+        std::cout<<"\n(return) ";
         if(yovm.envPeek().first == yovm.string || yovm.envPeek().first == yovm.character)
             std::cout<<yovm.getConstPool()[yovm.envPop().second];
         else if(yovm.envPeek().first == yovm.null)
