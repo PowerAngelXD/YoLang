@@ -172,7 +172,7 @@ bool parser::Parser::isWhileStmt() {
     return peek()->content == "while";
 }
 bool parser::Parser::isSpExprStmt() {
-    return isSiadExpr() || isAssignmentExpr();
+    return isSiadExpr() || isAssignmentExpr() || isFnCallExpr();
 }
 bool parser::Parser::isIfStmt() {
     return peek()->content == "if";
@@ -484,6 +484,7 @@ AST::SpExprStmtNode* parser::Parser::parseSpExprStmtNode() {
     AST::SpExprStmtNode* node = new AST::SpExprStmtNode;
     if(isSiadExpr()) node->siad = parseSiadExprNode();
     else if(isAssignmentExpr()) node->assign = parseAssignmentExprNode();
+    else if(isFnCallExpr()) node->fcall = parseFuncCallNode();
     if(peek()->content == ";") node->end = token();
     else throw yoexception::YoError("SyntaxError", "Expect ';'", tg[offset].line, tg[offset].column);
     return node;
