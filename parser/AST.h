@@ -193,6 +193,7 @@ namespace AST{
     public:
         SiadExprNode* siad = nullptr;
         AssignmentExprNode* assign = nullptr;
+        FuncCallNode* fcall = nullptr;
         yolexer::yoToken* end = nullptr;
 
         std::string toString();

@@ -187,6 +187,7 @@ std::string AST::BlockStmtNode::toString() {
 std::string AST::SpExprStmtNode::toString() {
     if(siad != nullptr) return "SpExprStmtNode: {" + siad->toString() + "}";
     else if(assign != nullptr) return "SpExprStmtNode: {" + assign->toString() + "}";
+    else if(fcall != nullptr) return "SpExprStmtNode: {" + fcall->toString() + "}";
     else return "null";
 }
 
