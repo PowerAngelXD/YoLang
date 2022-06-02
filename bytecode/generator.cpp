@@ -318,6 +318,7 @@ void ygen::ByteCodeGenerator::visitVorcStmt(AST::VorcStmtNode* node) {
 void ygen::ByteCodeGenerator::visitSpExprStmt(AST::SpExprStmtNode* node) {
     if(node->assign != nullptr) visitAssignmentExpr(node->assign);
     else if(node->siad != nullptr) visitSiadExpr(node->siad);
+    else if(node->fcall != nullptr) visitFuncCallExpr(node->fcall);
 }
 void ygen::ByteCodeGenerator::visitBlockStmt(AST::BlockStmtNode* node) {
     minCtor(btc::scopestart, node->left->line, node->left->column);
