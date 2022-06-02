@@ -446,6 +446,54 @@ yvm::YVM::vmValue yvm::YVM::envPeek() {
     return ret;
 }
 
+// BIF
+yvm::YVM::vmValue yvm::YVM::bifPrint(std::vector<vmValue> paras, int line, int column) {
+    if(paras.empty())
+        throw yoexception::YoError("ParaError", "Too few parameters", line, column);
+    else if(paras.size() > 1)
+        throw yoexception::YoError("ParaError", "Too many parameters", line, column);
+    auto content = paras[0];
+    if(content.first == vmVType::string || content.first == vmVType::character)
+        std::cout<<constpool[content.second];
+    else if(content.first == vmVType::list){
+        auto list = listpool[content.second];
+        for(int j = 0; j < list.size(); j++){
+            auto elt = list[j];
+            if(elt.first == vmVType::string || elt.first == vmVType::character)
+                std::cout<<constpool[elt.second];
+            else
+                std::cout<<elt.second;
+        }
+    }
+    else
+        std::cout<<content.second;
+    return vmValue(vmVType::null, 0.0);
+}
+yvm::YVM::vmValue yvm::YVM::bifPrintLn(std::vector<vmValue> paras, int line, int column) {
+    if(paras.empty())
+        throw yoexception::YoError("ParaError", "Too few parameters", line, column);
+    else if(paras.size() > 1)
+        throw yoexception::YoError("ParaError", "Too many parameters", line, column);
+    auto content = paras[0];
+    if(content.first == vmVType::string || content.first == vmVType::character)
+        std::cout<<constpool[content.second];
+    else if(content.first == vmVType::list){
+        auto list = listpool[content.second];
+        for(int j = 0; j < list.size(); j++){
+            auto elt = list[j];
+            if(elt.first == vmVType::string || elt.first == vmVType::character)
+                std::cout<<constpool[elt.second];
+            else
+                std::cout<<elt.second;
+        }
+    }
+    else
+        std::cout<<content.second;
+    std::cout<<std::endl;
+    return vmValue(vmVType::null, 0.0);
+}
+//
+
 int yvm::YVM::run(std::string arg) {
     for(int i = 0; i < codes.size(); i++) {
         switch (codes[i].code)
@@ -502,8 +550,36 @@ int yvm::YVM::run(std::string arg) {
                 else envPush(vmValue((vmVType)codes[i].arg2, codes[i].arg1));
                 break;
             }
+            case ygen::btc::call: {
+                std::vector<vmValue> paras;
+                bool hasPara = false;
+                auto name = constpool[envPop().second]; // funcName
+                if(envPeek().first == vmVType::flag && constpool[envPeek().second] == "PARAENDFLAG")
+                    hasPara = true;
+                envPop(); // 删除flag
+                if(hasPara) {
+                    // 有参数，开始制作参数列表
+                    while(envPeek().first != vmVType::flag) {
+                        paras.push_back(envPop());
+                    }
+                    envPop(); // 删除参数末尾的flag
+                }
+                std::reverse(paras.begin(), paras.end()); // 出来的参数顺序颠倒
+                if(std::find(bifNames.begin(), bifNames.end(), name) != bifNames.end()) {
+                    // 找到了bifname，是bif，交给bif处理
+                    if(name == "print")
+                        envPush(bifPrint(paras, codes[i].line, codes[i].column));
+                    else if(name == "println")
+                        envPush(bifPrintLn(paras, codes[i].line, codes[i].column));
+                }
+                break;
+            }
             case ygen::btc::listend:{
                 envPush(vmValue(vmVType::flag, addString("LISTENDFLAG")));
+                break;
+            }
+            case ygen::btc::paraend:{
+                envPush(vmValue(vmVType::flag, addString("PARAENDFLAG")));
                 break;
             }
             case ygen::btc::lst:{

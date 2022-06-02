@@ -201,14 +201,16 @@ namespace yvm{
             int getDeep();
         };
     }
-
     /**
      * @brief Yolang的VM实例类
      */
     class YVM{
     public:
-        // 值在YVM中的类型
-        enum vmVType {iden, iden_text, string, boolean, character, integer, decimal, null, list, flag, ref, obj}; // 必须与generator中的保持一致
+        // 值在YVM中的类型, 必须与generator中的保持一致
+        enum vmVType {iden, iden_text, string, boolean, character, integer, decimal, null, list, flag, ref, obj};
+        // bif表
+        std::vector<std::string> bifNames = {"print", "println"};
+        //
     private:
         // 描述一个YVM中的Value
         typedef std::pair<vmVType, float> vmValue;
@@ -228,6 +230,11 @@ namespace yvm{
         int addValueList(std::vector<var::Space::Scope::Value> list);
 
         std::vector<std::string> split(std::string str, char sp);
+
+        // BIF实现区域
+        // 所有BIF函数名称均会以bif开头
+        vmValue bifPrint(std::vector<vmValue> paras, int line, int column);
+        vmValue bifPrintLn(std::vector<vmValue> paras, int line, int column);
     public:
         // 对每一个vm实例的初始化
         YVM(ygen::ByteCodeGenerator bcg);
