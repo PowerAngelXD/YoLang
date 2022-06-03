@@ -492,6 +492,31 @@ yvm::YVM::vmValue yvm::YVM::bifPrintLn(std::vector<vmValue> paras, int line, int
     std::cout<<std::endl;
     return vmValue(vmVType::null, 0.0);
 }
+yvm::YVM::vmValue yvm::YVM::bifLen(std::vector<vmValue> paras, int line, int column) {
+    if(paras.empty())
+        throw yoexception::YoError("ParaError", "Too few parameters", line, column);
+    else if(paras.size() > 1)
+        throw yoexception::YoError("ParaError", "Too many parameters", line, column);
+    if(paras[0].first != vmVType::list && paras[0].first != vmVType::string)
+        throw yoexception::YoError("TypeError", "This function does not support arguments of this type", line, column);
+    vmValue ret;
+    switch (paras[0].first) {
+        case vmVType::list: ret = vmValue(vmVType::integer, listpool[paras[0].second].size()); break;
+        case vmVType::string: ret = vmValue(vmVType::integer, constpool[paras[0].second].size()); break;
+        default: break;
+    }
+    return ret;
+}
+yvm::YVM::vmValue yvm::YVM::bifSys(std::vector<vmValue> paras, int line, int column) {
+    if(paras.empty())
+        throw yoexception::YoError("ParaError", "Too few parameters", line, column);
+    else if(paras.size() > 1)
+        throw yoexception::YoError("ParaError", "Too many parameters", line, column);
+    if(paras[0].first != vmVType::string)
+        throw yoexception::YoError("TypeError", "This function does not support arguments of this type", line, column);
+    system(constpool[paras[0].second].c_str());
+    return vmValue(vmVType::null, 0.0);
+}
 //
 
 int yvm::YVM::run(std::string arg) {
@@ -571,6 +596,10 @@ int yvm::YVM::run(std::string arg) {
                         envPush(bifPrint(paras, codes[i].line, codes[i].column));
                     else if(name == "println")
                         envPush(bifPrintLn(paras, codes[i].line, codes[i].column));
+                    else if(name == "len")
+                        envPush(bifLen(paras, codes[i].line, codes[i].column));
+                    else if(name == "sys")
+                        envPush(bifSys(paras, codes[i].line, codes[i].column));
                 }
                 break;
             }
@@ -1391,6 +1420,8 @@ int yvm::YVM::run(std::string arg) {
                     else if(value.first == vmVType::list) {
                         auto list = listpool[value.second];
                         std::vector<Space::Scope::Value> newlist;
+                        if(list.empty())
+                            throw yoexception::YoError("InitError", "Initializing an empty list is currently not allowed", codes[i].line, codes[i].column);
                         if(list[0].first == vmVType::integer){
                             for(int j = 0; j < list.size(); j++){
                                 if(list[j].first != list[j - 1].first && j > 0) // 当前后类型不一致时，报错
