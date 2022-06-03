@@ -397,11 +397,11 @@ void ygen::ByteCodeGenerator::visitForStmt(AST::ForStmtNode* node) {
         normalCtor(btc::push, 1.0, paraHelper::boolean, node->mark->line, node->mark->column);
     normalCtor(btc::jmp, paraHelper::jmpt::reqTrue, paraHelper::jmpt::outWscope, node->mark->line, node->mark->column);
     SCOPE_BEGIN{
+        visit(node->body->stmts);
         if (node->assign != nullptr)
             visitAssignmentExpr(node->assign);
         else if (node->siad != nullptr)
             visitSiadExpr(node->siad);
-        visit(node->body->stmts);
 
         if (node->hasCond)
             visitBoolExpr(node->cond);
