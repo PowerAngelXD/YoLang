@@ -209,7 +209,7 @@ namespace yvm{
         // 值在YVM中的类型, 必须与generator中的保持一致
         enum vmVType {iden, iden_text, string, boolean, character, integer, decimal, null, list, flag, ref, obj};
         // bif表
-        std::vector<std::string> bifNames = {"print", "println"};
+        std::vector<std::string> bifNames = {"print", "println", "sys", "len"};
         //
     private:
         // 描述一个YVM中的Value
@@ -235,6 +235,8 @@ namespace yvm{
         // 所有BIF函数名称均会以bif开头
         vmValue bifPrint(std::vector<vmValue> paras, int line, int column);
         vmValue bifPrintLn(std::vector<vmValue> paras, int line, int column);
+        vmValue bifLen(std::vector<vmValue> paras, int line, int column);
+        vmValue bifSys(std::vector<vmValue> paras, int line, int column);
     public:
         // 对每一个vm实例的初始化
         YVM(ygen::ByteCodeGenerator bcg);
