@@ -1,4 +1,6 @@
 #include "generator.h"
+#define SCOPE_BEGIN minCtor(btc::scopestart, node->left->line, node->left->column);
+#define SCOPE_END minCtor(btc::scopeend, node->left->line, node->left->column);
 
 ygen::ByteCodeGenerator::ByteCodeGenerator(std::vector<AST::StmtNode*> _stmts): stmts(_stmts) {}
 ygen::ByteCodeGenerator::ByteCodeGenerator(AST::WholeExprNode* _expr): expr(_expr) {}
@@ -365,21 +367,51 @@ void ygen::ByteCodeGenerator::visitRepeatStmt(AST::RepeatStmtNode *node) {
     minCtor(btc::lt, node->right->line, node->right->column);
     normalCtor(btc::jmp, paraHelper::jmpt::reqTrue, paraHelper::jmpt::outWscope, node->mark->line, node->mark->column);
 
-    minCtor(btc::scopestart, node->left->line, node->left->column);
-    normalCtor(btc::push, addPara("__repit" + std::to_string(repit) + "__"), paraHelper::string, node->mark->line, node->mark->column);
-    normalCtor(btc::selfadd, 0.0, 0.0, node->right->line, node->right->column);
-    visit(node->body->stmts);
+    SCOPE_BEGIN{
+        normalCtor(btc::push, addPara("__repit" + std::to_string(repit) + "__"), paraHelper::string, node->mark->line,
+                   node->mark->column);
+        normalCtor(btc::selfadd, 0.0, 0.0, node->right->line, node->right->column);
+        visit(node->body->stmts);
 
-    normalCtor(btc::push, addPara("__repit" + std::to_string(repit) + "__"), paraHelper::iden, node->mark->line, node->mark->column);
-    minCtor(btc::idenend, node->left->line, node->left->column);
-    visitAddExpr(node->times);
-    minCtor(btc::lt, node->right->line, node->right->column);
-    minCtor(btc::scopeend, node->left->line, node->left->column);
+        normalCtor(btc::push, addPara("__repit" + std::to_string(repit) + "__"), paraHelper::iden, node->mark->line,
+                   node->mark->column);
+        minCtor(btc::idenend, node->left->line, node->left->column);
+        visitAddExpr(node->times);
+        minCtor(btc::lt, node->right->line, node->right->column);
+    }
+    SCOPE_END
 
     normalCtor(btc::jmp, paraHelper::jmpt::reqTrue, paraHelper::jmpt::findSStart, node->mark->line, node->mark->column);
     // repit的处理
     normalCtor(btc::del, addPara("__repit" + std::to_string(repit) + "__"), 1.0, node->mark->line, node->mark->column);
     repit --;
+}
+
+void ygen::ByteCodeGenerator::visitForStmt(AST::ForStmtNode* node) {
+    if (node->hasVorc)
+        visitVorcStmt(node->vorc);
+
+    if (node->hasCond)
+        visitBoolExpr(node->cond);
+    else
+        normalCtor(btc::push, 1.0, paraHelper::boolean, node->mark->line, node->mark->column);
+    normalCtor(btc::jmp, paraHelper::jmpt::reqTrue, paraHelper::jmpt::outWscope, node->mark->line, node->mark->column);
+    SCOPE_BEGIN{
+        if (node->assign != nullptr)
+            visitAssignmentExpr(node->assign);
+        else if (node->siad != nullptr)
+            visitSiadExpr(node->siad);
+        visit(node->body->stmts);
+
+        if (node->hasCond)
+            visitBoolExpr(node->cond);
+        else
+            normalCtor(btc::push, 1.0, paraHelper::boolean, node->mark->line, node->mark->column);
+    }SCOPE_END
+    normalCtor(btc::jmp, paraHelper::jmpt::reqTrue, paraHelper::jmpt::findSStart, node->mark->line, node->mark->column);
+    // 释放局部变量
+    if(node->hasVorc)
+        normalCtor(btc::del, addPara(node->vorc->name->content), 1.0, node->mark->line, node->mark->column);
 }
 
 void ygen::ByteCodeGenerator::visitDeleteStmt(AST::DeleteStmtNode* node) {
@@ -399,5 +431,6 @@ void ygen::ByteCodeGenerator::visit(std::vector<AST::StmtNode*> stmts) {
         else if(stmt->elsestmt != nullptr) visitElseStmt(stmt->elsestmt);
         else if(stmt->repeatstmt != nullptr) visitRepeatStmt(stmt->repeatstmt);
         else if(stmt->delstmt != nullptr) visitDeleteStmt(stmt->delstmt);
+        else if(stmt->forstmt != nullptr) visitForStmt(stmt->forstmt);
     }
 }
