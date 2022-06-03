@@ -269,21 +269,33 @@ namespace AST{
         std::string toString();
     };
 
-    class ForeachStmtNode {
+    class ForStmtNode {
     public:
+        bool hasVorc = false; // 是否有for括号内的第一项（变量/常量声明
+        bool hasCond = false; // 是否有for括号内的第二项（条件判断
+        bool hasOp = false; // 是否有for括号内的第三项（操作
+
         yolexer::yoToken* mark = nullptr;
         yolexer::yoToken* left = nullptr;
-        yolexer::yoToken* var_mark = nullptr;
-        yolexer::yoToken* iden = nullptr;
-        yolexer::yoToken* separate = nullptr;
-
-        yolexer::yoToken* listiden = nullptr;
-        ListExprNode* list = nullptr;
-
+        VorcStmtNode* vorc = nullptr;
+        yolexer::yoToken* sep1 = nullptr;
+        BoolExprNode* cond = nullptr;
+        yolexer::yoToken* sep2 = nullptr;
+        AssignmentExprNode* assign = nullptr;
+        SiadExprNode* siad = nullptr;
         yolexer::yoToken* right = nullptr;
+
         BlockStmtNode* body = nullptr;
 
         std::string toString();
+    };
+
+    class FuncDefStmtNode {
+    public:
+    };
+
+    class DeferStmtNode {
+    public:
     };
 
     class StmtNode{
@@ -296,9 +308,9 @@ namespace AST{
         ElifStmtNode* elifstmt = nullptr;
         ElseStmtNode* elsestmt = nullptr;
         WhileStmtNode* whilestmt = nullptr;
-        ForeachStmtNode* foreachstmt = nullptr;
         RepeatStmtNode* repeatstmt = nullptr;
         DeleteStmtNode* delstmt = nullptr;
+        ForStmtNode* forstmt = nullptr;
 
         std::string toString();
     };
