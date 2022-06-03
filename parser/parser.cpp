@@ -183,8 +183,8 @@ bool parser::Parser::isElifStmt() {
 bool parser::Parser::isElseStmt() {
     return peek()->content == "else";
 }
-bool parser::Parser::isForeachStmt() {
-    return peek()->content == "for_each";
+bool parser::Parser::isForStmt() {
+    return peek()->content == "for";
 }
 bool parser::Parser::isRepeatStmt() {
     return peek()->content == "repeat";
@@ -194,7 +194,7 @@ bool parser::Parser::isDeleteStmt() {
 }
 bool parser::Parser::isStmt() {
     return isOutStmt() || isVorcStmt() || isSpExprStmt() || isBlockStmt() || isWhileStmt() || isIfStmt() || isElifStmt() || isElseStmt() ||
-            isRepeatStmt() || isDeleteStmt();
+            isRepeatStmt() || isDeleteStmt() || isForStmt();
 }
 
 // EXPR
@@ -435,6 +435,7 @@ std::vector<AST::StmtNode*> parser::Parser::parse(){
         else if(isElseStmt()) node->elsestmt = parseElseStmtNode();
         else if(isRepeatStmt()) node->repeatstmt = parseRepeatStmtNode();
         else if(isDeleteStmt()) node->delstmt = parseDeleteStmtNode();
+        else if(isForStmt()) node->forstmt = parseForStmtNode();
         else throw yoexception::YoError("SyntaxError", "Not any statement", tg[offset].line, tg[offset].column);
         stmts.push_back(node);
     }
@@ -453,7 +454,7 @@ AST::OutStmtNode* parser::Parser::parseOutStmtNode(){
     return node;
 }
 
-AST::VorcStmtNode* parser::Parser::parseVorcStmtNode(){
+AST::VorcStmtNode* parser::Parser::parseVorcStmtNode(bool asStmt){
     AST::VorcStmtNode* node = new AST::VorcStmtNode;
     node->mark = token();
     if(isIdentifier()) node->name = token();
@@ -475,8 +476,11 @@ AST::VorcStmtNode* parser::Parser::parseVorcStmtNode(){
             else throw yoexception::YoError("SyntaxError", "Expect an expression", tg[offset].line, tg[offset].column);
         }
     }
-    if(peek()->content == ";") node->end = token();
-    else throw yoexception::YoError("SyntaxError", "Expect ';'", tg[offset].line, tg[offset].column);
+    if(peek()->content == ";" && asStmt) node->end = token();
+    else {
+        if(asStmt)
+            throw yoexception::YoError("SyntaxError", "Expect ';'", tg[offset].line, tg[offset].column);
+    }
     return node;
 }
 
@@ -549,10 +553,36 @@ AST::ElseStmtNode* parser::Parser::parseElseStmtNode() {
     return node;
 }
 
-AST::ForeachStmtNode* parser::Parser::parseForeachStmtNode() {
-    AST::ForeachStmtNode* node = new AST::ForeachStmtNode;
+AST::ForStmtNode* parser::Parser::parseForStmtNode() {
+    AST::ForStmtNode* node = new AST::ForStmtNode;
     node->mark = token();
-
+    if(peek()->content == "(") node->left = token();
+    else throw yoexception::YoError("SyntaxError", "Expect '('", tg[offset].line, tg[offset].column);
+    if(isVorcStmt()) {
+        node->vorc = parseVorcStmtNode(false);
+        node->hasVorc = true;
+    }
+    if(peek()->content == ";") node->sep1 = token();
+    else throw yoexception::YoError("SyntaxError", "Expect ';'", tg[offset].line, tg[offset].column);
+    if(isBoolExpr()) {
+        node->cond = parseBoolExprNode();
+        node->hasCond = true;
+    }
+    if(peek()->content == ";") node->sep2 = token();
+    else throw yoexception::YoError("SyntaxError", "Expect ';'", tg[offset].line, tg[offset].column);
+    if(isAssignmentExpr()) {
+        node->assign = parseAssignmentExprNode();
+        node->hasOp = true;
+    }
+    else if(isSiadExpr()) {
+        node->siad = parseSiadExprNode();
+        node->hasOp = true;
+    }
+    if(peek()->content == ")") node->right = token();
+    else throw yoexception::YoError("SyntaxError", "Expect ')'", tg[offset].line, tg[offset].column);
+    if(isBlockStmt()) node->body = parseBlockStmtNode();
+    else throw yoexception::YoError("SyntaxError", "Expect a block statement", tg[offset].line, tg[offset].column);
+    return node;
 }
 
 AST::RepeatStmtNode* parser::Parser::parseRepeatStmtNode() {

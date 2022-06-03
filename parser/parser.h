@@ -16,7 +16,7 @@ namespace parser{
         bool isListExpr(); bool isAssignmentExpr(); bool isExpr();
 
         bool isStmt(); bool isOutStmt(); bool isVorcStmt(); bool isSpExprStmt(); bool isBlockStmt();
-        bool isWhileStmt(); bool isIfStmt(); bool isElifStmt(); bool isElseStmt(); bool isForeachStmt();
+        bool isWhileStmt(); bool isIfStmt(); bool isElifStmt(); bool isElseStmt(); bool isForStmt();
         bool isRepeatStmt(); bool isDeleteStmt();
         // 生成区: parseXXX ---> 生成XXXNode
         AST::SiadExprNode* parseSiadExprNode();
@@ -37,16 +37,16 @@ namespace parser{
         AST::AssignmentExprNode* parseAssignmentExprNode();
 
         AST::OutStmtNode* parseOutStmtNode();
-        AST::VorcStmtNode* parseVorcStmtNode();
+        AST::VorcStmtNode* parseVorcStmtNode(bool asStmt=true);
         AST::SpExprStmtNode* parseSpExprStmtNode();
         AST::BlockStmtNode* parseBlockStmtNode();
         AST::WhileStmtNode* parseWhileStmtNode();
         AST::IfStmtNode* parseIfStmtNode();
         AST::ElifStmtNode* parseElifStmtNode();
         AST::ElseStmtNode* parseElseStmtNode();
-        AST::ForeachStmtNode* parseForeachStmtNode();
         AST::RepeatStmtNode* parseRepeatStmtNode();
         AST::DeleteStmtNode* parseDeleteStmtNode();
+        AST::ForStmtNode* parseForStmtNode();
 
         // 特例：不是以自己的Node命名的函数，因为它有特殊的用途：用于解析所有Expression
         AST::WholeExprNode* parseExpr(); 
