@@ -172,6 +172,15 @@ void ysh::insView(std::vector<std::string> paras) {
             std::cout<<"View content(AST): "<<std::endl;
             std::cout<<tools::formatAst(tools::stmtsToString(stmts))<<std::endl;
         }
+        else if(key == "token" || key == "t") {
+            yolexer::Lexer lexer(text);
+            lexer.generate();
+            auto tg = lexer.getTokenGroup();
+            std::cout<<"View content(Token group): "<<std::endl;
+            for(auto token: tg) {
+                std::cout<<token.toString() + ", ";
+            }
+        }
         else if(key == "file" || key == "f") {
             std::ifstream file(paras[0]);
             if(!file)
