@@ -219,6 +219,20 @@ std::string AST::ForStmtNode::toString() {
     return "ForStmt: {" + (hasVorc?vorc->toString() + ", ":"") + (hasCond?cond->toString() + ", ":"") + (hasOp?(siad != nullptr?siad->toString():assign->toString() + "}"):"}");
 }
 
+std::string AST::FuncDefStmtNode::toString() {
+    std::string ret = "FuncDef: {" + name->toString() + ", ";
+    if(hasPara) {
+        ret += "[";
+        for(int i = 0; i < paras.size(); i ++)
+            ret += paras[0]->paraname->toString() + ":" + paras[0]->paratype->toString() + ", ";
+        ret += "]";
+        return ret + ", " + body->toString() + "}";
+    }
+    else {
+        return ret + body->toString() + "}";
+    }
+}
+
 std::string AST::StmtNode::toString() {
     if(outstmt != nullptr) return "StmtNode: {" + outstmt->toString() + "}";
     else if(vorcstmt != nullptr) return "StmtNode: {" + vorcstmt->toString() + "}";
@@ -231,5 +245,6 @@ std::string AST::StmtNode::toString() {
     else if(repeatstmt != nullptr) return "StmtNode: {" + repeatstmt->toString() + "}";
     else if(delstmt != nullptr) return "StmtNode: {" + delstmt->toString() + "}";
     else if(forstmt != nullptr) return "StmtNode: {" + forstmt->toString() + "}";
+    else if(fdefstmt != nullptr) return "StmtNode: {" + fdefstmt->toString() + "}";
     return "null";
 }

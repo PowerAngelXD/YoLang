@@ -292,10 +292,24 @@ namespace AST{
 
     class FuncDefStmtNode {
     public:
-    };
+        bool hasPara = false; // 判断一个函数有没有参数
 
-    class DeferStmtNode {
-    public:
+        struct para {
+            yolexer::yoToken* paraname = nullptr;
+            yolexer::yoToken* parasep = nullptr;
+            yolexer::yoToken* paratype = nullptr;
+        };
+
+        yolexer::yoToken* mark = nullptr;
+        yolexer::yoToken* rettype = nullptr;
+        yolexer::yoToken* name = nullptr;
+        yolexer::yoToken* left = nullptr;
+        std::vector<para*> paras;
+        std::vector<yolexer::yoToken*> dots;
+        yolexer::yoToken* right = nullptr;
+        BlockStmtNode* body = nullptr;
+
+        std::string toString();
     };
 
     class StmtNode{
@@ -311,6 +325,7 @@ namespace AST{
         RepeatStmtNode* repeatstmt = nullptr;
         DeleteStmtNode* delstmt = nullptr;
         ForStmtNode* forstmt = nullptr;
+        FuncDefStmtNode* fdefstmt = nullptr;
 
         std::string toString();
     };
