@@ -1489,6 +1489,7 @@ int yvm::YVM::run(std::string arg) {
             default: break;
         }
     }
+    if(arg == "repl") std::cout<<std::endl;
     return 0;
 }
 void yvm::YVM::reload(std::vector<ygen::byteCode> _codes, std::vector<std::string> _constpool){
