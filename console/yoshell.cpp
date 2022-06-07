@@ -211,10 +211,10 @@ void ysh::insEVAL(std::vector<std::string> paras) {
         bcg.visitExpr(expr);
 
         yovm.reload(bcg.getCodes(), bcg.getConstPool());
-        yovm.run("null");
+        yovm.run("repl");
 
         // 返回值输出
-        std::cout<<"\n(return) ";
+        std::cout<<"(return) ";
         if(yovm.envPeek().first == yovm.string || yovm.envPeek().first == yovm.character)
             std::cout<<yovm.getConstPool()[yovm.envPop().second];
         else if(yovm.envPeek().first == yovm.null)
