@@ -1378,15 +1378,12 @@ int yvm::YVM::run(std::string arg) {
                             else if(reqType == "char" && value.first == vmVType::character);
                             else if(reqType == "boolean" && value.first == vmVType::boolean);
                             else {
-                                if(value.first == vmVType::list){
-                                    auto v = listpool[value.second];
-                                    if(reqType == "integer" && v[0].first == vmVType::integer);
-                                    else if(reqType == "decimal" && v[0].first == vmVType::decimal);
-                                    else if(reqType == "string" && v[0].first == vmVType::string);
-                                    else if(reqType == "char" && v[0].first == vmVType::character);
-                                    else if(reqType == "boolean" && v[0].first == vmVType::boolean);
-                                    else goto error_type;
-                                }
+                                auto v = listpool[value.second];
+                                if(reqType == "integer[]" && v[0].first == vmVType::integer);
+                                else if(reqType == "decima[]l" && v[0].first == vmVType::decimal);
+                                else if(reqType == "string[]" && v[0].first == vmVType::string);
+                                else if(reqType == "char[]" && v[0].first == vmVType::character);
+                                else if(reqType == "boolean[]" && v[0].first == vmVType::boolean);
                                 else{
                                     error_type:
                                     // 不允许创建该变量，于是删除对应memberlist中的元素
