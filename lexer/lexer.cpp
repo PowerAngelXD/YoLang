@@ -102,6 +102,11 @@ void yolexer::Lexer::generate(){
                 i++;column++;
             }
             i--;column--; // 防止跳过下一个字符
+            if(input[i + 1] == '[' && input[i + 2] == ']') {
+                i += 2;
+                column += 2;
+                content += "[]";
+            }
             for(auto word: yoKeyWords){
                 if(word == content){
                     tokenGroup.push_back({content, yoTokType::KeyWord, line, column});
