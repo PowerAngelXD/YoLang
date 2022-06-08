@@ -517,6 +517,62 @@ yvm::YVM::vmValue yvm::YVM::bifSys(std::vector<vmValue> paras, int line, int col
     system(constpool[paras[0].second].c_str());
     return vmValue(vmVType::null, 0.0);
 }
+yvm::YVM::vmValue yvm::YVM::bifInput(std::vector<vmValue> paras, int line, int column) {
+    if(paras.empty() || paras.size() == 1) {
+        if(paras.size() == 1)
+            std::cout<<constpool[paras[0].second];
+        std::string text;
+        std::getline(std::cin, text);
+        return vmValue(vmVType::string, addString(text));
+    }
+    else throw yoexception::YoError("ParaError", "Too many parameters", line, column);
+}
+yvm::YVM::vmValue yvm::YVM::bifToInteger(std::vector<vmValue> paras, int line, int column) {
+    if(paras.empty())
+        throw yoexception::YoError("ParaError", "Too few parameters", line, column);
+    else if(paras.size() > 1)
+        throw yoexception::YoError("ParaError", "Too many parameters", line, column);
+    vmValue value;
+    switch (paras[0].first) {
+        case vmVType::integer: value = vmValue(vmVType::integer, paras[0].second); break;
+        case vmVType::decimal: value = vmValue(vmVType::integer, (int)paras[0].second); break;
+        case vmVType::boolean: value = vmValue(vmVType::integer, (int)paras[0].second); break;
+        case vmVType::string: value = vmValue(vmVType::integer, std::atoi(constpool[paras[0].second].c_str())); break;
+        case vmVType::character: value = vmValue(vmVType::integer, (int)constpool[paras[0].second][0]); break;
+        default: value = vmValue(vmVType::integer, 0); break;
+    }
+    return value;
+}
+yvm::YVM::vmValue yvm::YVM::bifToString(std::vector<vmValue> paras, int line, int column) {
+    if(paras.empty())
+        throw yoexception::YoError("ParaError", "Too few parameters", line, column);
+    else if(paras.size() > 1)
+        throw yoexception::YoError("ParaError", "Too many parameters", line, column);
+    vmValue value;
+    switch (paras[0].first) {
+        case vmVType::integer: value = vmValue(vmVType::string, addString(std::to_string(paras[0].second))); break;
+        case vmVType::decimal: {
+            std::stringstream oss;
+            oss << paras[0].second;
+            value = vmValue(vmVType::string, addString(oss.str()));
+            break;
+        }
+        case vmVType::boolean: value = vmValue(vmVType::string, addString((bool)paras[0].second?"true":"false")); break;
+        case vmVType::string: value = vmValue(vmVType::string, paras[0].second); break;
+        case vmVType::character: value = vmValue(vmVType::string, paras[0].second); break;
+        default: value = vmValue(vmVType::string, addString("null")); break;
+    }
+    return value;
+}
+yvm::YVM::vmValue yvm::YVM::bifToDecimal(std::vector<vmValue> paras, int line, int column) {
+
+}
+yvm::YVM::vmValue yvm::YVM::bifToBoolean(std::vector<vmValue> paras, int line, int column) {
+
+}
+yvm::YVM::vmValue yvm::YVM::bifToChar(std::vector<vmValue> paras, int line, int column) {
+
+}
 //
 
 int yvm::YVM::run(std::string arg) {
@@ -584,7 +640,7 @@ int yvm::YVM::run(std::string arg) {
                 envPop(); // 删除flag
                 if(hasPara) {
                     // 有参数，开始制作参数列表
-                    while(envPeek().first != vmVType::flag) {
+                    while(envPeek().first != vmVType::flag && !runtimeStack.empty()) {
                         paras.push_back(envPop());
                     }
                     envPop(); // 删除参数末尾的flag
@@ -600,6 +656,12 @@ int yvm::YVM::run(std::string arg) {
                         envPush(bifLen(paras, codes[i].line, codes[i].column));
                     else if(name == "sys")
                         envPush(bifSys(paras, codes[i].line, codes[i].column));
+                    else if(name == "input")
+                        envPush(bifInput(paras, codes[i].line, codes[i].column));
+                    else if(name == "to_integer")
+                        envPush(bifToInteger(paras, codes[i].line, codes[i].column));
+                    else if(name == "to_string")
+                        envPush(bifToString(paras, codes[i].line, codes[i].column));
                 }
                 break;
             }

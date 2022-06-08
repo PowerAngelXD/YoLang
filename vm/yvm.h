@@ -209,7 +209,8 @@ namespace yvm{
         // 值在YVM中的类型, 必须与generator中的保持一致
         enum vmVType {iden, iden_text, string, boolean, character, integer, decimal, null, list, flag, ref, obj};
         // bif表
-        std::vector<std::string> bifNames = {"print", "println", "sys", "len"};
+        std::vector<std::string> bifNames = {"print", "println", "input", "sys", "len", "to_integer", "to_string",
+                                             "to_decimal", "to_boolean", "to_char"};
         //
     private:
         // 描述一个YVM中的Value
@@ -237,6 +238,12 @@ namespace yvm{
         vmValue bifPrintLn(std::vector<vmValue> paras, int line, int column);
         vmValue bifLen(std::vector<vmValue> paras, int line, int column);
         vmValue bifSys(std::vector<vmValue> paras, int line, int column);
+        vmValue bifInput(std::vector<vmValue> paras, int line, int column);
+        vmValue bifToInteger(std::vector<vmValue> paras, int line, int column);
+        vmValue bifToString(std::vector<vmValue> paras, int line, int column);
+        vmValue bifToDecimal(std::vector<vmValue> paras, int line, int column);
+        vmValue bifToBoolean(std::vector<vmValue> paras, int line, int column);
+        vmValue bifToChar(std::vector<vmValue> paras, int line, int column);
     public:
         // 对每一个vm实例的初始化
         YVM(ygen::ByteCodeGenerator bcg);
