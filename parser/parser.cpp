@@ -428,7 +428,6 @@ std::vector<AST::StmtNode*> parser::Parser::parse(){
         if(isOutStmt()) node->outstmt = parseOutStmtNode();
         else if(isBlockStmt()) node->blockstmt = parseBlockStmtNode();
         else if(isVorcStmt()) node->vorcstmt = parseVorcStmtNode();
-        else if(isSpExprStmt()) node->spexprstmt = parseSpExprStmtNode();
         else if(isWhileStmt()) node->whilestmt = parseWhileStmtNode();
         else if(isIfStmt()) node->ifstmt = parseIfStmtNode();
         else if(isElifStmt()) node->elifstmt = parseElifStmtNode();
@@ -436,6 +435,7 @@ std::vector<AST::StmtNode*> parser::Parser::parse(){
         else if(isRepeatStmt()) node->repeatstmt = parseRepeatStmtNode();
         else if(isDeleteStmt()) node->delstmt = parseDeleteStmtNode();
         else if(isForStmt()) node->forstmt = parseForStmtNode();
+        else if(isSpExprStmt()) node->spexprstmt = parseSpExprStmtNode();
         else throw yoexception::YoError("SyntaxError", "Not any statement", tg[offset].line, tg[offset].column);
         stmts.push_back(node);
     }
