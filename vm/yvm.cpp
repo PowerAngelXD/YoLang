@@ -1476,7 +1476,7 @@ int yvm::YVM::run(std::string arg) {
                             else if(reqType == "boolean")
                                 runtimeSpace.createValue(name, Space::Scope::Value(false, constpool[codes[i].arg2] == "var"?false:true, codes[i].line, codes[i].column));
                             else if(reqType == "string")
-                                runtimeSpace.createValue(name, Space::Scope::Value("\0", constpool[codes[i].arg2] == "var"?false:true, codes[i].line, codes[i].column));
+                                runtimeSpace.createValue(name, Space::Scope::Value((std::string)"\0", constpool[codes[i].arg2] == "var"?false:true, codes[i].line, codes[i].column));
                             else if(reqType == "char")
                                 runtimeSpace.createValue(name, Space::Scope::Value('\0', constpool[codes[i].arg2] == "var"?false:true, codes[i].line, codes[i].column));
                             break;
