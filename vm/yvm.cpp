@@ -550,7 +550,12 @@ yvm::YVM::vmValue yvm::YVM::bifToString(std::vector<vmValue> paras, int line, in
         throw yoexception::YoError("ParaError", "Too many parameters", line, column);
     vmValue value;
     switch (paras[0].first) {
-        case vmVType::integer: value = vmValue(vmVType::string, addString(std::to_string(paras[0].second))); break;
+        case vmVType::integer: {
+            std::stringstream oss;
+            oss << paras[0].second;
+            value = vmValue(vmVType::string, addString(oss.str()));
+            break;
+        }
         case vmVType::decimal: {
             std::stringstream oss;
             oss << paras[0].second;
@@ -565,13 +570,36 @@ yvm::YVM::vmValue yvm::YVM::bifToString(std::vector<vmValue> paras, int line, in
     return value;
 }
 yvm::YVM::vmValue yvm::YVM::bifToDecimal(std::vector<vmValue> paras, int line, int column) {
-
+    if(paras.empty())
+        throw yoexception::YoError("ParaError", "Too few parameters", line, column);
+    else if(paras.size() > 1)
+        throw yoexception::YoError("ParaError", "Too many parameters", line, column);
+    vmValue value;
+    switch (paras[0].first) {
+        case vmVType::integer: value = vmValue(vmVType::decimal, (float)paras[0].second); break;
+        case vmVType::decimal: value = vmValue(vmVType::decimal, paras[0].second); break;
+        case vmVType::boolean: value = vmValue(vmVType::decimal, (float)paras[0].second); break;
+        case vmVType::string: value = vmValue(vmVType::decimal, (float)atof(constpool[paras[0].second].c_str())); break;
+        case vmVType::character: value = vmValue(vmVType::decimal, (float)atof(constpool[paras[0].second].c_str())); break;
+        default: value = vmValue(vmVType::decimal, 0.0); break;
+    }
+    return value;
 }
 yvm::YVM::vmValue yvm::YVM::bifToBoolean(std::vector<vmValue> paras, int line, int column) {
-
-}
-yvm::YVM::vmValue yvm::YVM::bifToChar(std::vector<vmValue> paras, int line, int column) {
-
+    if(paras.empty())
+        throw yoexception::YoError("ParaError", "Too few parameters", line, column);
+    else if(paras.size() > 1)
+        throw yoexception::YoError("ParaError", "Too many parameters", line, column);
+    vmValue value;
+    switch (paras[0].first) {
+        case vmVType::integer: value = vmValue(vmVType::boolean, (bool)paras[0].second); break;
+        case vmVType::decimal: value = vmValue(vmVType::boolean, (bool)paras[0].second); break;
+        case vmVType::boolean: value = vmValue(vmVType::boolean, (bool)paras[0].second); break;
+        case vmVType::string: value = vmValue(vmVType::boolean, constpool[paras[0].second] == "true"? true: false); break;
+        case vmVType::character: throw yoexception::YoError("TypeError", "cannot convert type 'Character' to 'Boolean'", line, column); break;
+        default: value = vmValue(vmVType::boolean, false); break;
+    }
+    return value;
 }
 //
 
@@ -658,10 +686,14 @@ int yvm::YVM::run(std::string arg) {
                         envPush(bifSys(paras, codes[i].line, codes[i].column));
                     else if(name == "input")
                         envPush(bifInput(paras, codes[i].line, codes[i].column));
-                    else if(name == "to_integer")
+                    else if(name == "toInt")
                         envPush(bifToInteger(paras, codes[i].line, codes[i].column));
-                    else if(name == "to_string")
+                    else if(name == "toStr")
                         envPush(bifToString(paras, codes[i].line, codes[i].column));
+                    else if(name == "toDeci")
+                        envPush(bifToDecimal(paras, codes[i].line, codes[i].column));
+                    else if(name == "toBool")
+                        envPush(bifToBoolean(paras, codes[i].line, codes[i].column));
                 }
                 break;
             }
@@ -940,6 +972,14 @@ int yvm::YVM::run(std::string arg) {
                         }
                         break;
                     }
+                    case vmVType::boolean: {
+                        switch (right.first) {
+                            case vmVType::boolean: envPush(vmValue(vmVType::boolean, constpool[left.second] == constpool[right.second])); break;
+                            case vmVType::null: envPush(vmValue(vmVType::boolean, 0.0)); break;
+                            default: throw yoexception::YoError("TypeError", "This operator does not support this type of operation",codes[i].line, codes[i].column); break;
+                        }
+                        break;
+                    }
                     case vmVType::null: {
                         switch (right.first) {
                             case vmVType::null: envPush(vmValue(vmVType::boolean, 1.0)); break;
@@ -985,6 +1025,14 @@ int yvm::YVM::run(std::string arg) {
                         switch (right.first) {
                             case vmVType::null: envPush(vmValue(vmVType::boolean, 1.0)); break;
                             case vmVType::string: envPush(vmValue(vmVType::boolean, constpool[left.second] != constpool[right.second])); break;
+                            default: throw yoexception::YoError("TypeError", "This operator does not support this type of operation",codes[i].line, codes[i].column); break;
+                        }
+                        break;
+                    }
+                    case vmVType::boolean: {
+                        switch (right.first) {
+                            case vmVType::boolean: envPush(vmValue(vmVType::boolean, constpool[left.second] != constpool[right.second])); break;
+                            case vmVType::null: envPush(vmValue(vmVType::boolean, 0.0)); break;
                             default: throw yoexception::YoError("TypeError", "This operator does not support this type of operation",codes[i].line, codes[i].column); break;
                         }
                         break;
