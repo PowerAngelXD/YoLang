@@ -61,6 +61,12 @@ void ygen::ByteCodeGenerator::visitNumber(yolexer::yoToken* token){
     else if(token->type == yolexer::yoTokType::Decimal)
         normalCtor(btc::push, atof(token->content.c_str()), paraHelper::decimal, token->line, token->column);
 }
+void ygen::ByteCodeGenerator::buildIntegerNumber(std::string number, int line, int column) {
+    normalCtor(btc::push, atoi(number.c_str()), paraHelper::integer, line, column);
+}
+void ygen::ByteCodeGenerator::buildDecimalNumber(std::string number, int line, int column) {
+    normalCtor(btc::push, atof(number.c_str()), paraHelper::decimal, line, column);
+}
 void ygen::ByteCodeGenerator::visitStrCh(yolexer::yoToken* token){
     if(token->type == yolexer::yoTokType::Character){
         if(token->content.size() > 1 && token->content[0] != '\\')
@@ -364,6 +370,9 @@ void ygen::ByteCodeGenerator::visitRepeatStmt(AST::RepeatStmtNode *node) {
     normalCtor(btc::push, addPara("__repit" + std::to_string(repit) + "__"), paraHelper::iden, node->mark->line, node->mark->column);
     minCtor(btc::idenend, node->left->line, node->left->column);
     visitAddExpr(node->times);
+    buildIntegerNumber("1", node->left->line, node->left->column);
+    minCtor(btc::sub, node->left->line, node->left->column);
+
     minCtor(btc::lt, node->right->line, node->right->column);
     normalCtor(btc::jmp, paraHelper::jmpt::reqTrue, paraHelper::jmpt::outWscope, node->mark->line, node->mark->column);
 
@@ -377,6 +386,8 @@ void ygen::ByteCodeGenerator::visitRepeatStmt(AST::RepeatStmtNode *node) {
                    node->mark->column);
         minCtor(btc::idenend, node->left->line, node->left->column);
         visitAddExpr(node->times);
+        buildIntegerNumber("1", node->left->line, node->left->column);
+        minCtor(btc::sub, node->left->line, node->left->column);
         minCtor(btc::lt, node->right->line, node->right->column);
     }
     SCOPE_END
@@ -419,6 +430,11 @@ void ygen::ByteCodeGenerator::visitDeleteStmt(AST::DeleteStmtNode* node) {
     normalCtor(btc::del, 0.0, 0.0, node->mark->line, node->mark->column);
 }
 
+void ygen::ByteCodeGenerator::visitBreakStmt(AST::BreakStmtNode* node) {
+    normalCtor(btc::push, 0.0, paraHelper::boolean, node->mark->line, node->mark->column);
+    normalCtor(btc::jmp, paraHelper::jmpt::reqTrue, paraHelper::jmpt::outWscope, node->mark->line, node->mark->column);
+}
+
 void ygen::ByteCodeGenerator::visit(std::vector<AST::StmtNode*> stmts) {
     for(auto stmt: stmts){
         if(stmt->outstmt != nullptr) visitOutStmt(stmt->outstmt);
@@ -432,5 +448,6 @@ void ygen::ByteCodeGenerator::visit(std::vector<AST::StmtNode*> stmts) {
         else if(stmt->repeatstmt != nullptr) visitRepeatStmt(stmt->repeatstmt);
         else if(stmt->delstmt != nullptr) visitDeleteStmt(stmt->delstmt);
         else if(stmt->forstmt != nullptr) visitForStmt(stmt->forstmt);
+        else if(stmt->breakstmt != nullptr) visitBreakStmt(stmt->breakstmt);
     }
 }

@@ -84,6 +84,8 @@ namespace ygen{
         void genFile(std::string name);
 
         void visitNumber(yolexer::yoToken* token);
+        void buildIntegerNumber(std::string number, int line, int column);
+        void buildDecimalNumber(std::string number, int line, int column);
         void visitStrCh(yolexer::yoToken* token);
         void visitNull(yolexer::yoToken* token);
         void visitBoolean(yolexer::yoToken* token);
@@ -117,6 +119,7 @@ namespace ygen{
         void visitRepeatStmt(AST::RepeatStmtNode* node);
         void visitDeleteStmt(AST::DeleteStmtNode* node);
         void visitForStmt(AST::ForStmtNode* node);
+        void visitBreakStmt(AST::BreakStmtNode* node);
         void visit(std::vector<AST::StmtNode*> stmts); // 特殊的visitor，visit的是整个stmts
     };
 }
