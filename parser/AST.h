@@ -1,6 +1,9 @@
 #pragma once
 #include "../lexer/lexer.h"
 
+/**
+ * @brief AST树
+ */
 namespace AST{
     class AddExprNode; class FuncCallNode; class ListExprNode; class WholeExprNode; class StmtNode; class StfOpNode;
 
@@ -312,9 +315,18 @@ namespace AST{
         std::string toString();
     };
 
+    class BreakStmtNode {
+    public:
+        yolexer::yoToken* mark = nullptr;
+        yolexer::yoToken* end = nullptr;
+
+        std::string toString();
+    };
+
     class StmtNode{
     public:
         OutStmtNode* outstmt = nullptr;
+        BreakStmtNode* breakstmt = nullptr;
         VorcStmtNode* vorcstmt = nullptr;
         BlockStmtNode* blockstmt = nullptr;
         SpExprStmtNode* spexprstmt = nullptr;
