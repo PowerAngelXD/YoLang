@@ -192,9 +192,12 @@ bool parser::Parser::isRepeatStmt() {
 bool parser::Parser::isDeleteStmt() {
     return peek()->content == "delete";
 }
+bool parser::Parser::isBreakStmt() {
+    return peek()->content == "break";
+}
 bool parser::Parser::isStmt() {
     return isOutStmt() || isVorcStmt() || isSpExprStmt() || isBlockStmt() || isWhileStmt() || isIfStmt() || isElifStmt() || isElseStmt() ||
-            isRepeatStmt() || isDeleteStmt() || isForStmt();
+            isRepeatStmt() || isDeleteStmt() || isForStmt() || isBreakStmt();
 }
 
 // EXPR
@@ -436,6 +439,7 @@ std::vector<AST::StmtNode*> parser::Parser::parse(){
         else if(isDeleteStmt()) node->delstmt = parseDeleteStmtNode();
         else if(isForStmt()) node->forstmt = parseForStmtNode();
         else if(isSpExprStmt()) node->spexprstmt = parseSpExprStmtNode();
+        else if(isBreakStmt()) node->breakstmt = parseBreakStmtNode();
         else throw yoexception::YoError("SyntaxError", "Not any statement", tg[offset].line, tg[offset].column);
         stmts.push_back(node);
     }
@@ -604,6 +608,14 @@ AST::DeleteStmtNode* parser::Parser::parseDeleteStmtNode() {
     node->mark = token();
     if(isIdentifier()) node->iden = parseIdentifierNode();
     else throw yoexception::YoError("SyntaxError", "Expect an identifier!", tg[offset].line, tg[offset].column);
+    if(peek()->content == ";") node->end = token();
+    else throw yoexception::YoError("SyntaxError", "Expect ';'", tg[offset].line, tg[offset].column);
+    return node;
+}
+
+AST::BreakStmtNode* parser::Parser::parseBreakStmtNode() {
+    AST::BreakStmtNode* node = new AST::BreakStmtNode;
+    node->mark = token();
     if(peek()->content == ";") node->end = token();
     else throw yoexception::YoError("SyntaxError", "Expect ';'", tg[offset].line, tg[offset].column);
     return node;
