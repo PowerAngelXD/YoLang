@@ -1,6 +1,37 @@
 #include "generator.h"
 #define SCOPE_BEGIN minCtor(btc::scopestart, node->left->line, node->left->column);
 #define SCOPE_END minCtor(btc::scopeend, node->left->line, node->left->column);
+#define PUSH(value, type, line, column) normalCtor(btc::push, value, type, line, column);
+#define JMP(cond, mode, line, column) normalCtor(btc::jmp, cond, mode, line, column);
+#define SELF_ADD(isfront) normalCtor(btc::selfadd, isfront, 0, node->op->line, node->op->column);
+#define SELF_SUB(isfront) normalCtor(btc::selfsub, isfront, 0, node->op->line, node->op->column);
+#define ADD normalCtor(btc::add, 0, 0, node->op->line, node->op->column);
+#define SUB normalCtor(btc::sub, 0, 0, node->op->line, node->op->column);
+#define DIV normalCtor(btc::div, 0, 0, node->op->line, node->op->column);
+#define MUL normalCtor(btc::mul, 0, 0, node->op->line, node->op->column);
+#define TMO normalCtor(btc::tmo, 0, 0, node->op->line, node->op->column);
+#define IDX normalCtor(btc::idx, 0, 0, node->left->line, node->left->column);
+#define GMEM normalCtor(btc::gmem, 0, 0, node->dots[i]->line, node->dots[i]->column);
+#define LST minCtor(btc::lst, node->right->line, node->right->column);
+#define GT normalCtor(btc::gt, 0, 0, node->op->line, node->op->column);
+#define GTET normalCtor(btc::gtet, 0, 0, node->op->line, node->op->column);
+#define LT normalCtor(btc::lt, 0, 0, node->op->line, node->op->column);
+#define LTET normalCtor(btc::ltet, 0, 0, node->op->line, node->op->column);
+#define EQU normalCtor(btc::equ, 0, 0, node->op->line, node->op->column);
+#define NOEQU normalCtor(btc::noequ, 0, 0, node->op->line, node->op->column);
+#define LOGIC_AND normalCtor(btc::logicand, 0, 0, node->op->line, node->op->column);
+#define LOGIC_OR normalCtor(btc::logicor, 0, 0, node->op->line, node->op->column);
+#define NO normalCtor(btc::no, 0, 0, node->op->line, node->op->column);
+#define STF(sname) normalCtor(btc::selfsub, sname, 0, node->name->line, node->name->column);
+#define OUT normalCtor(btc::out, 0, 0, node->mark->line, node->mark->column);
+#define DEFINE(name) normalCtor(btc::define, name, 0, node->mark->line, node->mark->column);
+#define INIT(name, type, vtype, vsign) completeCtor(btc::init, name, type, vtype, vsign, node->mark->line, node->mark->column);
+#define ASSIGN(isidx) normalCtor(btc::assign, isidx, 0.0, node->equ->line, node->equ->column);
+#define DEL(name, type) normalCtor(btc::del, name, type, node->mark->line, node->mark->column);
+#define LISTEND minCtor(btc::listend, node->right->line, node->right->column);
+#define PARAEND minCtor(btc::paraend, node->right->line, node->left->column);
+#define IDENEND minCtor(btc::idenend, node->idens[0]->line, node->idens[0]->column);
+#define CALL minCtor(btc::call, node->left->line, node->left->column);
 
 ygen::ByteCodeGenerator::ByteCodeGenerator(std::vector<AST::StmtNode*> _stmts): stmts(_stmts) {}
 ygen::ByteCodeGenerator::ByteCodeGenerator(AST::WholeExprNode* _expr): expr(_expr) {}
@@ -51,21 +82,21 @@ void ygen::ByteCodeGenerator::genFile(std::string name) {
 
 void ygen::ByteCodeGenerator::visitBoolean(yolexer::yoToken* token){
     if(token->content == "false")
-        normalCtor(btc::push, 0, paraHelper::boolean, token->line, token->column);
+        PUSH(0, paraHelper::boolean, token->line, token->column)
     else if(token->content == "true")
-        normalCtor(btc::push, 1, paraHelper::boolean, token->line, token->column);
+        PUSH(1, paraHelper::boolean, token->line, token->column);
 }
 void ygen::ByteCodeGenerator::visitNumber(yolexer::yoToken* token){
     if(token->type == yolexer::yoTokType::Integer)
-        normalCtor(btc::push, atoi(token->content.c_str()), paraHelper::integer, token->line, token->column);
+        PUSH(atoi(token->content.c_str()), paraHelper::integer, token->line, token->column)
     else if(token->type == yolexer::yoTokType::Decimal)
-        normalCtor(btc::push, atof(token->content.c_str()), paraHelper::decimal, token->line, token->column);
+        PUSH(atof(token->content.c_str()), paraHelper::decimal, token->line, token->column)
 }
 void ygen::ByteCodeGenerator::buildIntegerNumber(std::string number, int line, int column) {
-    normalCtor(btc::push, atoi(number.c_str()), paraHelper::integer, line, column);
+    PUSH(atoi(number.c_str()), paraHelper::integer, line, column)
 }
 void ygen::ByteCodeGenerator::buildDecimalNumber(std::string number, int line, int column) {
-    normalCtor(btc::push, atof(number.c_str()), paraHelper::decimal, line, column);
+    PUSH(atof(number.c_str()), paraHelper::decimal, line, column)
 }
 void ygen::ByteCodeGenerator::visitStrCh(yolexer::yoToken* token){
     if(token->type == yolexer::yoTokType::Character){
@@ -85,7 +116,7 @@ void ygen::ByteCodeGenerator::visitStrCh(yolexer::yoToken* token){
             }
         }
         else ret = content[0];
-        normalCtor(btc::push, addPara(ret), paraHelper::character, token->line, token->column);
+        PUSH(addPara(ret), paraHelper::character, token->line, token->column);
     }
     else if(token->type == yolexer::yoTokType::String){
         std::string content = token->content;
@@ -105,24 +136,24 @@ void ygen::ByteCodeGenerator::visitStrCh(yolexer::yoToken* token){
             }
             else ret.push_back(content[i]);
         }
-        normalCtor(btc::push, addPara(ret), paraHelper::string, token->line, token->column);
+        PUSH(addPara(ret), paraHelper::string, token->line, token->column);
     }
 }
 void ygen::ByteCodeGenerator::visitNull(yolexer::yoToken* token){
-    normalCtor(btc::push, 0.0, paraHelper::null, token->line, token->column);
+    PUSH(0.0, paraHelper::null, token->line, token->column);
 }
 void ygen::ByteCodeGenerator::visitIdentifier(AST::IdentifierNode* node){
     if(node->dots.empty()){
-        normalCtor(btc::push, addPara(node->idens[0]->content), paraHelper::iden, node->idens[0]->line, node->idens[0]->column);
-        minCtor(btc::idenend, node->idens[0]->line, node->idens[0]->column);
+        PUSH(addPara(node->idens[0]->content), paraHelper::iden, node->idens[0]->line, node->idens[0]->column)
+        IDENEND
     }
     else{
         for(int i = 0; i < node->idens.size(); i++) {
-            normalCtor(btc::push, addPara(node->idens[i]->content), paraHelper::iden, node->idens[i]->line, node->idens[i]->column);
+            PUSH(addPara(node->idens[i]->content), paraHelper::iden, node->idens[i]->line, node->idens[i]->column);
             if(i == node->idens.size() - 1); // 防止末尾还添加gmem
-            else minCtor(btc::gmem, node->dots[i]->line, node->dots[i]->column);
+            else GMEM
         }
-        minCtor(btc::idenend, node->idens[0]->line, node->idens[0]->column);
+        IDENEND
     }
 }
 void ygen::ByteCodeGenerator::visitIdentifierText(AST::IdentifierNode* node, bool isref){
@@ -132,73 +163,73 @@ void ygen::ByteCodeGenerator::visitIdentifierText(AST::IdentifierNode* node, boo
         text += node->dots[i]->content;
         text += node->idens[i + 1]->content;
     }
-    normalCtor(btc::push, addPara(text), isref == true?paraHelper::ref:paraHelper::string, node->idens[0]->line, node->idens[0]->column);
+    PUSH(addPara(text), isref == true?paraHelper::ref:paraHelper::string, node->idens[0]->line, node->idens[0]->column);
 }
 void ygen::ByteCodeGenerator::visitSiadExpr(AST::SiadExprNode* node){
     if(node->isFront){
         // 是前置类型
         if(node->op->content == "++"){
             visitIdentifierText(node->iden);
-            normalCtor(btc::selfadd, 1.0, 0.0, node->op->line, node->op->column); // 前置第一个参数为1，否则为0
+            SELF_ADD(1.0) // 如果是前置则参数为1，否则为0
         }
         else if(node->op->content == "--"){
             visitIdentifierText(node->iden);
-            normalCtor(btc::selfsub, 1.0, 0.0, node->op->line, node->op->column);
+            SELF_SUB(1.0)
         }
     }
     else{
         if(node->op->content == "++"){
             visitIdentifierText(node->iden);
-            normalCtor(btc::selfadd, 0.0, 0.0, node->op->line, node->op->column);
+            SELF_ADD(0.0)
         }
         else if(node->op->content == "--"){
             visitIdentifierText(node->iden);
-            normalCtor(btc::selfsub, 0.0, 0.0, node->op->line, node->op->column);
+            SELF_SUB(0.0)
         }
     }
 }
 void ygen::ByteCodeGenerator::visitAddOp(AST::AddOpNode* node){
     if(node->op->content == "+")
-        minCtor(btc::add, node->op->line, node->op->column);
-    else if(node->op->content == "-") minCtor(btc::sub, node->op->line, node->op->column);
+        ADD
+    else if(node->op->content == "-") SUB
 }
 void ygen::ByteCodeGenerator::visitMulOp(AST::MulOpNode* node){
     if(node->op->content == "*")
-        minCtor(btc::mul, node->op->line, node->op->column);
+        MUL
     else if(node->op->content == "/")
-        minCtor(btc::div, node->op->line, node->op->column);
+        DIV
     else if(node->op->content == "%")
-        minCtor(btc::tmo, node->op->line, node->op->column);
+        TMO
 }
 void ygen::ByteCodeGenerator::visitCmpOp(AST::CmpOpNode* node){
     if(node->op->content == ">")
-        minCtor(btc::gt, node->op->line, node->op->column);
+        GT
     else if(node->op->content == ">=")
-        minCtor(btc::gtet, node->op->line, node->op->column);
+        GTET
     else if(node->op->content == "<")
-        minCtor(btc::lt, node->op->line, node->op->column);
+        LT
     else if(node->op->content == "<=")
-        minCtor(btc::ltet, node->op->line, node->op->column);
+        LTET
     else if(node->op->content == "==")
-        minCtor(btc::equ, node->op->line, node->op->column);
+        EQU
     else if(node->op->content == "!=")
-        minCtor(btc::noequ, node->op->line, node->op->column);
+        NOEQU
     else if(node->op->content == "!")
-        minCtor(btc::no, node->op->line, node->op->column);
+        NO
 }
 void ygen::ByteCodeGenerator::visitBoolOp(AST::BoolOpNode* node){
     if(node->op->content == "&&")
-        minCtor(btc::logicand, node->op->line, node->op->column);
+        LOGIC_AND
     else if(node->op->content == "||")
-        minCtor(btc::logicor, node->op->line, node->op->column);
+        LOGIC_OR
 }
 void ygen::ByteCodeGenerator::visitIndexOp(AST::IndexOpNode* node){
     visitAddExpr(node->index);
-    minCtor(btc::idx, node->left->line, node->left->column);
+    IDX
 }
 void ygen::ByteCodeGenerator::visitStfOp(AST::StfOpNode* node){
     if(node->expr != nullptr) visitExpr(node->expr);
-    normalCtor(btc::stf, addPara(node->name->content), 0.0, node->name->line, node->name->column);
+    STF(addPara(node->name->content));
 }
 void ygen::ByteCodeGenerator::visitPrimExpr(AST::PrimExprNode* node){
     if(node->number != nullptr) visitNumber(node->number);
@@ -245,23 +276,23 @@ void ygen::ByteCodeGenerator::visitBoolExpr(AST::BoolExprNode* node){
     }
 }
 void ygen::ByteCodeGenerator::visitListExpr(AST::ListExprNode* node){
-    minCtor(btc::listend, node->right->line, node->right->column);
+    LISTEND
     for(int i = 0; i < node->elements.size(); i++) {
         visitExpr(node->elements[i]);
     }
-    minCtor(btc::lst, node->right->line, node->right->column);
+    LST
 }
 void ygen::ByteCodeGenerator::visitAssignmentExpr(AST::AssignmentExprNode* node){
     if (node->idx != nullptr) {
         visitAddExpr(node->idx->index);
         visitIdentifierText(node->iden);
         visitExpr(node->expr);
-        normalCtor(btc::assign, 1.0, 0.0, node->equ->line, node->equ->column);
+        ASSIGN(1.0)
     }
     else {
         visitIdentifierText(node->iden);
         visitExpr(node->expr);
-        minCtor(btc::assign, node->equ->line, node->equ->column);
+        ASSIGN(0.0)
     }
 }
 void ygen::ByteCodeGenerator::visitExpr(AST::WholeExprNode* node){
@@ -275,37 +306,35 @@ void ygen::ByteCodeGenerator::visitExpr(AST::WholeExprNode* node){
         visitListExpr(node->listexpr);
 }
 void ygen::ByteCodeGenerator::visitFuncCallExpr(AST::FuncCallNode* node) {
-    minCtor(btc::paraend, node->right->line, node->left->column);
+    PARAEND
     if(!node->paras.empty()) {
         // 函数调用有参数，生成参数指令
         for(int i = 0; i < node->paras.size(); i ++) {
             visitExpr(node->paras[i]);
         }
-        minCtor(btc::paraend, node->right->line, node->left->column);
+        PARAEND
     }
     visitIdentifierText(node->iden); // push一个iden的text用于调用函数
-    minCtor(btc::call, node->left->line, node->left->column);
+    CALL
 }
 
 // STMT
 
 void ygen::ByteCodeGenerator::visitOutStmt(AST::OutStmtNode* node) {
     visitExpr(node->expr);
-    minCtor(btc::out, node->mark->line, node->mark->column);
+    OUT
 }
 void ygen::ByteCodeGenerator::visitVorcStmt(AST::VorcStmtNode* node) {
     if(node->mark->content != "ref") {
-        normalCtor(btc::define, addPara(node->name->content), 0.0, node->mark->line, node->mark->column);
+        DEFINE(addPara(node->name->content))
         if(node->expr == nullptr)
-            normalCtor(btc::push, 0.0, paraHelper::null, node->mark->line, node->mark->column);
+            PUSH(0.0, paraHelper::null, node->mark->line, node->mark->column)
         else
             visitExpr(node->expr);
-        completeCtor(btc::init, 
-                    addPara(node->name->content), 
-                    addPara(node->mark->content), 
-                    node->separate != nullptr?addPara(node->type->content):0.0, 
-                    node->separate != nullptr?1.0:0.0, 
-                    node->mark->line, node->mark->column);
+        INIT(addPara(node->name->content),
+             addPara(node->mark->content),
+             node->separate != nullptr?addPara(node->type->content):0.0,
+             node->separate != nullptr?1.0:0.0);
     }
     else {
         //  ref定义
@@ -313,14 +342,12 @@ void ygen::ByteCodeGenerator::visitVorcStmt(AST::VorcStmtNode* node) {
             throw yoexception::YoError("RefError", "Only identifiers can be referenced", 
                                 node->mark->line, 
                                 node->mark->column);
-        normalCtor(btc::define, addPara(node->name->content), 0.0, node->mark->line, node->mark->column);
+        DEFINE(addPara(node->name->content));
         visitIdentifierText(node->expr->addexpr->muls[0]->prims[0]->iden, true);
-        completeCtor(btc::init, 
-                    addPara(node->name->content), 
-                    addPara(node->mark->content), 
-                    node->separate != nullptr?addPara(node->type->content):0.0, 
-                    node->separate != nullptr?1.0:0.0, 
-                    node->mark->line, node->mark->column);
+        INIT(addPara(node->name->content),
+             addPara(node->mark->content),
+             node->separate != nullptr?addPara(node->type->content):0.0,
+             node->separate != nullptr?1.0:0.0);
     }
 }
 void ygen::ByteCodeGenerator::visitSpExprStmt(AST::SpExprStmtNode* node) {
@@ -329,19 +356,20 @@ void ygen::ByteCodeGenerator::visitSpExprStmt(AST::SpExprStmtNode* node) {
     else if(node->fcall != nullptr) visitFuncCallExpr(node->fcall);
 }
 void ygen::ByteCodeGenerator::visitBlockStmt(AST::BlockStmtNode* node) {
-    minCtor(btc::scopestart, node->left->line, node->left->column);
+    SCOPE_BEGIN
     visit(node->stmts);
-    minCtor(btc::scopeend, node->right->line, node->right->column);
+    SCOPE_END
 }
 void ygen::ByteCodeGenerator::visitWhileStmt(AST::WhileStmtNode* node) {
     visitBoolExpr(node->cond);
-    normalCtor(btc::jmp, paraHelper::jmpt::reqTrue, paraHelper::jmpt::outWscope, node->mark->line, node->mark->column); // -1代表如果不满足jmp所需要的条件，则直接跳出scope，如果没有scope则向前偏移
-    minCtor(btc::scopestart, node->left->line, node->left->column);
-    visit(node->body->stmts);
-    // 下面的指令用于检测表达式是否还成立，成立则jmp到下一个循环，否则向前偏移
-    visitBoolExpr(node->cond);
-    minCtor(btc::scopeend, node->right->line, node->right->column);
-    normalCtor(btc::jmp, paraHelper::jmpt::reqTrue, paraHelper::jmpt::findSStart, node->mark->line, node->mark->column);
+    JMP(paraHelper::jmpt::reqTrue, paraHelper::jmpt::outWscope, node->mark->line, node->mark->column)
+    SCOPE_BEGIN{
+        visit(node->body->stmts);
+        // 下面的指令用于检测表达式是否还成立，成立则jmp到下一个循环，否则向前偏移
+        visitBoolExpr(node->cond);
+    }
+    SCOPE_END
+    JMP(paraHelper::jmpt::reqTrue, paraHelper::jmpt::findSStart, node->mark->line, node->mark->column)
 }
 void ygen::ByteCodeGenerator::visitIfStmt(AST::IfStmtNode* node) {
     visitBoolExpr(node->cond);
