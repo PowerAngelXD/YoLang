@@ -456,7 +456,7 @@ void ygen::ByteCodeGenerator::visitDeleteStmt(AST::DeleteStmtNode* node) {
 
 void ygen::ByteCodeGenerator::visitBreakStmt(AST::BreakStmtNode* node) {
     PUSH(0.0, paraHelper::boolean, node->mark->line, node->mark->column)
-    JMP(paraHelper::jmpt::reqTrue, paraHelper::jmpt::outWscope, node->mark->line, node->mark->column)
+    JMP(paraHelper::jmpt::reqTrue, paraHelper::jmpt::outScopeDirectly, node->mark->line, node->mark->column)
 }
 
 void ygen::ByteCodeGenerator::visit(std::vector<AST::StmtNode*> stmts) {
