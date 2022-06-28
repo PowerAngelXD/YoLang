@@ -1180,6 +1180,22 @@ int yvm::YVM::run(std::string arg) {
                                 }
                                 break;
                             }
+                            case ygen::paraHelper::jmpt::outScopeDirectly: {
+                                auto cond = envPop();
+                                if((bool)cond.second == true); // 条件为真进入循环体
+                                else {
+                                    int state = 1;
+                                    while(true) {
+                                        i ++;
+                                        if(codes[i].code == ygen::scopestart) state ++;
+                                        else if(codes[i].code == ygen::scopeend) state --;
+
+                                        if(state == 0) break;
+                                    }
+
+                                }
+                                break;
+                            }
                             case ygen::paraHelper::jmpt::outIFscope: {
                                 auto cond = envPop();
                                 if((bool)cond.second == true) envPush(vmValue(vmVType::boolean, 1.0)); // 条件为真进入
