@@ -1,5 +1,7 @@
 #include "lexer.h"
 
+std::vector<std::string> yolexer::typeList = {"integer", "decimal", "char", "string", "boolean", "string[]", "decimal[]", "char[]", "integer[]", "boolean[]"};
+
 std::string yolexer::yoToken::toString(){
     std::string ret = "token: {" + content + ", ";
     switch (type)
@@ -46,7 +48,7 @@ void yolexer::Lexer::generate(){
         "var", "ref", "typeof", "nameof", "const", "out", "repeat", 
         "while", "for", "for_each", "return", "func", 
         "string", "integer", "decimal", "char", "boolean", "delete",
-        "string[]", "integer[]", "decimal[]", "char[]", "boolean[]"
+        "string[]", "integer[]", "decimal[]", "char[]", "boolean[]", "function"
     }; // 新增关键字都在这里
     for(int i = 0; i < input.size(); i++){
         if(input[i] == '\n'){

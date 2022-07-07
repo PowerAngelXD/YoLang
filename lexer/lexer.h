@@ -2,9 +2,11 @@
 #include <iostream>
 #include <vector>
 #include <string>
+#include <algorithm>
 #include "../exception/yoexc.h"
 
 namespace yolexer{
+    extern std::vector<std::string> typeList;
     enum yoTokType{Integer, Decimal, Identifier, KeyWord, Character, String, Symbol, Eof};
 
     struct yoToken{
