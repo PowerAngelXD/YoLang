@@ -195,9 +195,12 @@ bool parser::Parser::isDeleteStmt() {
 bool parser::Parser::isBreakStmt() {
     return peek()->content == "break";
 }
+bool parser::Parser::isFuncDefStmt() {
+    return peek()->content == "function";
+}
 bool parser::Parser::isStmt() {
     return isOutStmt() || isVorcStmt() || isSpExprStmt() || isBlockStmt() || isWhileStmt() || isIfStmt() || isElifStmt() || isElseStmt() ||
-            isRepeatStmt() || isDeleteStmt() || isForStmt() || isBreakStmt();
+            isRepeatStmt() || isDeleteStmt() || isForStmt() || isBreakStmt() || isFuncDefStmt();
 }
 
 // EXPR
@@ -440,6 +443,7 @@ std::vector<AST::StmtNode*> parser::Parser::parse(){
         else if(isForStmt()) node->forstmt = parseForStmtNode();
         else if(isSpExprStmt()) node->spexprstmt = parseSpExprStmtNode();
         else if(isBreakStmt()) node->breakstmt = parseBreakStmtNode();
+        else if(isFuncDefStmt()) node->fdefstmt = parseFuncDefStmtNode();
         else throw yoexception::YoError("SyntaxError", "Not any statement", tg[offset].line, tg[offset].column);
         stmts.push_back(node);
     }
@@ -619,4 +623,50 @@ AST::BreakStmtNode* parser::Parser::parseBreakStmtNode() {
     if(peek()->content == ";") node->end = token();
     else throw yoexception::YoError("SyntaxError", "Expect ';'", tg[offset].line, tg[offset].column);
     return node;
+}
+
+AST::FuncDefStmtNode* parser::Parser::parseFuncDefStmtNode() {
+    AST::FuncDefStmtNode* node = new AST::FuncDefStmtNode;
+    node->mark = token();
+    if(std::find(yolexer::typeList.begin(), yolexer::typeList.end(), peek()->content) != yolexer::typeList.end()) {
+        // 是typename，继续生成
+        node->rettype = token();
+        if(peek()->type == yolexer::yoTokType::Identifier) {
+            node->name = token();
+            if(peek()->content == "(") {
+                node->left = token();
+                if(peek()->type == yolexer::yoTokType::Identifier) {
+                    node->hasPara = true;
+                    AST::FuncDefStmtNode::para* temp = new AST::FuncDefStmtNode::para;
+                    temp->paraname = token();
+                    temp->parasep = token();
+                    temp->paratype = token();
+                    node->paras.push_back(temp);
+                    delete temp;
+                    while(true) {
+                        if(peek()->content != ",") break;
+                        node->dots.push_back(token());
+
+                        temp = new AST::FuncDefStmtNode::para;
+                        temp->paraname = token();
+                        temp->parasep = token();
+                        temp->paratype = token();
+                        node->paras.push_back(temp);
+                    }
+                    delete temp;
+                }
+                if(peek()->content == ")") {
+                    node->right = token();
+                    if(isBlockStmt()) {
+                        node->body = parseBlockStmtNode();
+                        return node;
+                    }
+                    else throw yoexception::YoError("SyntaxError", "Expect a blockstatement", tg[offset].line, tg[offset].column);
+                }
+                else throw yoexception::YoError("SyntaxError", "Expect ')'", tg[offset].line, tg[offset].column);
+            }
+        }
+        else throw yoexception::YoError("SyntaxError", "It is not an identifier", tg[offset].line, tg[offset].column);
+    }
+    else throw yoexception::YoError("SyntaxError", "It is not a valid type name", tg[offset].line, tg[offset].column);
 }
