@@ -31,7 +31,7 @@ namespace ysh{
         std::string mulStr(std::string str, int times);
         std::string stmtsToString(std::vector<AST::StmtNode*> stmts);
     }
-    // 版本号
+    // Yolang版本号
     static std::string version = "22.7.60";
     // 发行版本号
     static std::string relVersion = "Yolang 1.1.8";
