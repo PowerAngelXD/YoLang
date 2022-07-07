@@ -223,8 +223,8 @@ std::string AST::FuncDefStmtNode::toString() {
     std::string ret = "FuncDef: {" + name->toString() + ", ";
     if(hasPara) {
         ret += "[";
-        for(int i = 0; i < paras.size(); i ++)
-            ret += paras[0]->paraname->toString() + ":" + paras[0]->paratype->toString() + ", ";
+        for(int i = 0; i < paras.size() ;i++)
+            ret += paras[i]->paraname->toString() + ":" + paras[i]->paratype->toString() + ", ";
         ret += "]";
         return ret + ", " + body->toString() + "}";
     }

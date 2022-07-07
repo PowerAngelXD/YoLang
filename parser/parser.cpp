@@ -642,7 +642,6 @@ AST::FuncDefStmtNode* parser::Parser::parseFuncDefStmtNode() {
                     temp->parasep = token();
                     temp->paratype = token();
                     node->paras.push_back(temp);
-                    delete temp;
                     while(true) {
                         if(peek()->content != ",") break;
                         node->dots.push_back(token());
@@ -653,7 +652,6 @@ AST::FuncDefStmtNode* parser::Parser::parseFuncDefStmtNode() {
                         temp->paratype = token();
                         node->paras.push_back(temp);
                     }
-                    delete temp;
                 }
                 if(peek()->content == ")") {
                     node->right = token();

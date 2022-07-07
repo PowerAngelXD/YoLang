@@ -170,7 +170,7 @@ void ysh::insView(std::vector<std::string> paras) {
             parser::Parser p(tg);
             auto stmts = p.parse();
             std::cout<<"View content(AST): "<<std::endl;
-            std::cout<<tools::formatAst(tools::stmtsToString(stmts))<<std::endl;
+            std::cout<<tools::stmtsToString(stmts)<<std::endl;
         }
         else if(key == "token" || key == "t") {
             yolexer::Lexer lexer(text);
