@@ -449,8 +449,7 @@ std::vector<AST::StmtNode*> parser::Parser::parse(){
     }
     if(stmts.empty())
         throw yoexception::YoError("SyntaxError", "Not any statement", tg[offset].line, tg[offset].column);
-    return stmts;
-}
+    return stmts;}
 
 AST::OutStmtNode* parser::Parser::parseOutStmtNode(){
     AST::OutStmtNode* node = new AST::OutStmtNode;
@@ -652,6 +651,9 @@ AST::FuncDefStmtNode* parser::Parser::parseFuncDefStmtNode() {
                         temp->paratype = token();
                         node->paras.push_back(temp);
                     }
+                }
+                else {
+                    node->hasPara = false;
                 }
                 if(peek()->content == ")") {
                     node->right = token();
