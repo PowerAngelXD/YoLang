@@ -461,8 +461,8 @@ void ygen::ByteCodeGenerator::visitBreakStmt(AST::BreakStmtNode* node) {
 
 void ygen::ByteCodeGenerator::visitFuncDefStmt(AST::FuncDefStmtNode* node) {
     PUSH(addPara(node->rettype->content), paraHelper::string, node->mark->line, node->mark->column); // 将要定义的函数的返回值类型入栈
+    PARAEND // 因为栈的原因，flag应该置后
     if(node->hasPara) {
-        PARAEND // 因为栈的原因，flag应该置后
         for(int i = 0; i < node->paras.size(); i++) {
             PUSH(addPara(node->paras[i]->paratype->content), paraHelper::string, node->paras[i]->paratype->line, node->paras[i]->paratype->column);
             PUSH(addPara(node->paras[i]->paraname->content), paraHelper::string, node->paras[i]->paraname->line, node->paras[i]->paraname->column);
