@@ -459,6 +459,20 @@ void ygen::ByteCodeGenerator::visitBreakStmt(AST::BreakStmtNode* node) {
     JMP(paraHelper::jmpt::reqTrue, paraHelper::jmpt::outScopeDirectly, node->mark->line, node->mark->column)
 }
 
+void ygen::ByteCodeGenerator::visitFuncDefStmt(AST::FuncDefStmtNode* node) {
+    PUSH(addPara(node->rettype->content), paraHelper::string, node->mark->line, node->mark->column); // 将要定义的函数的返回值类型入栈
+    if(node->hasPara) {
+        PARAEND // 因为栈的原因，flag应该置后
+        for(int i = 0; i < node->paras.size(); i++) {
+            PUSH(addPara(node->paras[i]->paratype->content), paraHelper::string, node->paras[i]->paratype->line, node->paras[i]->paratype->column);
+            PUSH(addPara(node->paras[i]->paraname->content), paraHelper::string, node->paras[i]->paraname->line, node->paras[i]->paraname->column);
+        }
+    }
+    DEFINE(addPara(node->name->content)) // 符号定义
+    INIT(addPara(node->name->content), addPara(node->mark->content), addPara(node->rettype->content), 1.0)
+    visit(node->body->stmts);
+}
+
 void ygen::ByteCodeGenerator::visit(std::vector<AST::StmtNode*> stmts) {
     for(auto stmt: stmts){
         if(stmt->outstmt != nullptr) visitOutStmt(stmt->outstmt);
@@ -473,5 +487,6 @@ void ygen::ByteCodeGenerator::visit(std::vector<AST::StmtNode*> stmts) {
         else if(stmt->delstmt != nullptr) visitDeleteStmt(stmt->delstmt);
         else if(stmt->forstmt != nullptr) visitForStmt(stmt->forstmt);
         else if(stmt->breakstmt != nullptr) visitBreakStmt(stmt->breakstmt);
+        else if(stmt->fdefstmt != nullptr) visitFuncDefStmt(stmt->fdefstmt);
     }
 }
