@@ -254,6 +254,8 @@ namespace yvm{
         std::vector<std::string> getConstPool();
         std::vector<std::vector<vmValue>> getListPool();
 
+        ygen::paraHelper::type string2Type(std::string str);
+
         int run(std::string arg);
         void reload(std::vector<ygen::byteCode> _codes, std::vector<std::string> _constpool);
         void clear(); // 清空环境

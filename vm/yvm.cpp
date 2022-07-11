@@ -601,6 +601,15 @@ yvm::YVM::vmValue yvm::YVM::bifToBoolean(std::vector<vmValue> paras, int line, i
     }
     return value;
 }
+ygen::paraHelper::type yvm::YVM::string2Type(std::string str) {
+    if(str == "integer") return ygen::paraHelper::type::integer;
+    else if(str == "decimal") return ygen::paraHelper::type::decimal;
+    else if(str == "string") return ygen::paraHelper::type::string;
+    else if(str == "char") return ygen::paraHelper::type::character;
+    else if(str == "boolean") return ygen::paraHelper::type::boolean;
+    else if(str == "null") return ygen::paraHelper::type::null;
+    else throw yoexception::YoError("VM ERROR", "Cannot give a wrong identifier!", -1, -1);
+}
 //
 
 int yvm::YVM::run(std::string arg) {
@@ -1478,109 +1487,139 @@ int yvm::YVM::run(std::string arg) {
             }     
             case ygen::btc::init:{
                 auto name = constpool[codes[i].arg1];
-                if(std::count(runtimeSpace.current().memberlist.begin(), runtimeSpace.current().memberlist.end(), name)){
-                    auto value = envPop();
-                    //type-checker
-                    if(codes[i].arg4 == 1.0){
-                        auto reqType = constpool[codes[i].arg3];
-                        if(value.first == vmVType::null){
-                            // null 如果给了类型指定，存储在量中
-                            if(reqType == "integer")
-                                runtimeSpace.createValue(name, Space::Scope::Value(0, constpool[codes[i].arg2] == "var"?false:true, codes[i].line, codes[i].column));
-                            else if(reqType == "decimal")
-                                runtimeSpace.createValue(name, Space::Scope::Value((float)0.0f, constpool[codes[i].arg2] == "var"?false:true, codes[i].line, codes[i].column));
-                            else if(reqType == "boolean")
-                                runtimeSpace.createValue(name, Space::Scope::Value(false, constpool[codes[i].arg2] == "var"?false:true, codes[i].line, codes[i].column));
-                            else if(reqType == "string")
-                                runtimeSpace.createValue(name, Space::Scope::Value((std::string)"\0", constpool[codes[i].arg2] == "var"?false:true, codes[i].line, codes[i].column));
-                            else if(reqType == "char")
-                                runtimeSpace.createValue(name, Space::Scope::Value('\0', constpool[codes[i].arg2] == "var"?false:true, codes[i].line, codes[i].column));
-                            break;
-                        }
-                        else{
-                            if(reqType == "integer" && value.first == vmVType::integer);
-                            else if(reqType == "decimal" && value.first == vmVType::decimal);
-                            else if(reqType == "string" && value.first == vmVType::string);
-                            else if(reqType == "char" && value.first == vmVType::character);
-                            else if(reqType == "boolean" && value.first == vmVType::boolean);
-                            else {
-                                auto v = listpool[value.second];
-                                if(reqType == "integer[]" && v[0].first == vmVType::integer);
-                                else if(reqType == "decima[]l" && v[0].first == vmVType::decimal);
-                                else if(reqType == "string[]" && v[0].first == vmVType::string);
-                                else if(reqType == "char[]" && v[0].first == vmVType::character);
-                                else if(reqType == "boolean[]" && v[0].first == vmVType::boolean);
-                                else{
-                                    error_type:
-                                    // 不允许创建该变量，于是删除对应memberlist中的元素
-                                    auto &scope = runtimeSpace.current();
-                                    for(int i = 0; i < scope.memberlist.size(); i++) {
-                                        if(scope.memberlist[i] == name)
-                                            scope.memberlist.erase(scope.memberlist.begin() + i);
+                if(constpool[codes[i].arg2] == "function") {
+                    int line = codes[i].line, column = codes[i].column;
+                    std::vector<std::pair<ygen::paraHelper::type, std::string>> paras;
+                    while(constpool[envPeek().second] != "PARAENDFLAG") {
+                        std::pair<ygen::paraHelper::type, std::string> para;
+                        auto pname = envPop();
+                        auto ptype = envPop();
+                        para.first = string2Type(constpool[ptype.second]);
+                        para.second = constpool[pname.second];
+                        paras.push_back(para);
+                    }
+                    envPop(); // 跳过paraendflag
+                    std::reverse(paras.begin(), paras.end()); // 参数顺序颠倒
+                    auto rettype = constpool[envPop().second];
+                    // 提取函数体内容
+                    std::vector<ygen::byteCode> fcodes;
+                    int state = 0;
+                    while(true) {
+                        i ++;
+                        if(codes[i].code == ygen::scopestart) state ++;
+                        else if(codes[i].code == ygen::scopeend) state --;
+                        fcodes.push_back(codes[i]);
+                        if(state == 0) break;
+                    }
+                    //
+                    Space::Scope::Object function(name, fcodes, constpool, paras, line, column);
+                    runtimeSpace.createValue(name, Space::Scope::Value(function, false, line, column));
+                }
+                else {
+                    if(std::count(runtimeSpace.current().memberlist.begin(), runtimeSpace.current().memberlist.end(), name)){
+                        auto value = envPop();
+                        //type-checker
+                        if(codes[i].arg4 == 1.0){
+                            auto reqType = constpool[codes[i].arg3];
+                            if(value.first == vmVType::null){
+                                // null 如果给了类型指定，存储在量中
+                                if(reqType == "integer")
+                                    runtimeSpace.createValue(name, Space::Scope::Value(0, constpool[codes[i].arg2] == "var"?false:true, codes[i].line, codes[i].column));
+                                else if(reqType == "decimal")
+                                    runtimeSpace.createValue(name, Space::Scope::Value((float)0.0f, constpool[codes[i].arg2] == "var"?false:true, codes[i].line, codes[i].column));
+                                else if(reqType == "boolean")
+                                    runtimeSpace.createValue(name, Space::Scope::Value(false, constpool[codes[i].arg2] == "var"?false:true, codes[i].line, codes[i].column));
+                                else if(reqType == "string")
+                                    runtimeSpace.createValue(name, Space::Scope::Value((std::string)"\0", constpool[codes[i].arg2] == "var"?false:true, codes[i].line, codes[i].column));
+                                else if(reqType == "char")
+                                    runtimeSpace.createValue(name, Space::Scope::Value('\0', constpool[codes[i].arg2] == "var"?false:true, codes[i].line, codes[i].column));
+                                break;
+                            }
+                            else{
+                                if(reqType == "integer" && value.first == vmVType::integer);
+                                else if(reqType == "decimal" && value.first == vmVType::decimal);
+                                else if(reqType == "string" && value.first == vmVType::string);
+                                else if(reqType == "char" && value.first == vmVType::character);
+                                else if(reqType == "boolean" && value.first == vmVType::boolean);
+                                else {
+                                    auto v = listpool[value.second];
+                                    if(reqType == "integer[]" && v[0].first == vmVType::integer);
+                                    else if(reqType == "decima[]l" && v[0].first == vmVType::decimal);
+                                    else if(reqType == "string[]" && v[0].first == vmVType::string);
+                                    else if(reqType == "char[]" && v[0].first == vmVType::character);
+                                    else if(reqType == "boolean[]" && v[0].first == vmVType::boolean);
+                                    else{
+                                        error_type:
+                                        // 不允许创建该变量，于是删除对应memberlist中的元素
+                                        auto &scope = runtimeSpace.current();
+                                        for(int i = 0; i < scope.memberlist.size(); i++) {
+                                            if(scope.memberlist[i] == name)
+                                                scope.memberlist.erase(scope.memberlist.begin() + i);
+                                        }
+                                        throw yoexception::YoError("TypeError", "The expected type does not match the type given by the actual expression", codes[i].line, codes[i].column);
                                     }
-                                    throw yoexception::YoError("TypeError", "The expected type does not match the type given by the actual expression", codes[i].line, codes[i].column);
                                 }
                             }
                         }
-                    }
-                    //
-                    if(value.first == vmVType::integer)
-                        runtimeSpace.createValue(name, Space::Scope::Value((int)value.second, constpool[codes[i].arg2] == "var"?false:true, codes[i].line, codes[i].column));
-                    else if(value.first == vmVType::decimal)
-                        runtimeSpace.createValue(name, Space::Scope::Value((float)value.second, constpool[codes[i].arg2] == "var"?false:true, codes[i].line, codes[i].column));
-                    else if(value.first == vmVType::boolean)
-                        runtimeSpace.createValue(name, Space::Scope::Value((bool)value.second, constpool[codes[i].arg2] == "var"?false:true, codes[i].line, codes[i].column));
-                    else if(value.first == vmVType::string)
-                        runtimeSpace.createValue(name, Space::Scope::Value(constpool[value.second], constpool[codes[i].arg2] == "var"?false:true, codes[i].line, codes[i].column));
-                    else if(value.first == vmVType::character)
-                        runtimeSpace.createValue(name, Space::Scope::Value(constpool[value.second][0], constpool[codes[i].arg2] == "var"?false:true, codes[i].line, codes[i].column));
-                    else if(value.first == vmVType::null)
-                        runtimeSpace.createValue(name, Space::Scope::Value(constpool[codes[i].arg2] == "var"?false:true, codes[i].line, codes[i].column));
-                    else if(value.first == vmVType::ref){
-                        auto refName = constpool[value.second];
-                        runtimeSpace.createValue(name, Space::Scope::Value(runtimeSpace.getValueSelfRef(refName), constpool[codes[i].arg2] == "var"?false:true, codes[i].line, codes[i].column));
-                    }
-                    else if(value.first == vmVType::list) {
-                        auto list = listpool[value.second];
-                        std::vector<Space::Scope::Value> newlist;
-                        if(list.empty())
-                            throw yoexception::YoError("InitError", "Initializing an empty list is currently not allowed", codes[i].line, codes[i].column);
-                        if(list[0].first == vmVType::integer){
-                            for(int j = 0; j < list.size(); j++){
-                                if(list[j].first != list[j - 1].first && j > 0) // 当前后类型不一致时，报错
-                                    throw yoexception::YoError("TypeError", "All elements in the list must be of the same type", codes[i].line, codes[i].column);
-                                newlist.push_back(Space::Scope::Value((int)list[j].second, constpool[codes[i].arg2] == "var"?false:true, codes[i].line, codes[i].column));
-                            }
+                        //
+                        if(value.first == vmVType::integer)
+                            runtimeSpace.createValue(name, Space::Scope::Value((int)value.second, constpool[codes[i].arg2] == "var"?false:true, codes[i].line, codes[i].column));
+                        else if(value.first == vmVType::decimal)
+                            runtimeSpace.createValue(name, Space::Scope::Value((float)value.second, constpool[codes[i].arg2] == "var"?false:true, codes[i].line, codes[i].column));
+                        else if(value.first == vmVType::boolean)
+                            runtimeSpace.createValue(name, Space::Scope::Value((bool)value.second, constpool[codes[i].arg2] == "var"?false:true, codes[i].line, codes[i].column));
+                        else if(value.first == vmVType::string)
+                            runtimeSpace.createValue(name, Space::Scope::Value(constpool[value.second], constpool[codes[i].arg2] == "var"?false:true, codes[i].line, codes[i].column));
+                        else if(value.first == vmVType::character)
+                            runtimeSpace.createValue(name, Space::Scope::Value(constpool[value.second][0], constpool[codes[i].arg2] == "var"?false:true, codes[i].line, codes[i].column));
+                        else if(value.first == vmVType::null)
+                            runtimeSpace.createValue(name, Space::Scope::Value(constpool[codes[i].arg2] == "var"?false:true, codes[i].line, codes[i].column));
+                        else if(value.first == vmVType::ref){
+                            auto refName = constpool[value.second];
+                            runtimeSpace.createValue(name, Space::Scope::Value(runtimeSpace.getValueSelfRef(refName), constpool[codes[i].arg2] == "var"?false:true, codes[i].line, codes[i].column));
                         }
-                        else if(list[0].first == vmVType::boolean){
-                            for(int j = 0; j < list.size(); j++){
-                                if(list[j].first != list[j - 1].first && j > 0) // 当前后类型不一致时，报错
-                                    throw yoexception::YoError("TypeError", "All elements in the list must be of the same type", codes[i].line, codes[i].column);
-                                newlist.push_back(Space::Scope::Value((bool)list[j].second, constpool[codes[i].arg2] == "var"?false:true, codes[i].line, codes[i].column));
+                        else if(value.first == vmVType::list) {
+                            auto list = listpool[value.second];
+                            std::vector<Space::Scope::Value> newlist;
+                            if(list.empty())
+                                throw yoexception::YoError("InitError", "Initializing an empty list is currently not allowed", codes[i].line, codes[i].column);
+                            if(list[0].first == vmVType::integer){
+                                for(int j = 0; j < list.size(); j++){
+                                    if(list[j].first != list[j - 1].first && j > 0) // 当前后类型不一致时，报错
+                                        throw yoexception::YoError("TypeError", "All elements in the list must be of the same type", codes[i].line, codes[i].column);
+                                    newlist.push_back(Space::Scope::Value((int)list[j].second, constpool[codes[i].arg2] == "var"?false:true, codes[i].line, codes[i].column));
+                                }
                             }
-                        }
-                        else if(list[0].first == vmVType::decimal){
-                            for(int j = 0; j < list.size(); j++){
-                                if(list[j].first != list[j - 1].first && j > 0) // 当前后类型不一致时，报错
-                                    throw yoexception::YoError("TypeError", "All elements in the list must be of the same type", codes[i].line, codes[i].column);
-                                newlist.push_back(Space::Scope::Value((float)list[j].second, constpool[codes[i].arg2] == "var"?false:true, codes[i].line, codes[i].column));
+                            else if(list[0].first == vmVType::boolean){
+                                for(int j = 0; j < list.size(); j++){
+                                    if(list[j].first != list[j - 1].first && j > 0) // 当前后类型不一致时，报错
+                                        throw yoexception::YoError("TypeError", "All elements in the list must be of the same type", codes[i].line, codes[i].column);
+                                    newlist.push_back(Space::Scope::Value((bool)list[j].second, constpool[codes[i].arg2] == "var"?false:true, codes[i].line, codes[i].column));
+                                }
                             }
-                        }
-                        else if(list[0].first == vmVType::string){
-                            for(int j = 0; j < list.size(); j++){
-                                if(list[j].first != list[j - 1].first && j > 0) // 当前后类型不一致时，报错
-                                    throw yoexception::YoError("TypeError", "All elements in the list must be of the same type", codes[i].line, codes[i].column);
-                                newlist.push_back(Space::Scope::Value(constpool[list[j].second], constpool[codes[i].arg2] == "var"?false:true, codes[i].line, codes[i].column));
+                            else if(list[0].first == vmVType::decimal){
+                                for(int j = 0; j < list.size(); j++){
+                                    if(list[j].first != list[j - 1].first && j > 0) // 当前后类型不一致时，报错
+                                        throw yoexception::YoError("TypeError", "All elements in the list must be of the same type", codes[i].line, codes[i].column);
+                                    newlist.push_back(Space::Scope::Value((float)list[j].second, constpool[codes[i].arg2] == "var"?false:true, codes[i].line, codes[i].column));
+                                }
                             }
-                        }
-                        else if(list[0].first == vmVType::character){
-                            for(int j = 0; j < list.size(); j++){
-                                if(list[j].first != list[j - 1].first && j > 0) // 当前后类型不一致时，报错
-                                    throw yoexception::YoError("TypeError", "All elements in the list must be of the same type", codes[i].line, codes[i].column);
-                                newlist.push_back(Space::Scope::Value(constpool[list[j].second][0], constpool[codes[i].arg2] == "var"?false:true, codes[i].line, codes[i].column));
+                            else if(list[0].first == vmVType::string){
+                                for(int j = 0; j < list.size(); j++){
+                                    if(list[j].first != list[j - 1].first && j > 0) // 当前后类型不一致时，报错
+                                        throw yoexception::YoError("TypeError", "All elements in the list must be of the same type", codes[i].line, codes[i].column);
+                                    newlist.push_back(Space::Scope::Value(constpool[list[j].second], constpool[codes[i].arg2] == "var"?false:true, codes[i].line, codes[i].column));
+                                }
                             }
+                            else if(list[0].first == vmVType::character){
+                                for(int j = 0; j < list.size(); j++){
+                                    if(list[j].first != list[j - 1].first && j > 0) // 当前后类型不一致时，报错
+                                        throw yoexception::YoError("TypeError", "All elements in the list must be of the same type", codes[i].line, codes[i].column);
+                                    newlist.push_back(Space::Scope::Value(constpool[list[j].second][0], constpool[codes[i].arg2] == "var"?false:true, codes[i].line, codes[i].column));
+                                }
+                            }
+                            runtimeSpace.createValue(name, Space::Scope::Value(newlist, constpool[codes[i].arg2] == "var"?false:true, codes[i].line, codes[i].column));
                         }
-                        runtimeSpace.createValue(name, Space::Scope::Value(newlist, constpool[codes[i].arg2] == "var"?false:true, codes[i].line, codes[i].column));
                     }
                 }
                 break;
