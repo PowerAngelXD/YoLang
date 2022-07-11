@@ -25,10 +25,11 @@ namespace yvm{
                     std::vector<ygen::byteCode> codes;
                     std::vector<std::string> constpool;
                     Space* objSpace = nullptr; // Object专用Space
-                    YVM* objVM = nullptr; // Object专用VM（仅限于funcObj）
                     // Object参数对，first：参数类型，second：参数名称（仅限于funcObj）
                     std::vector<std::pair<ygen::paraHelper::type, std::string>> paras;
                 public:
+                    YVM* objVM = nullptr; // Object专用VM（仅限于funcObj）
+
                     Object()=default; // 为Value而生的默认构造函数
                     Object(std::string name, objKind k, int ln, int col); // 最简Object构造器
                     Object(std::string name, objKind k, std::vector<ygen::byteCode> c, std::vector<std::string> cp, int ln, int col); // 构造Object的同时传入codes
@@ -40,7 +41,7 @@ namespace yvm{
                     // 获取目标成员名称（仅限于typable）
                     Value getMember(std::string name);
                     // 运行Object（仅限于funcObj）
-                    YVM call();
+                    YVM call(std::vector<Value> actparas);
                     // 判断Object是什么类别的
                     bool isFuncObj();
                     bool isTypableObj();
@@ -260,5 +261,7 @@ namespace yvm{
         void reload(std::vector<ygen::byteCode> _codes, std::vector<std::string> _constpool);
         void clear(); // 清空环境
         void loadVMFile(std::string path);
+
+        friend var::Space::Scope::Object;
     };
 }

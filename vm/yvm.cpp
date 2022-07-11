@@ -147,6 +147,7 @@ Space::Scope::Value Space::Scope::val(std::string name){
     throw yoexception::YoError("InsideError", "In: yvm::var::Space::Scope::getValue:Cannot find the value that name is '" + name + "'", -1, -1);
 }
 void Space::Scope::create(std::string name, Value value){
+    memberlist.push_back(name);
     values.push_back(storage(name, value));
 }
 
@@ -202,9 +203,9 @@ Space::Scope::Object::Object(std::string name, objKind k, int ln, int col): objN
 Space::Scope::Object::Object(std::string name, objKind k, std::vector<ygen::byteCode> c, std::vector<std::string> cp, int ln, int col):
                             objName(name), kind(k), codes(c), constpool(cp), line(ln), column(col) {}
 Space::Scope::Object::Object(std::string name, std::vector<std::pair<ygen::paraHelper::type, std::string>> p, int ln, int col):
-                            objName(name), paras(p), kind(objKind::funcObj), line(ln), column(col) {}
+                            objName(name), paras(p), kind(objKind::funcObj), line(ln), column(col) {objVM = new yvm::YVM;}
 Space::Scope::Object::Object(std::string name, std::vector<ygen::byteCode> c, std::vector<std::string> cp, std::vector<std::pair<ygen::paraHelper::type, std::string>> p, int ln, int col):
-                            objName(name), paras(p), codes(c), constpool(cp), kind(objKind::funcObj), line(ln), column(col) {}
+                            objName(name), paras(p), codes(c), constpool(cp), kind(objKind::funcObj), line(ln), column(col) {objVM = new yvm::YVM;}
 
 Space::Scope::Value Space::Scope::Object::getMember(std::string name) {
     if(!isTypableObj())
@@ -215,9 +216,17 @@ Space::Scope::Value Space::Scope::Object::getMember(std::string name) {
         throw yoexception::YoError("NameError", "Cannot find identifier named: '" + name + "'", line, column);
 }
 
-yvm::YVM Space::Scope::Object::call() {
+yvm::YVM Space::Scope::Object::call(std::vector<Value> actparas) {
     if(!isFuncObj())
         throw yoexception::YoError("TypeError", "You cannot call an Object of a non-function type as a function", line, column);
+    // 创建临时参数变量
+    for(int i = 0; i < paras.size(); i ++) {
+        if(paras[i].first != actparas[i].getType()) {
+            throw yoexception::YoError("TypeError", "The parameter '" + paras[i].second + "' passed in does not conform to the defined type", line, column);
+        }
+        objVM->runtimeSpace.createValue(paras[i].second, actparas[i]);
+    }
+    //
     objVM->reload(codes, constpool);
     objVM->run("null");
     return *objVM;
@@ -669,7 +678,7 @@ int yvm::YVM::run(std::string arg) {
                 break;
             }
             case ygen::btc::call: {
-                std::vector<vmValue> paras;
+                std::vector<vmValue> temp;
                 bool hasPara = false;
                 auto name = constpool[envPop().second]; // funcName
                 if(envPeek().first == vmVType::flag && constpool[envPeek().second] == "PARAENDFLAG")
@@ -678,31 +687,69 @@ int yvm::YVM::run(std::string arg) {
                 if(hasPara) {
                     // 有参数，开始制作参数列表
                     while(envPeek().first != vmVType::flag && !runtimeStack.empty()) {
-                        paras.push_back(envPop());
+                        temp.push_back(envPop());
                     }
                     envPop(); // 删除参数末尾的flag
                 }
-                std::reverse(paras.begin(), paras.end()); // 出来的参数顺序颠倒
+                std::reverse(temp.begin(), temp.end()); // 出来的参数顺序颠倒
                 if(std::find(bifNames.begin(), bifNames.end(), name) != bifNames.end()) {
                     // 找到了bifname，是bif，交给bif处理
                     if(name == "print")
-                        envPush(bifPrint(paras, codes[i].line, codes[i].column));
+                        envPush(bifPrint(temp, codes[i].line, codes[i].column));
                     else if(name == "println")
-                        envPush(bifPrintLn(paras, codes[i].line, codes[i].column));
+                        envPush(bifPrintLn(temp, codes[i].line, codes[i].column));
                     else if(name == "len")
-                        envPush(bifLen(paras, codes[i].line, codes[i].column));
+                        envPush(bifLen(temp, codes[i].line, codes[i].column));
                     else if(name == "sys")
-                        envPush(bifSys(paras, codes[i].line, codes[i].column));
+                        envPush(bifSys(temp, codes[i].line, codes[i].column));
                     else if(name == "input")
-                        envPush(bifInput(paras, codes[i].line, codes[i].column));
+                        envPush(bifInput(temp, codes[i].line, codes[i].column));
                     else if(name == "toInt")
-                        envPush(bifToInteger(paras, codes[i].line, codes[i].column));
+                        envPush(bifToInteger(temp, codes[i].line, codes[i].column));
                     else if(name == "toStr")
-                        envPush(bifToString(paras, codes[i].line, codes[i].column));
+                        envPush(bifToString(temp, codes[i].line, codes[i].column));
                     else if(name == "toDeci")
-                        envPush(bifToDecimal(paras, codes[i].line, codes[i].column));
+                        envPush(bifToDecimal(temp, codes[i].line, codes[i].column));
                     else if(name == "toBool")
-                        envPush(bifToBoolean(paras, codes[i].line, codes[i].column));
+                        envPush(bifToBoolean(temp, codes[i].line, codes[i].column));
+                }
+                else {
+                    auto function = runtimeSpace.getValue(name);
+                    function.getObjectValue().objVM->runtimeSpace = this->runtimeSpace;
+                    // 转换成Value
+                    std::vector<Space::Scope::Value> paras;
+                    for(int j = 0; j < temp.size(); j ++) {
+                        switch (temp[j].first) {
+                            case vmVType::integer: {
+                                paras.push_back(Space::Scope::Value((int)temp[j].second, false, codes[i].line, codes[i].column));
+                                break;
+                            }
+                            case vmVType::string: {
+                                paras.push_back(Space::Scope::Value(constpool[(int)temp[j].second], false, codes[i].line, codes[i].column));
+                                break;
+                            }
+                            case vmVType::boolean: {
+                                paras.push_back(Space::Scope::Value((bool)temp[j].second, false, codes[i].line, codes[i].column));
+                                break;
+                            }
+                            case vmVType::character: {
+                                paras.push_back(Space::Scope::Value(constpool[(int)temp[j].second][0], false, codes[i].line, codes[i].column));
+                                break;
+                            }
+                            case vmVType::decimal: {
+                                paras.push_back(Space::Scope::Value(temp[j].second, false, codes[i].line, codes[i].column));
+                                break;
+                            }
+                            case vmVType::null: {
+                                paras.push_back(Space::Scope::Value(false, codes[i].line, codes[i].column));
+                                break;
+                            }
+                        }
+                    }
+                    //
+                    if(function.isObj()) {
+                        function.getObjectValue().call(paras);
+                    }
                 }
                 break;
             }
