@@ -24,6 +24,7 @@ namespace yvm{
                     std::string objName; // Object名称，funcObj和typableObj都适用
                     std::vector<ygen::byteCode> codes;
                     std::vector<std::string> constpool;
+                    std::string rettype;
                     Space* objSpace = nullptr; // Object专用Space
                     // Object参数对，first：参数类型，second：参数名称（仅限于funcObj）
                     std::vector<std::pair<ygen::paraHelper::type, std::string>> paras;
@@ -36,12 +37,14 @@ namespace yvm{
                     Object(std::string name, std::vector<std::pair<ygen::paraHelper::type, std::string>> p, int ln, int col); // 构造FunctionObject，无codes
                     Object(std::string name, std::vector<ygen::byteCode> c,
                            std::vector<std::string> cp,
-                           std::vector<std::pair<ygen::paraHelper::type, std::string>> p,
+                           std::vector<std::pair<ygen::paraHelper::type, std::string>> p, std::string ret,
                            int ln, int col); // 构造完整的FunctionObject
                     // 获取目标成员名称（仅限于typable）
                     Value getMember(std::string name);
                     // 运行Object（仅限于funcObj）
                     YVM call(std::vector<Value> actparas);
+                    // 获得Object的返回值（仅限于funcObj）
+                    std::string getRettype();
                     // 判断Object是什么类别的
                     bool isFuncObj();
                     bool isTypableObj();

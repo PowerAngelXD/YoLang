@@ -204,8 +204,8 @@ Space::Scope::Object::Object(std::string name, objKind k, std::vector<ygen::byte
                             objName(name), kind(k), codes(c), constpool(cp), line(ln), column(col) {}
 Space::Scope::Object::Object(std::string name, std::vector<std::pair<ygen::paraHelper::type, std::string>> p, int ln, int col):
                             objName(name), paras(p), kind(objKind::funcObj), line(ln), column(col) {objVM = new yvm::YVM;}
-Space::Scope::Object::Object(std::string name, std::vector<ygen::byteCode> c, std::vector<std::string> cp, std::vector<std::pair<ygen::paraHelper::type, std::string>> p, int ln, int col):
-                            objName(name), paras(p), codes(c), constpool(cp), kind(objKind::funcObj), line(ln), column(col) {objVM = new yvm::YVM;}
+Space::Scope::Object::Object(std::string name, std::vector<ygen::byteCode> c, std::vector<std::string> cp, std::vector<std::pair<ygen::paraHelper::type, std::string>> p, std::string ret, int ln, int col):
+                            objName(name), paras(p), codes(c), constpool(cp), kind(objKind::funcObj), rettype(ret), line(ln), column(col) {objVM = new yvm::YVM;}
 
 Space::Scope::Value Space::Scope::Object::getMember(std::string name) {
     if(!isTypableObj())
@@ -231,6 +231,8 @@ yvm::YVM Space::Scope::Object::call(std::vector<Value> actparas) {
     objVM->run("null");
     return *objVM;
 }
+
+std::string Space::Scope::Object::getRettype() {return rettype;}
 
 bool Space::Scope::Object::isFuncObj() {
     return kind == objKind::funcObj? true:false;
@@ -749,6 +751,9 @@ int yvm::YVM::run(std::string arg) {
                     //
                     if(function.isObj()) {
                         function.getObjectValue().call(paras);
+                        if(function.getObjectValue().getRettype() == "null") {
+                            envPush(vmValue(vmVType::null, 0.0));
+                        }
                     }
                 }
                 break;
@@ -1559,7 +1564,7 @@ int yvm::YVM::run(std::string arg) {
                         if(state == 0) break;
                     }
                     //
-                    Space::Scope::Object function(name, fcodes, constpool, paras, line, column);
+                    Space::Scope::Object function(name, fcodes, constpool, paras, rettype, line, column);
                     runtimeSpace.createValue(name, Space::Scope::Value(function, false, line, column));
                 }
                 else {
