@@ -470,7 +470,7 @@ void ygen::ByteCodeGenerator::visitFuncDefStmt(AST::FuncDefStmtNode* node) {
     }
     DEFINE(addPara(node->name->content)) // 符号定义
     INIT(addPara(node->name->content), addPara(node->mark->content), addPara(node->rettype->content), 1.0)
-    visit(node->body->stmts);
+    visitBlockStmt(node->body);
 }
 
 void ygen::ByteCodeGenerator::visit(std::vector<AST::StmtNode*> stmts) {
