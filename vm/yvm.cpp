@@ -624,6 +624,7 @@ ygen::paraHelper::type yvm::YVM::string2Type(std::string str) {
 //
 
 int yvm::YVM::run(std::string arg) {
+    bool elseState = true;
     for(int i = 0; i < codes.size(); i++) {
         switch (codes[i].code)
         {
@@ -1259,7 +1260,10 @@ int yvm::YVM::run(std::string arg) {
                             }
                             case ygen::paraHelper::jmpt::outIFscope: {
                                 auto cond = envPop();
-                                if((bool)cond.second == true) envPush(vmValue(vmVType::boolean, 1.0)); // 条件为真进入
+                                if((bool)cond.second == true) {
+                                    envPush(vmValue(vmVType::boolean, 1.0));
+                                    elseState = false;
+                                } // 条件为真进入
                                 else {
                                     int state = 0;
                                     while(true) {
@@ -1279,7 +1283,10 @@ int yvm::YVM::run(std::string arg) {
                                     throw yoexception::YoError("Syntax", "You cannot use elif statements directly without an if statement", codes[i].line, codes[i].column);
                                 else if(envPeek().first != vmVType::boolean)
                                     throw yoexception::YoError("Syntax", "You cannot use elif statements directly without an if statement", codes[i].line, codes[i].column);
-                                if((bool)cond.second == true && (bool)envPop().second == false) envPush(vmValue(vmVType::boolean, 1.0)); // 条件为真进入
+                                if((bool)cond.second == true && (bool)envPop().second == false) {
+                                    envPush(vmValue(vmVType::boolean, 1.0));
+                                    elseState = false;
+                                } // 条件为真进入
                                 else {
                                     int state = 0;
                                     while(true) {
@@ -1298,7 +1305,7 @@ int yvm::YVM::run(std::string arg) {
                                     throw yoexception::YoError("Syntax", "You cannot use else statements directly without an if statement", codes[i].line, codes[i].column);
                                 else if(envPeek().first != vmVType::boolean)
                                     throw yoexception::YoError("Syntax", "You cannot use else statements directly without an if statement", codes[i].line, codes[i].column);
-                                if((bool)envPop().second == false) envPush(vmValue(vmVType::boolean, 1.0)); // 条件为真进入
+                                if((bool)envPop().second == false && elseState == true) envPush(vmValue(vmVType::boolean, 1.0)); // 条件为真进入
                                 else {
                                     int state = 0;
                                     while(true) {
