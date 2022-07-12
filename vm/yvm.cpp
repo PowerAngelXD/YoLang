@@ -1259,6 +1259,7 @@ int yvm::YVM::run(std::string arg) {
                                 break;
                             }
                             case ygen::paraHelper::jmpt::outIFscope: {
+                                if(envPeek().first == vmVType::null) envPop(); // 排除潜在的null值
                                 auto cond = envPop();
                                 if((bool)cond.second == true) {
                                     envPush(vmValue(vmVType::boolean, 1.0));
@@ -1279,6 +1280,7 @@ int yvm::YVM::run(std::string arg) {
                             }
                             case ygen::paraHelper::jmpt::outElifscope: {
                                 auto cond = envPop();
+                                if(envPeek().first == vmVType::null) envPop(); // 排除潜在的null值
                                 if(runtimeStack.empty()) 
                                     throw yoexception::YoError("Syntax", "You cannot use elif statements directly without an if statement", codes[i].line, codes[i].column);
                                 else if(envPeek().first != vmVType::boolean)
@@ -1301,6 +1303,7 @@ int yvm::YVM::run(std::string arg) {
                                 break;
                             }
                             case ygen::paraHelper::jmpt::outElsescope: {
+                                if(envPeek().first == vmVType::null) envPop(); // 排除潜在的null值
                                 if(runtimeStack.empty()) 
                                     throw yoexception::YoError("Syntax", "You cannot use else statements directly without an if statement", codes[i].line, codes[i].column);
                                 else if(envPeek().first != vmVType::boolean)
