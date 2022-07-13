@@ -315,6 +315,11 @@ namespace AST{
         std::string toString();
     };
 
+    class ReturnStmtNode {
+    public:
+
+    };
+
     class BreakStmtNode {
     public:
         yolexer::yoToken* mark = nullptr;
