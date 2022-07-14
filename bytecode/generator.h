@@ -17,21 +17,22 @@ namespace ygen{
     };
 
     namespace type{
-        enum vtype {integer, boolean, decimal, string, null, obj};
-        enum modifier {list, dict, norm}; // norm：没有任何变化，最普通的
-        struct vtypeUnit{
-            vtype type;    // 类型本身
-            modifier modi; // 类型的修饰符
-        };
+        enum vtype {integer = 1, boolean, decimal, string, null, object};
+        typedef float modifier;
+        typedef float vtypeUnit;
+        extern modifier norm;
+        extern modifier list;
+        extern modifier dict;
 
-        vtypeUnit type(vtype t, modifier m);
-        std::string type2String(vtype t);
+        float type(vtype t, modifier m); // 构造type对应的数字
+        int getType(vtypeUnit unit);
+        float getModifier(vtypeUnit unit);
+
+        std::string vtype2String(vtype t);
         std::string modifier2String(modifier m);
-        std::string unit2String(vtypeUnit tu);
-        vtype string2Type(std::string str);
-        modifier string2Modifier(std::string str);
-        vtypeUnit string2VtypeUnit(std::string str); // 请写成：“type:modifier”的形式便于构造
-        vtypeUnit string2VtypeUnit(std::string t, std::string m); // 分割构造
+
+        vtype string2Vtype(std::string s);
+        modifier string2Modifier(std::string s);
     }
 
     // ByteCode的参数帮助，可以快捷的写一些参数。内部均为枚举，以XXXXHelper的形式存在

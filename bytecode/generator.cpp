@@ -33,6 +33,77 @@
 #define IDENEND(line, column) minCtor(btc::idenend, line, column);
 #define CALL minCtor(btc::call, node->left->line, node->left->column);
 
+ygen::type::modifier norm = 0.0;
+ygen::type::modifier list = 0.1;
+ygen::type::modifier dict = 0.2;
+
+float ygen::type::type(vtype t, modifier m) {
+    return t + m;
+}
+int ygen::type::getType(vtypeUnit unit) {
+    type::vtype t = static_cast<type::vtype>(unit);
+    return t;
+}
+float ygen::type::getModifier(vtypeUnit unit) {
+    type::vtype t = static_cast<type::vtype>(unit);
+    type::modifier m = unit - t;
+    return m;
+}
+
+ygen::type::vtype ygen::type::string2Vtype(std::string s) {
+    type::vtype t;
+    if(s == "integer") t = type::vtype::integer;
+    else if(s == "decimal") t = type::vtype::decimal;
+    else if(s == "string") t = type::vtype::string;
+    else if(s == "object") t = type::vtype::object;
+    else if(s == "boolean") t = type::vtype::boolean;
+    else if(s == "null") t = type::vtype::null;
+    else throw yoexception::YoError("GneratorError", "Wrong string: " + s + "to initialize a vtype!", -1, -1);
+    return t;
+}
+ygen::type::modifier ygen::type::string2Modifier(std::string s) {
+    modifier m;
+    if(s == "norm") m = norm;
+    else if(s == "list") m = list;
+    else if(s == "dict") m = dict;
+    else throw yoexception::YoError("GneratorError", "Wrong string: " + s + "to initialize a vtype!", -1, -1);
+    return m;
+}
+
+std::string ygen::type::modifier2String(modifier m) {
+    std::string ret;
+    if(m == norm) ret = "norm";
+    else if(m == list) ret = "list";
+    else if(m == dict) ret = "dict";
+    return ret;
+}
+std::string ygen::type::vtype2String(ygen::type::vtype t) {
+    std::string ret = "null";
+    switch (t) {
+        case integer:
+            ret = "integer";
+            break;
+        case boolean:
+            ret = "boolean";
+            break;
+        case decimal:
+            ret = "decimal";
+            break;
+        case string:
+            ret = "string";
+            break;
+        case null:
+            ret = "null";
+            break;
+        case object:
+            ret = "obj";
+            break;
+        default:
+            break;
+    }
+    return ret;
+}
+
 ygen::ByteCodeGenerator::ByteCodeGenerator(std::vector<AST::StmtNode*> _stmts): stmts(_stmts) {}
 ygen::ByteCodeGenerator::ByteCodeGenerator(AST::WholeExprNode* _expr): expr(_expr) {}
 std::string ygen::ByteCodeGenerator::removeZero(float content) {
