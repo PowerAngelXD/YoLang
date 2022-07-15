@@ -17,7 +17,7 @@ namespace ygen{
     };
 
     namespace type{
-        enum vtype {integer = 1, boolean, decimal, string, null, object};
+        enum vtype {integer = 1, boolean, decimal, string, null, object, iden, flag}; // iden类型只是为了标记为标识符所代表的值
         typedef float modifier;
         typedef float vtypeUnit;
         extern modifier norm;
@@ -37,11 +37,6 @@ namespace ygen{
 
     // ByteCode的参数帮助，可以快捷的写一些参数。内部均为枚举，以XXXXHelper的形式存在
     namespace paraHelper{
-        // 对于值类型的帮助，有yolang系统类型
-        // 说明：iden和iden_text
-        // iden：标识符和它对应的值
-        // iden_text：标识符本身，纯文字
-        enum type{ iden, iden_text, string, boolean, character, integer, decimal, null, list, flag, ref, obj};
         // reqXXX代表jmp指令需要的条件以供跳转
         // outWscope指的是跳出while所属的scope外并向前偏移，如果没有则向前偏移一个单位
         // findSStart代表跳转到所属scope的scopestart处
@@ -105,7 +100,7 @@ namespace ygen{
         void visitNumber(yolexer::yoToken* token);
         void buildIntegerNumber(std::string number, int line, int column);
         void buildDecimalNumber(std::string number, int line, int column);
-        void visitStrCh(yolexer::yoToken* token);
+        void visitString(yolexer::yoToken* token);
         void visitNull(yolexer::yoToken* token);
         void visitBoolean(yolexer::yoToken* token);
         void visitIdentifier(AST::IdentifierNode* node);

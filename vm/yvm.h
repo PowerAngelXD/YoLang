@@ -27,17 +27,17 @@ namespace yvm{
                     std::string rettype;
                     Space* objSpace = nullptr; // Object专用Space
                     // Object参数对，first：参数类型，second：参数名称（仅限于funcObj）
-                    std::vector<std::pair<ygen::paraHelper::type, std::string>> paras;
+                    std::vector<std::pair<ygen::type::vtypeUnit, std::string>> paras;
                 public:
                     YVM* objVM = nullptr; // Object专用VM（仅限于funcObj）
 
                     Object()=default; // 为Value而生的默认构造函数
                     Object(std::string name, objKind k, int ln, int col); // 最简Object构造器
                     Object(std::string name, objKind k, std::vector<ygen::byteCode> c, std::vector<std::string> cp, int ln, int col); // 构造Object的同时传入codes
-                    Object(std::string name, std::vector<std::pair<ygen::paraHelper::type, std::string>> p, int ln, int col); // 构造FunctionObject，无codes
+                    Object(std::string name, std::vector<std::pair<ygen::type::vtypeUnit, std::string>> p, int ln, int col); // 构造FunctionObject，无codes
                     Object(std::string name, std::vector<ygen::byteCode> c,
                            std::vector<std::string> cp,
-                           std::vector<std::pair<ygen::paraHelper::type, std::string>> p, std::string ret,
+                           std::vector<std::pair<ygen::type::vtypeUnit, std::string>> p, std::string ret,
                            int ln, int col); // 构造完整的FunctionObject
                     // 获取目标成员名称（仅限于typable）
                     Value getMember(std::string name);
@@ -53,14 +53,13 @@ namespace yvm{
                     int intvalue;   // 值
                     float decivalue;   // 值
                     std::string strvalue;   // 值
-                    char charvalue;   // 值
                     bool boolvalue;   // 值
                     Object objvalue; // 值
                     Value *ref = nullptr; // 引用
                     
                     std::vector<Value> list; // 列表
 
-                    ygen::paraHelper::type type; // 类型
+                    ygen::type::vtypeUnit type; // 类型
                     int line, column; // 行，列
 
                     bool isconst = false;
@@ -74,9 +73,7 @@ namespace yvm{
                     Value(int val, bool isc, int ln, int col);
                     Value(float val, bool isc, int ln, int col);
                     Value(std::string val, bool isc, int ln, int col);
-                    Value(char val, bool isc, int ln, int col);
                     Value(bool val, bool isc, int ln, int col);
-                    Value(Value* _ref, bool isc, int ln, int col);
                     Value(Object obj, bool isc, int ln, int col);
                     // 构造列表
                     Value(std::vector<Value> list, int ln, int col);
@@ -91,13 +88,12 @@ namespace yvm{
                     bool isObj();    // 判断当前Value是否为Object
                     bool isNull();   // 判断当前Value是否为Null
                     void removeNull(); // 取消Value的null状态
-                    ygen::paraHelper::type getType(); // 获得Value的type
+                    ygen::type::vtypeUnit getType(); // 获得Value的type
 
                     std::vector<Value> getList();
                     int getIntValue();
                     float getDeciValue();
                     std::string getStrValue();
-                    char getCharValue();
                     bool getBoolValue();
                     Object getObjectValue();
                     Value* getRef();
@@ -108,7 +104,6 @@ namespace yvm{
                     void assignDeci(float value);
                     void assignBool(bool value);
                     void assignString(std::string value);
-                    void assignChar(char value);
                     void assignValue(Value value);
                     void assignListValue(std::vector<Value> value);
                     void assignObject(Object value);
@@ -133,8 +128,7 @@ namespace yvm{
                 // 赋值
                 void assign(std::string name, int value);  
                 void assign(std::string name, float value);  
-                void assign(std::string name, bool value);  
-                void assign(std::string name, char value);  
+                void assign(std::string name, bool value);
                 void assign(std::string name, Value value);
                 void assign(std::string name, std::string value);  
                 void assign(std::string name, std::vector<Value> value);
@@ -148,7 +142,7 @@ namespace yvm{
                 // 删除指定名称的value的null状态
                 void rmNull(std::string name);
                 // 更改指定value的类型
-                void rewriteType(std::string name, ygen::paraHelper::type t);
+                void rewriteType(std::string name, ygen::type::vtypeUnit t);
                 // 更改指定Value的列表类型
                 void changeList(std::string name);
             };
@@ -199,7 +193,7 @@ namespace yvm{
             // 改变指定标识符的列表类型
             void toggleList(std::string name);
             // 更改指定Value的类型
-            void reWriteType(std::string name, ygen::paraHelper::type t);
+            void reWriteType(std::string name, ygen::type::vtypeUnit t);
 
             // 获得当前对应的深度值
             int getDeep();
@@ -210,15 +204,13 @@ namespace yvm{
      */
     class YVM{
     public:
-        // 值在YVM中的类型, 必须与generator中的保持一致
-        enum vmVType {iden, iden_text, string, boolean, character, integer, decimal, null, list, flag, ref, obj};
         // bif表
         std::vector<std::string> bifNames = {"print", "println", "input", "sys", "len", "toInt", "toStr",
                                              "toDeci", "toBool"};
         //
     private:
         // 描述一个YVM中的Value
-        typedef std::pair<vmVType, float> vmValue;
+        typedef std::pair<ygen::type::vtypeUnit , float> vmValue;
 
         std::vector<ygen::byteCode> codes;
         std::vector<std::string> constpool;
@@ -257,8 +249,6 @@ namespace yvm{
         vmValue envPeek();
         std::vector<std::string> getConstPool();
         std::vector<std::vector<vmValue>> getListPool();
-
-        ygen::paraHelper::type string2Type(std::string str);
 
         int run(std::string arg);
         void reload(std::vector<ygen::byteCode> _codes, std::vector<std::string> _constpool);

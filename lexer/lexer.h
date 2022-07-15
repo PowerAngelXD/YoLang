@@ -7,7 +7,7 @@
 
 namespace yolexer{
     extern std::vector<std::string> typeList;
-    enum yoTokType{Integer, Decimal, Identifier, KeyWord, Character, String, Symbol, Eof};
+    enum yoTokType{Integer, Decimal, Identifier, KeyWord, String, Symbol, Eof};
 
     struct yoToken{
         std::string content;

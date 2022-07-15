@@ -12,9 +12,6 @@ std::string yolexer::yoToken::toString(){
     case yolexer::yoTokType::Decimal:
         ret += "Decimal";
         break;
-    case yolexer::yoTokType::Character:
-        ret += "Character";
-        break;
     case yolexer::yoTokType::String:
         ret += "String";
     break;
@@ -73,17 +70,6 @@ void yolexer::Lexer::generate(){
                 tokenGroup.push_back({content, yoTokType::Decimal, line, column});
             else
                 tokenGroup.push_back({content, yoTokType::Integer, line, column});
-        }
-        else if(input[i] == '\''){
-            //是字符
-            std::string content;
-            i++;column++; // 跳过字符 ‘
-            while(input[i] != '\''){
-                if(input[i] == '\0') throw yoexception::YoError("SyntaxError", "Expect '\''!", line, column);
-                content.push_back(input[i]);
-                i++;column++;
-            }
-            tokenGroup.push_back({content, yoTokType::Character, line, column});
         }
         else if(input[i] == '"'){
             //是字符串
