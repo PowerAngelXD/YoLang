@@ -1,5 +1,6 @@
 #include "yvm.h"
 using namespace yvm::var;
+using namespace ygen;
 
 // Space
 Space::Space(){
@@ -120,7 +121,7 @@ void Space::createValue(std::string name, Scope::Value value) {
 void Space::rmValueNull(std::string name) {
     scopestack[getValuePos(name)].rmNull(name);
 }
-void Space::reWriteType(std::string name, ygen::paraHelper::type t){
+void Space::reWriteType(std::string name, type::vtypeUnit t){
     scopestack[getValuePos(name)].rewriteType(name, t);
 }
 void Space::toggleList(std::string name) {
@@ -163,9 +164,6 @@ void Space::Scope::assign(std::string name, bool value) {
 void Space::Scope::assign(std::string name, Object value) {
     values[pos(name)].second.assignObject(value);
 }
-void Space::Scope::assign(std::string name, char value) {
-    values[pos(name)].second.assignChar(value);
-}
 void Space::Scope::assign(std::string name, std::string value) {
     values[pos(name)].second.assignString(value);
 }
@@ -175,7 +173,7 @@ void Space::Scope::assign(std::string name, Value value) {
 void Space::Scope::assign(std::string name, std::vector<Value> value) {
     values[pos(name)].second.assignListValue(value);
 }
-void Space::Scope::rewriteType(std::string name, ygen::paraHelper::type t) {
+void Space::Scope::rewriteType(std::string name, type::vtypeUnit t) {
     values[pos(name)].second.type = t;
 }
 
@@ -202,9 +200,9 @@ void Space::Scope::changeList(std::string name) {
 Space::Scope::Object::Object(std::string name, objKind k, int ln, int col): objName(name), kind(k), line(ln), column(col) {}
 Space::Scope::Object::Object(std::string name, objKind k, std::vector<ygen::byteCode> c, std::vector<std::string> cp, int ln, int col):
                             objName(name), kind(k), codes(c), constpool(cp), line(ln), column(col) {}
-Space::Scope::Object::Object(std::string name, std::vector<std::pair<ygen::paraHelper::type, std::string>> p, int ln, int col):
+Space::Scope::Object::Object(std::string name, std::vector<std::pair<type::vtypeUnit, std::string>> p, int ln, int col):
                             objName(name), paras(p), kind(objKind::funcObj), line(ln), column(col) {objVM = new yvm::YVM;}
-Space::Scope::Object::Object(std::string name, std::vector<ygen::byteCode> c, std::vector<std::string> cp, std::vector<std::pair<ygen::paraHelper::type, std::string>> p, std::string ret, int ln, int col):
+Space::Scope::Object::Object(std::string name, std::vector<ygen::byteCode> c, std::vector<std::string> cp, std::vector<std::pair<type::vtypeUnit, std::string>> p, std::string ret, int ln, int col):
                             objName(name), paras(p), codes(c), constpool(cp), kind(objKind::funcObj), rettype(ret), line(ln), column(col) {objVM = new yvm::YVM;}
 
 Space::Scope::Value Space::Scope::Object::getMember(std::string name) {
@@ -242,24 +240,17 @@ bool Space::Scope::Object::isTypableObj() {
 }
 // Value
 Space::Scope::Value::Value(bool isc, int ln, int col):
-        isnull(true), isconst(isc), type(ygen::paraHelper::null), line(ln), column(col) {}
+        isnull(true), isconst(isc), type(type::type(type::vtype::null, type::norm)), line(ln), column(col) {}
 Space::Scope::Value::Value(int val, bool isc, int ln, int col): 
-                intvalue(val), isconst(isc), type(ygen::paraHelper::integer), line(ln), column(col) {}
+                intvalue(val), isconst(isc), type(type::type(type::vtype::integer, type::norm)), line(ln), column(col) {}
 Space::Scope::Value::Value(float val, bool isc, int ln, int col): 
-                decivalue(val), isconst(isc), type(ygen::paraHelper::decimal), line(ln), column(col) {}
+                decivalue(val), isconst(isc), type(type::type(type::vtype::decimal, type::norm)), line(ln), column(col) {}
 Space::Scope::Value::Value(std::string val, bool isc, int ln, int col): 
-                strvalue(val), isconst(isc), type(ygen::paraHelper::string), line(ln), column(col) {}
-Space::Scope::Value::Value(char val, bool isc, int ln, int col): 
-                charvalue(val), isconst(isc), type(ygen::paraHelper::character), line(ln), column(col) {}
+                strvalue(val), isconst(isc), type(type::type(type::vtype::string, type::norm)), line(ln), column(col) {}
 Space::Scope::Value::Value(bool val, bool isc, int ln, int col):
-                boolvalue(val), isconst(isc), type(ygen::paraHelper::boolean), line(ln), column(col) {}
+                boolvalue(val), isconst(isc), type(type::type(type::vtype::boolean, type::norm)), line(ln), column(col) {}
 Space::Scope::Value::Value(Object val, bool isc, int ln, int col):
-                objvalue(val), isconst(isc), type(ygen::paraHelper::boolean), line(ln), column(col), isobj(true) {}
-Space::Scope::Value::Value(Value* _ref, bool isc, int ln, int col): 
-                isconst(isc), isref(true), type(ygen::paraHelper::ref), line(ln), column(col) {
-                    ref = new Value;
-                    ref = _ref;
-                }
+                objvalue(val), isconst(isc), type(type::type(type::vtype::object, type::norm)), line(ln), column(col), isobj(true) {}
 
 Space::Scope::Value::Value(std::vector<Value> list, int ln, int col): 
                 list(list), islist(true), type(list[0].getType()), line(ln), column(col) {}
@@ -282,7 +273,7 @@ bool Space::Scope::Value::isObj(){
 bool Space::Scope::Value::isNull(){
     return isnull;
 }
-ygen::paraHelper::type Space::Scope::Value::getType(){
+type::vtypeUnit Space::Scope::Value::getType(){
     return type;
 }
 void Space::Scope::Value::removeNull() {
@@ -296,9 +287,6 @@ float Space::Scope::Value::getDeciValue() {
 }
 std::string Space::Scope::Value::getStrValue() {
     return strvalue;
-}
-char Space::Scope::Value::getCharValue() {
-    return charvalue;
 }
 bool Space::Scope::Value::getBoolValue() {
     return boolvalue;
@@ -338,10 +326,6 @@ void Space::Scope::Value::assignObject(Object value) {
     if(isconst) throw yoexception::YoError("ConstantError", "A constant cannot be assigned", line, column);
     objvalue = value;
 }
-void Space::Scope::Value::assignChar(char value) {
-    if(isconst) throw yoexception::YoError("ConstantError", "A constant cannot be assigned", line, column);
-    charvalue = value;
-}
 void Space::Scope::Value::refAnother(Value value) {
     if(isconst) throw yoexception::YoError("ConstantError", "A constant cannot be assigned", line, column);
     ref = &value;
@@ -349,7 +333,6 @@ void Space::Scope::Value::refAnother(Value value) {
 void Space::Scope::Value::assignValue(Value value) {
     if(isconst) throw yoexception::YoError("ConstantError", "A constant cannot be assigned", line, column);
     this->boolvalue = value.boolvalue;
-    this->charvalue = value.charvalue;
     this->intvalue = value.intvalue;
     this->decivalue = value.decivalue;
     this->strvalue = value.strvalue;
@@ -384,29 +367,24 @@ int yvm::YVM::addList(std::vector<vmValue> values){
 }
 int yvm::YVM::addValueList(std::vector<Space::Scope::Value> list){
     std::vector<vmValue> newlist;
-    if((vmVType)list[0].getType() == vmVType::integer){
+    if(list[0].getType() == type::vtype::integer){
         for(int i = 0; i < list.size(); i++){
-            newlist.push_back(vmValue((vmVType)list[i].getType(), list[i].getIntValue()));
+            newlist.push_back(vmValue(list[i].getType(), list[i].getIntValue()));
         }
     }
-    else if((vmVType)list[0].getType() == vmVType::decimal){
+    else if(list[0].getType() == type::vtype::decimal){
         for(int i = 0; i < list.size(); i++){
-            newlist.push_back(vmValue((vmVType)list[i].getType(), list[i].getDeciValue()));
+            newlist.push_back(vmValue(list[i].getType(), list[i].getDeciValue()));
         }
     }
-    else if((vmVType)list[0].getType() == vmVType::boolean){
+    else if(list[0].getType() == type::vtype::boolean){
         for(int i = 0; i < list.size(); i++){
-            newlist.push_back(vmValue((vmVType)list[i].getType(), list[i].getBoolValue()));
+            newlist.push_back(vmValue(list[i].getType(), list[i].getBoolValue()));
         }
     }
-    else if((vmVType)list[0].getType() == vmVType::string){
+    else if(list[0].getType() == type::vtype::string){
         for(int i = 0; i < list.size(); i++){
-            newlist.push_back(vmValue((vmVType)list[i].getType(), addString(list[i].getStrValue())));
-        }
-    }
-    else if((vmVType)list[0].getType() == vmVType::character){
-        for(int i = 0; i < list.size(); i++){
-            newlist.push_back(vmValue((vmVType)list[i].getType(), addChar(list[i].getCharValue())));
+            newlist.push_back(vmValue(list[i].getType(), addString(list[i].getStrValue())));
         }
     }
     listpool.push_back(newlist);
@@ -442,7 +420,7 @@ std::vector<std::vector<yvm::YVM::vmValue>> yvm::YVM::getListPool(){
 void yvm::YVM::envPush(yvm::YVM::vmValue val) {
     if (runtimeStack.size() <= runtimeTop) {
         for (int i = runtimeStack.size() ; i <= runtimeTop ; i ++)
-            runtimeStack.emplace_back(vmValue(vmVType::null, 0.0));
+            runtimeStack.emplace_back(vmValue(type::type(type::vtype::null, type::norm), 0.0));
     }
     runtimeStack[runtimeTop ++] = val;
 }
@@ -464,13 +442,13 @@ yvm::YVM::vmValue yvm::YVM::bifPrint(std::vector<vmValue> paras, int line, int c
     else if(paras.size() > 1)
         throw yoexception::YoError("ParaError", "Too many parameters", line, column);
     auto content = paras[0];
-    if(content.first == vmVType::string || content.first == vmVType::character)
+    if(content.first == type::vtype::string)
         std::cout<<constpool[content.second];
-    else if(content.first == vmVType::list){
+    else if(type::getModifier(content.first) == type::list){
         auto list = listpool[content.second];
         for(int j = 0; j < list.size(); j++){
             auto elt = list[j];
-            if(elt.first == vmVType::string || elt.first == vmVType::character)
+            if(elt.first == type::vtype::string)
                 std::cout<<constpool[elt.second];
             else
                 std::cout<<elt.second;
@@ -478,7 +456,7 @@ yvm::YVM::vmValue yvm::YVM::bifPrint(std::vector<vmValue> paras, int line, int c
     }
     else
         std::cout<<content.second;
-    return vmValue(vmVType::null, 0.0);
+    return vmValue(type::type(type::vtype::null, type::norm), 0.0);
 }
 yvm::YVM::vmValue yvm::YVM::bifPrintLn(std::vector<vmValue> paras, int line, int column) {
     if(paras.empty())
@@ -486,13 +464,13 @@ yvm::YVM::vmValue yvm::YVM::bifPrintLn(std::vector<vmValue> paras, int line, int
     else if(paras.size() > 1)
         throw yoexception::YoError("ParaError", "Too many parameters", line, column);
     auto content = paras[0];
-    if(content.first == vmVType::string || content.first == vmVType::character)
+    if(content.first == type::vtype::string)
         std::cout<<constpool[content.second];
-    else if(content.first == vmVType::list){
+    else if(type::getModifier(content.first) == type::list){
         auto list = listpool[content.second];
         for(int j = 0; j < list.size(); j++){
             auto elt = list[j];
-            if(elt.first == vmVType::string || elt.first == vmVType::character)
+            if(elt.first == type::vtype::string)
                 std::cout<<constpool[elt.second];
             else
                 std::cout<<elt.second;
@@ -501,21 +479,20 @@ yvm::YVM::vmValue yvm::YVM::bifPrintLn(std::vector<vmValue> paras, int line, int
     else
         std::cout<<content.second;
     std::cout<<std::endl;
-    return vmValue(vmVType::null, 0.0);
+    return vmValue(type::type(type::vtype::null, type::norm), 0.0);
 }
 yvm::YVM::vmValue yvm::YVM::bifLen(std::vector<vmValue> paras, int line, int column) {
     if(paras.empty())
         throw yoexception::YoError("ParaError", "Too few parameters", line, column);
     else if(paras.size() > 1)
         throw yoexception::YoError("ParaError", "Too many parameters", line, column);
-    if(paras[0].first != vmVType::list && paras[0].first != vmVType::string)
+    if(type::getModifier(paras[0].first) != type::list && paras[0].first != type::vtype::string)
         throw yoexception::YoError("TypeError", "This function does not support arguments of this type", line, column);
     vmValue ret;
-    switch (paras[0].first) {
-        case vmVType::list: ret = vmValue(vmVType::integer, listpool[paras[0].second].size()); break;
-        case vmVType::string: ret = vmValue(vmVType::integer, constpool[paras[0].second].size()); break;
-        default: break;
-    }
+    if(type::getModifier(paras[0].first) == type::list)
+        ret = vmValue(type::type(type::vtype::integer, type::norm), listpool[paras[0].second].size());
+    else if(paras[0].first == type::vtype::string)
+        ret = vmValue(type::type(type::vtype::integer, type::norm), constpool[paras[0].second].size());
     return ret;
 }
 yvm::YVM::vmValue yvm::YVM::bifSys(std::vector<vmValue> paras, int line, int column) {
@@ -523,10 +500,10 @@ yvm::YVM::vmValue yvm::YVM::bifSys(std::vector<vmValue> paras, int line, int col
         throw yoexception::YoError("ParaError", "Too few parameters", line, column);
     else if(paras.size() > 1)
         throw yoexception::YoError("ParaError", "Too many parameters", line, column);
-    if(paras[0].first != vmVType::string)
+    if(paras[0].first != type::vtype::string)
         throw yoexception::YoError("TypeError", "This function does not support arguments of this type", line, column);
     system(constpool[paras[0].second].c_str());
-    return vmValue(vmVType::null, 0.0);
+    return vmValue(type::type(type::vtype::null, type::norm), 0.0);
 }
 yvm::YVM::vmValue yvm::YVM::bifInput(std::vector<vmValue> paras, int line, int column) {
     if(paras.empty() || paras.size() == 1) {
@@ -534,7 +511,7 @@ yvm::YVM::vmValue yvm::YVM::bifInput(std::vector<vmValue> paras, int line, int c
             std::cout<<constpool[paras[0].second];
         std::string text;
         std::getline(std::cin, text);
-        return vmValue(vmVType::string, addString(text));
+        return vmValue(type::type(type::vtype::string, type::norm), addString(text));
     }
     else throw yoexception::YoError("ParaError", "Too many parameters", line, column);
 }
@@ -544,14 +521,11 @@ yvm::YVM::vmValue yvm::YVM::bifToInteger(std::vector<vmValue> paras, int line, i
     else if(paras.size() > 1)
         throw yoexception::YoError("ParaError", "Too many parameters", line, column);
     vmValue value;
-    switch (paras[0].first) {
-        case vmVType::integer: value = vmValue(vmVType::integer, paras[0].second); break;
-        case vmVType::decimal: value = vmValue(vmVType::integer, (int)paras[0].second); break;
-        case vmVType::boolean: value = vmValue(vmVType::integer, (int)paras[0].second); break;
-        case vmVType::string: value = vmValue(vmVType::integer, std::atoi(constpool[paras[0].second].c_str())); break;
-        case vmVType::character: value = vmValue(vmVType::integer, (int)constpool[paras[0].second][0]); break;
-        default: value = vmValue(vmVType::integer, 0); break;
-    }
+    if(paras[0].first == type::vtype::integer) value = vmValue(type::type(type::vtype::integer, type::norm), (int)paras[0].second);
+    else if(paras[0].first == type::vtype::string) value = vmValue(type::type(type::vtype::integer, type::norm), atoi(constpool[paras[0].second].c_str()));
+    else if(paras[0].first == type::vtype::decimal) value = vmValue(type::type(type::vtype::integer, type::norm), static_cast<int>(paras[0].second));
+    else if(paras[0].first == type::vtype::null) value = vmValue(type::type(type::vtype::integer, type::norm), 0);
+    else if(paras[0].first == type::vtype::boolean) value = vmValue(type::type(type::vtype::integer, type::norm), (int)paras[0].second);
     return value;
 }
 yvm::YVM::vmValue yvm::YVM::bifToString(std::vector<vmValue> paras, int line, int column) {
@@ -560,23 +534,21 @@ yvm::YVM::vmValue yvm::YVM::bifToString(std::vector<vmValue> paras, int line, in
     else if(paras.size() > 1)
         throw yoexception::YoError("ParaError", "Too many parameters", line, column);
     vmValue value;
-    switch (paras[0].first) {
-        case vmVType::integer: {
-            std::stringstream oss;
-            oss << paras[0].second;
-            value = vmValue(vmVType::string, addString(oss.str()));
-            break;
-        }
-        case vmVType::decimal: {
-            std::stringstream oss;
-            oss << paras[0].second;
-            value = vmValue(vmVType::string, addString(oss.str()));
-            break;
-        }
-        case vmVType::boolean: value = vmValue(vmVType::string, addString((bool)paras[0].second?"true":"false")); break;
-        case vmVType::string: value = vmValue(vmVType::string, paras[0].second); break;
-        case vmVType::character: value = vmValue(vmVType::string, paras[0].second); break;
-        default: value = vmValue(vmVType::string, addString("null")); break;
+    if(paras[0].first == type::vtype::integer) {
+        std::ostringstream oss;
+        oss << paras[0].second;
+        value = vmValue(type::type(type::vtype::string, type::norm), addString(oss.str()));
+    }
+    else if(paras[0].first == type::vtype::string) value = vmValue(type::type(type::vtype::integer, type::norm), paras[0].second);
+    else if(paras[0].first == type::vtype::decimal) {
+        std::ostringstream oss;
+        oss << paras[0].second;
+        value = vmValue(type::type(type::vtype::string, type::norm), addString(oss.str()));
+    }
+    else if(paras[0].first == type::vtype::null) value = vmValue(type::type(type::vtype::integer, type::norm), addString("null"));
+    else if(paras[0].first == type::vtype::boolean) {
+        if((bool)paras[0].second == true) value = vmValue(type::type(type::vtype::integer, type::norm), addString("true"));
+        else value = vmValue(type::type(type::vtype::integer, type::norm), addString("false"));
     }
     return value;
 }
@@ -586,14 +558,11 @@ yvm::YVM::vmValue yvm::YVM::bifToDecimal(std::vector<vmValue> paras, int line, i
     else if(paras.size() > 1)
         throw yoexception::YoError("ParaError", "Too many parameters", line, column);
     vmValue value;
-    switch (paras[0].first) {
-        case vmVType::integer: value = vmValue(vmVType::decimal, (float)paras[0].second); break;
-        case vmVType::decimal: value = vmValue(vmVType::decimal, paras[0].second); break;
-        case vmVType::boolean: value = vmValue(vmVType::decimal, (float)paras[0].second); break;
-        case vmVType::string: value = vmValue(vmVType::decimal, (float)atof(constpool[paras[0].second].c_str())); break;
-        case vmVType::character: value = vmValue(vmVType::decimal, (float)atof(constpool[paras[0].second].c_str())); break;
-        default: value = vmValue(vmVType::decimal, 0.0); break;
-    }
+    if(paras[0].first == type::vtype::integer) value = vmValue(type::type(type::vtype::decimal, type::norm), (int)paras[0].second);
+    else if(paras[0].first == type::vtype::string) value = vmValue(type::type(type::vtype::decimal, type::norm), atof(constpool[paras[0].second].c_str()));
+    else if(paras[0].first == type::vtype::decimal) value = vmValue(type::type(type::vtype::decimal, type::norm), static_cast<int>(paras[0].second));
+    else if(paras[0].first == type::vtype::null) value = vmValue(type::type(type::vtype::decimal, type::norm), 0.0);
+    else if(paras[0].first == type::vtype::boolean) value = vmValue(type::type(type::vtype::decimal, type::norm), (float)paras[0].second);
     return value;
 }
 yvm::YVM::vmValue yvm::YVM::bifToBoolean(std::vector<vmValue> paras, int line, int column) {
@@ -602,24 +571,15 @@ yvm::YVM::vmValue yvm::YVM::bifToBoolean(std::vector<vmValue> paras, int line, i
     else if(paras.size() > 1)
         throw yoexception::YoError("ParaError", "Too many parameters", line, column);
     vmValue value;
-    switch (paras[0].first) {
-        case vmVType::integer: value = vmValue(vmVType::boolean, (bool)paras[0].second); break;
-        case vmVType::decimal: value = vmValue(vmVType::boolean, (bool)paras[0].second); break;
-        case vmVType::boolean: value = vmValue(vmVType::boolean, (bool)paras[0].second); break;
-        case vmVType::string: value = vmValue(vmVType::boolean, constpool[paras[0].second] == "true"? true: false); break;
-        case vmVType::character: throw yoexception::YoError("TypeError", "cannot convert type 'Character' to 'Boolean'", line, column); break;
-        default: value = vmValue(vmVType::boolean, false); break;
+    if(paras[0].first == type::vtype::integer) value = vmValue(type::type(type::vtype::boolean, type::norm), (bool)paras[0].second);
+    else if(paras[0].first == type::vtype::string) {
+        if(constpool[paras[0].second] == "true") value = vmValue(type::type(type::vtype::boolean, type::norm), true);
+        else value = vmValue(type::type(type::vtype::boolean, type::norm), false);
     }
+    else if(paras[0].first == type::vtype::decimal) value = vmValue(type::type(type::vtype::boolean, type::norm), (bool)paras[0].second);
+    else if(paras[0].first == type::vtype::null) value = vmValue(type::type(type::vtype::boolean, type::norm), false);
+    else if(paras[0].first == type::vtype::boolean) value = vmValue(type::type(type::vtype::boolean, type::norm), (bool)paras[0].second);
     return value;
-}
-ygen::paraHelper::type yvm::YVM::string2Type(std::string str) {
-    if(str == "integer") return ygen::paraHelper::type::integer;
-    else if(str == "decimal") return ygen::paraHelper::type::decimal;
-    else if(str == "string") return ygen::paraHelper::type::string;
-    else if(str == "char") return ygen::paraHelper::type::character;
-    else if(str == "boolean") return ygen::paraHelper::type::boolean;
-    else if(str == "null") return ygen::paraHelper::type::null;
-    else throw yoexception::YoError("VM ERROR", "Cannot give a wrong identifier!", -1, -1);
 }
 //
 
@@ -629,67 +589,40 @@ int yvm::YVM::run(std::string arg) {
         switch (codes[i].code)
         {
             case ygen::btc::push:{
-                if(codes[i].arg2 == vmVType::iden){
+                if(codes[i].arg2 == type::vtype::iden){
                     if(codes[i + 1].code == ygen::btc::idenend){
                         // 单个identifier，直接push
                         auto name = constpool[codes[i].arg1];
                         if(runtimeSpace.find(name)){
-                            auto type = (vmVType)runtimeSpace.getValue(name).getType();
+                            auto type = runtimeSpace.getValue(name).getType();
                             if(!runtimeSpace.getValue(name).isList()){
-                                switch (type)
-                                {
-                                    case vmVType::null: envPush(vmValue(type, 0));
-                                    case vmVType::integer: envPush(vmValue(type, runtimeSpace.getValue(name).getIntValue())); break;
-                                    case vmVType::decimal: envPush(vmValue(type, runtimeSpace.getValue(name).getDeciValue())); break;
-                                    case vmVType::boolean: envPush(vmValue(type, runtimeSpace.getValue(name).getBoolValue())); break;
-                                    case vmVType::string: envPush(vmValue(type, addString(runtimeSpace.getValue(name).getStrValue()))); break;
-                                    case vmVType::character: envPush(vmValue(type, addChar(runtimeSpace.getValue(name).getCharValue()))); break;
-                                    case vmVType::ref: {
-                                        // 嵌套处理
-                                        auto value = runtimeSpace.getValue(name).getRef();
-                                        auto refType = (vmVType)value->getType();
-                                        if(!value->isList()){
-                                            switch (refType)
-                                            {
-                                                case vmVType::integer: envPush(vmValue(refType, value->getIntValue())); break;
-                                                case vmVType::decimal: envPush(vmValue(refType, value->getDeciValue())); break;
-                                                case vmVType::boolean: envPush(vmValue(refType, value->getBoolValue())); break;
-                                                case vmVType::string: envPush(vmValue(refType, addString(value->getStrValue()))); break;
-                                                case vmVType::character: envPush(vmValue(refType, addChar(value->getCharValue()))); break;
-                                                default: throw yoexception::YoError("TypeError","Unsupported type used",codes[i].line, codes[i].column); break;
-                                            }
-                                        }
-                                        else{
-                                            envPush(vmValue(vmVType::list, addValueList(value->getList())));
-                                        }
-                                        break;
-                                    }
-                                    default: throw yoexception::YoError("TypeError","Unsupported type used",codes[i].line, codes[i].column); break;
-                                }
+                                 if(type == type::type(type::vtype::null, type::norm)) envPush(vmValue(type::type(type::vtype::null, type::norm), 0));
+                                 else if(type == type::type(type::vtype::integer, type::norm)) envPush(vmValue(type, runtimeSpace.getValue(name).getIntValue()));
+                                 else if(type == type::type(type::vtype::decimal, type::norm)) envPush(vmValue(type, runtimeSpace.getValue(name).getDeciValue()));
+                                 else if(type == type::type(type::vtype::boolean, type::norm)) envPush(vmValue(type, runtimeSpace.getValue(name).getBoolValue()));
+                                 else if(type ==type::type(type::vtype::string, type::norm)) envPush(vmValue(type, addString(runtimeSpace.getValue(name).getStrValue())));
                             }
                             else{
-                                envPush(vmValue(vmVType::list, addValueList(runtimeSpace.getValue(name).getList())));
+                                envPush(vmValue(type::type((type::vtype)type::getType(type), type::list), addValueList(runtimeSpace.getValue(name).getList())));
                             }
                         }
                         else throw yoexception::YoError("NameError", "Cannot find identifier named: '" + constpool[codes[i].arg1] + "'", codes[i].line, codes[i].column);
                     }
                     else ; // 多个identifier连接在一起
                 }
-                else if(codes[i].arg2 == vmVType::ref)
-                    envPush(vmValue(vmVType::ref, codes[i].arg1));
-                else envPush(vmValue((vmVType)codes[i].arg2, codes[i].arg1));
+                else envPush(vmValue(type::type((type::vtype)codes[i].arg2, type::norm), codes[i].arg1));
                 break;
             }
             case ygen::btc::call: {
                 std::vector<vmValue> temp;
                 bool hasPara = false;
                 auto name = constpool[envPop().second]; // funcName
-                if(envPeek().first == vmVType::flag && constpool[envPeek().second] == "PARAENDFLAG")
+                if(envPeek().first == type::type(type::vtype::flag, type::norm) && constpool[envPeek().second] == "PARAENDFLAG")
                     hasPara = true;
                 envPop(); // 删除flag
                 if(hasPara) {
                     // 有参数，开始制作参数列表
-                    while(envPeek().first != vmVType::flag && !runtimeStack.empty()) {
+                    while(envPeek().first != type::type(type::vtype::flag, type::norm) && !runtimeStack.empty()) {
                         temp.push_back(envPop());
                     }
                     envPop(); // 删除参数末尾的flag
@@ -722,66 +655,42 @@ int yvm::YVM::run(std::string arg) {
                     // 转换成Value
                     std::vector<Space::Scope::Value> paras;
                     for(int j = 0; j < temp.size(); j ++) {
-                        switch (temp[j].first) {
-                            case vmVType::integer: {
+                        if(temp[i].first == type::type(type::vtype::integer, type::norm))
                                 paras.push_back(Space::Scope::Value((int)temp[j].second, false, codes[i].line, codes[i].column));
-                                break;
-                            }
-                            case vmVType::string: {
-                                paras.push_back(Space::Scope::Value(constpool[(int)temp[j].second], false, codes[i].line, codes[i].column));
-                                break;
-                            }
-                            case vmVType::boolean: {
-                                paras.push_back(Space::Scope::Value((bool)temp[j].second, false, codes[i].line, codes[i].column));
-                                break;
-                            }
-                            case vmVType::character: {
-                                paras.push_back(Space::Scope::Value(constpool[(int)temp[j].second][0], false, codes[i].line, codes[i].column));
-                                break;
-                            }
-                            case vmVType::decimal: {
-                                paras.push_back(Space::Scope::Value(temp[j].second, false, codes[i].line, codes[i].column));
-                                break;
-                            }
-                            case vmVType::null: {
-                                paras.push_back(Space::Scope::Value(false, codes[i].line, codes[i].column));
-                                break;
-                            }
-                        }
                     }
                     //
                     if(function.isObj()) {
                         function.getObjectValue().call(paras);
                         if(function.getObjectValue().getRettype() == "null") {
-                            envPush(vmValue(vmVType::null, 0.0));
+                            envPush(vmValue(type::type(type::vtype::null, type::norm), 0.0));
                         }
                     }
                 }
                 break;
             }
             case ygen::btc::listend:{
-                envPush(vmValue(vmVType::flag, addString("LISTENDFLAG")));
+                envPush(vmValue(type::type(type::vtype::flag, type::norm), addString("LISTENDFLAG")));
                 break;
             }
             case ygen::btc::paraend:{
-                envPush(vmValue(vmVType::flag, addString("PARAENDFLAG")));
+                envPush(vmValue(type::type(type::vtype::flag, type::norm), addString("PARAENDFLAG")));
                 break;
             }
             case ygen::btc::lst:{
                 std::vector<vmValue> list;
                 bool flag = false;
-                while(runtimeStack[runtimeTop].first != vmVType::flag){
+                while(runtimeStack[runtimeTop].first != type::type(type::vtype::flag, type::norm)){
                     list.push_back(envPop());
                 }
                 list.erase(list.begin() + list.size() - 1);
                 std::reverse(list.begin(), list.end());
-                envPush(vmValue(vmVType::list, addList(list)));
+                envPush(vmValue(type::type((type::vtype)type::getType(list[0].first), type::list), addList(list)));
                 break;
             }
             case ygen::btc::idx:{
                 auto index = envPop();
                 auto list = envPop();
-                if(list.first == vmVType::list){
+                if(type::getModifier(list.first) == type::list){
                     auto listnew = listpool[list.second];
                     if(index.second > listnew.size() - 1)
                         throw yoexception::YoError("ListError", "Index out of range of list", codes[i].line, codes[i].column);
@@ -793,18 +702,18 @@ int yvm::YVM::run(std::string arg) {
             case ygen::btc::selfadd:{
                 auto iden = envPop();
                 bool isFront = codes[i].arg1 == 1.0 ? true : false;
-                if(runtimeSpace.getValue(constpool[iden.second]).getType() != ygen::paraHelper::integer) 
+                if(runtimeSpace.getValue(constpool[iden.second]).getType() != type::type(type::vtype::integer, type::norm))
                     throw yoexception::YoError("TypeError", "This operator does not support this type of operation",codes[i].line, codes[i].column);
                 
                 if(isFront) {
                     auto temp = runtimeSpace.getValue(constpool[iden.second]).getIntValue() + 1;
                     runtimeSpace.assignValue(constpool[iden.second], 
                         temp);
-                    envPush(vmValue(vmVType::integer, runtimeSpace.getValue(constpool[iden.second]).getIntValue()));
+                    envPush(vmValue(type::type(type::vtype::integer, type::norm), runtimeSpace.getValue(constpool[iden.second]).getIntValue()));
                 }
                 else {
                     auto temp = runtimeSpace.getValue(constpool[iden.second]).getIntValue() + 1;
-                    envPush(vmValue(vmVType::integer, runtimeSpace.getValue(constpool[iden.second]).getIntValue()));
+                    envPush(vmValue(type::type(type::vtype::integer, type::norm), runtimeSpace.getValue(constpool[iden.second]).getIntValue()));
                     runtimeSpace.assignValue(constpool[iden.second], 
                         temp);
                 }
@@ -814,18 +723,18 @@ int yvm::YVM::run(std::string arg) {
             case ygen::btc::selfsub:{
                 auto iden = envPop();
                 bool isFront = codes[i].arg1 == 1.0 ? true : false;
-                if(runtimeSpace.getValue(constpool[iden.second]).getType() != ygen::paraHelper::integer) 
+                if(runtimeSpace.getValue(constpool[iden.second]).getType() != type::type(type::vtype::integer, type::norm))
                     throw yoexception::YoError("TypeError", "This operator does not support this type of operation",codes[i].line, codes[i].column);
                 
                 if(isFront) {
                     auto temp = runtimeSpace.getValue(constpool[iden.second]).getIntValue() - 1;
                     runtimeSpace.assignValue(constpool[iden.second], 
                         temp);
-                    envPush(vmValue(vmVType::integer, runtimeSpace.getValue(constpool[iden.second]).getIntValue()));
+                    envPush(vmValue(type::type(type::vtype::integer, type::norm), runtimeSpace.getValue(constpool[iden.second]).getIntValue()));
                 }
                 else {
                     auto temp = runtimeSpace.getValue(constpool[iden.second]).getIntValue() - 1;
-                    envPush(vmValue(vmVType::integer, runtimeSpace.getValue(constpool[iden.second]).getIntValue()));
+                    envPush(vmValue(type::type(type::vtype::integer, type::norm), runtimeSpace.getValue(constpool[iden.second]).getIntValue()));
                     runtimeSpace.assignValue(constpool[iden.second], 
                         temp);
                 }
@@ -835,391 +744,91 @@ int yvm::YVM::run(std::string arg) {
             case ygen::btc::add:{
                 auto right = envPop();
                 auto left = envPop();
-                switch (left.first) {
-                    case vmVType::integer: {
-                        switch (right.first) {
-                            case vmVType::integer: envPush(vmValue(vmVType::integer, left.second + right.second)); break;
-                            case vmVType::decimal: envPush(vmValue(vmVType::decimal, left.second + right.second)); break;
-                            default: throw yoexception::YoError("TypeError", "This operator does not support this type of operation",codes[i].line, codes[i].column); break;
-                        }
-                        break;
-                    }
-                    case vmVType::decimal: {
-                        switch (right.first) {
-                            case vmVType::integer: envPush(vmValue(vmVType::integer, left.second + right.second)); break;
-                            case vmVType::decimal: envPush(vmValue(vmVType::decimal, left.second + right.second)); break;
-                            default: throw yoexception::YoError("TypeError", "This operator does not support this type of operation",codes[i].line, codes[i].column); break;
-                        }
-                        break;
-                    }
-                    case vmVType::string: {
-                        switch (right.first) {
-                            case vmVType::string: envPush(vmValue(vmVType::string, addString(constpool[left.second] + constpool[right.second]))); break;
-                            default: throw yoexception::YoError("TypeError", "This operator does not support this type of operation",codes[i].line, codes[i].column); break;
-                        }
-                        break;
-                    }
-                    case vmVType::character: {
-                        switch (right.first) {
-                            case vmVType::string: envPush(vmValue(vmVType::string, addString(constpool[left.second] + constpool[right.second]))); break;
-                            default: throw yoexception::YoError("TypeError", "This operator does not support this type of operation",codes[i].line, codes[i].column); break;
-                        }
-                        break;
-                    }
-                    default: break;
+                if(left.first == type::type(type::vtype::integer, type::norm)) {
+
+                }
+                else if(left.first == type::type(type::vtype::decimal, type::norm)) {
+
+                }
+                else if(left.first == type::type(type::vtype::string, type::norm)) {
+
                 }
                 break;
             }
             case ygen::btc::sub:{
                 auto right = envPop();
                 auto left = envPop();
-                switch (left.first) {
-                    case vmVType::integer: {
-                        switch (right.first) {
-                            case vmVType::integer: envPush(vmValue(vmVType::integer, left.second - right.second)); break;
-                            case vmVType::decimal: envPush(vmValue(vmVType::decimal, left.second - right.second)); break;
-                            default: throw yoexception::YoError("TypeError", "This operator does not support this type of operation",codes[i].line, codes[i].column); break;
-                        }
-                        break;
-                    }
-                    case vmVType::decimal: {
-                        switch (right.first) {
-                            case vmVType::integer: envPush(vmValue(vmVType::integer, left.second - right.second)); break;
-                            case vmVType::decimal: envPush(vmValue(vmVType::decimal, left.second - right.second)); break;
-                            default: throw yoexception::YoError("TypeError", "This operator does not support this type of operation",codes[i].line, codes[i].column); break;
-                        }
-                        break;
-                    }
-                    default: break;
-                }
+
                 break;
             }
             case ygen::btc::div:{
                 auto right = envPop();
                 auto left = envPop();
-                switch (left.first) {
-                    case vmVType::integer: {
-                        switch (right.first) {
-                            case vmVType::integer: envPush(vmValue(vmVType::integer, left.second - right.second)); break;
-                            case vmVType::decimal: envPush(vmValue(vmVType::decimal, left.second - right.second)); break;
-                            default: throw yoexception::YoError("TypeError", "This operator does not support this type of operation",codes[i].line, codes[i].column); break;
-                        }
-                        break;
-                    }
-                    case vmVType::decimal: {
-                        switch (right.first) {
-                            case vmVType::integer: envPush(vmValue(vmVType::integer, left.second - right.second)); break;
-                            case vmVType::decimal: envPush(vmValue(vmVType::decimal, left.second - right.second)); break;
-                            default: throw yoexception::YoError("TypeError", "This operator does not support this type of operation",codes[i].line, codes[i].column); break;
-                        }
-                        break;
-                    }
-                    default: break;
-                }
+
                 break;
             }
             case ygen::btc::mul:{
                 auto right = envPop();
                 auto left = envPop();
-                switch (left.first) {
-                    case vmVType::integer: {
-                        switch (right.first) {
-                            case vmVType::integer: envPush(vmValue(vmVType::integer, left.second * right.second)); break;
-                            case vmVType::decimal: envPush(vmValue(vmVType::decimal, left.second * right.second)); break;
-                            case vmVType::string: {
-                                auto str = constpool[right.second];
-                                for(int i = 1; i < left.second; i ++) {
-                                    str += str;
-                                }
-                                envPush(vmValue(vmVType::string, addString(str)));
-                                break;
-                            }
-                            case vmVType::character: {
-                                auto str = constpool[right.second];
-                                for(int i = 1; i < left.second; i ++) {
-                                    str += str;
-                                }
-                                envPush(vmValue(vmVType::string, addString(str)));
-                                break;
-                            }
-                            default: throw yoexception::YoError("TypeError", "This operator does not support this type of operation",codes[i].line, codes[i].column); break;
-                        }
-                        break;
-                    }
-                    case vmVType::decimal: {
-                        switch (right.first) {
-                            case vmVType::integer: envPush(vmValue(vmVType::integer, left.second * right.second)); break;
-                            case vmVType::decimal: envPush(vmValue(vmVType::decimal, left.second * right.second)); break;
-                            default: throw yoexception::YoError("TypeError", "This operator does not support this type of operation",codes[i].line, codes[i].column); break;
-                        }
-                        break;
-                    }
-                    case vmVType::string: {
-                        switch (right.first) {
-                            case vmVType::integer: {
-                                auto str = constpool[left.second];
-                                for(int i = 1; i < right.second; i ++) {
-                                    str += str;
-                                }
-                                envPush(vmValue(vmVType::string, addString(str)));
-                                break;
-                            }
-                            default: throw yoexception::YoError("TypeError", "This operator does not support this type of operation",codes[i].line, codes[i].column); break;
-                        }
-                        break;
-                    }
-                    case vmVType::character: {
-                        switch (right.first) {
-                            case vmVType::integer: {
-                                auto str = constpool[left.second];
-                                for(int i = 1; i < right.second; i ++) {
-                                    str += str;
-                                }
-                                envPush(vmValue(vmVType::string, addString(str)));
-                                break;
-                            }
-                            default: throw yoexception::YoError("TypeError", "This operator does not support this type of operation",codes[i].line, codes[i].column); break;
-                        }
-                        break;
-                    }
-                    default: break;
-                }
+
                 break;
             }
             case ygen::btc::tmo:{
                 auto right = envPop();
                 auto left = envPop();
-                if(left.first == vmVType::integer && right.first == vmVType::integer)
-                    envPush(vmValue(vmVType::integer, (int)left.second % (int)right.second));
-                else 
-                    throw yoexception::YoError("TypeError", "This operator does not support this type of operation",
-                            codes[i].line, codes[i].column);
+
                 break;
             }
             case ygen::btc::equ:{
                 auto right = envPop();
                 auto left = envPop();
-                switch (left.first) {
-                    case vmVType::integer: {
-                        switch (right.first) {
-                            case vmVType::integer: envPush(vmValue(vmVType::boolean, left.second == right.second)); break;
-                            case vmVType::decimal: envPush(vmValue(vmVType::boolean, left.second == right.second)); break;
-                            case vmVType::null: envPush(vmValue(vmVType::boolean, 0.0)); break;
-                            default: throw yoexception::YoError("TypeError", "This operator does not support this type of operation",codes[i].line, codes[i].column); break;
-                        }
-                        break;
-                    }
-                    case vmVType::decimal: {
-                        switch (right.first) {
-                            case vmVType::integer: envPush(vmValue(vmVType::boolean, left.second == right.second)); break;
-                            case vmVType::decimal: envPush(vmValue(vmVType::boolean, left.second == right.second)); break;
-                            case vmVType::null: envPush(vmValue(vmVType::boolean, 0.0)); break;
-                            default: throw yoexception::YoError("TypeError", "This operator does not support this type of operation",codes[i].line, codes[i].column); break;
-                        }
-                        break;
-                    }
-                    case vmVType::string: {
-                        switch (right.first) {
-                            case vmVType::string: envPush(vmValue(vmVType::boolean, constpool[left.second] == constpool[right.second])); break;
-                            case vmVType::null: envPush(vmValue(vmVType::boolean, 0.0)); break;
-                            default: throw yoexception::YoError("TypeError", "This operator does not support this type of operation",codes[i].line, codes[i].column); break;
-                        }
-                        break;
-                    }
-                    case vmVType::character: {
-                        switch (right.first) {
-                            case vmVType::string: envPush(vmValue(vmVType::boolean, constpool[left.second] == constpool[right.second])); break;
-                            case vmVType::null: envPush(vmValue(vmVType::boolean, 0.0)); break;
-                            default: throw yoexception::YoError("TypeError", "This operator does not support this type of operation",codes[i].line, codes[i].column); break;
-                        }
-                        break;
-                    }
-                    case vmVType::boolean: {
-                        switch (right.first) {
-                            case vmVType::boolean: envPush(vmValue(vmVType::boolean, constpool[left.second] == constpool[right.second])); break;
-                            case vmVType::null: envPush(vmValue(vmVType::boolean, 0.0)); break;
-                            default: throw yoexception::YoError("TypeError", "This operator does not support this type of operation",codes[i].line, codes[i].column); break;
-                        }
-                        break;
-                    }
-                    case vmVType::null: {
-                        switch (right.first) {
-                            case vmVType::null: envPush(vmValue(vmVType::boolean, 1.0)); break;
-                            default: envPush(vmValue(vmVType::boolean, 0.0)); break;
-                        }
-                        break;
-                    }
-                    default: break;
-                }
+
                 break;
             }
             case ygen::btc::noequ:{
                 auto right = envPop();
                 auto left = envPop();
-                switch (left.first) {
-                    case vmVType::integer: {
-                        switch (right.first) {
-                            case vmVType::null: envPush(vmValue(vmVType::boolean, 1.0)); break;
-                            case vmVType::integer: envPush(vmValue(vmVType::boolean, left.second != right.second)); break;
-                            case vmVType::decimal: envPush(vmValue(vmVType::boolean, left.second != right.second)); break;
-                            default: throw yoexception::YoError("TypeError", "This operator does not support this type of operation",codes[i].line, codes[i].column); break;
-                        }
-                        break;
-                    }
-                    case vmVType::decimal: {
-                        switch (right.first) {
-                            case vmVType::null: envPush(vmValue(vmVType::boolean, 1.0)); break;
-                            case vmVType::integer: envPush(vmValue(vmVType::boolean, left.second != right.second)); break;
-                            case vmVType::decimal: envPush(vmValue(vmVType::boolean, left.second != right.second)); break;
-                            default: throw yoexception::YoError("TypeError", "This operator does not support this type of operation",codes[i].line, codes[i].column); break;
-                        }
-                        break;
-                    }
-                    case vmVType::string: {
-                        switch (right.first) {
-                            case vmVType::null: envPush(vmValue(vmVType::boolean, 1.0)); break;
-                            case vmVType::string: envPush(vmValue(vmVType::boolean, constpool[left.second] != constpool[right.second])); break;
-                            default: throw yoexception::YoError("TypeError", "This operator does not support this type of operation",codes[i].line, codes[i].column); break;
-                        }
-                        break;
-                    }
-                    case vmVType::character: {
-                        switch (right.first) {
-                            case vmVType::null: envPush(vmValue(vmVType::boolean, 1.0)); break;
-                            case vmVType::string: envPush(vmValue(vmVType::boolean, constpool[left.second] != constpool[right.second])); break;
-                            default: throw yoexception::YoError("TypeError", "This operator does not support this type of operation",codes[i].line, codes[i].column); break;
-                        }
-                        break;
-                    }
-                    case vmVType::boolean: {
-                        switch (right.first) {
-                            case vmVType::boolean: envPush(vmValue(vmVType::boolean, constpool[left.second] != constpool[right.second])); break;
-                            case vmVType::null: envPush(vmValue(vmVType::boolean, 0.0)); break;
-                            default: throw yoexception::YoError("TypeError", "This operator does not support this type of operation",codes[i].line, codes[i].column); break;
-                        }
-                        break;
-                    }
-                    case vmVType::null: {
-                        switch (right.first) {
-                            case vmVType::null: envPush(vmValue(vmVType::boolean, 0.0)); break;
-                            default: envPush(vmValue(vmVType::boolean, 1.0)); break;
-                        }
-                        break;
-                    }
-                    default: break;
-                }
+
                 break;
             }
             case ygen::btc::gt:{
                 auto right = envPop();
                 auto left = envPop();
-                switch (left.first) {
-                    case vmVType::integer: {
-                        switch (right.first) {
-                            case vmVType::integer: envPush(vmValue(vmVType::boolean, left.second > right.second)); break;
-                            case vmVType::decimal: envPush(vmValue(vmVType::boolean, left.second > right.second)); break;
-                            default: throw yoexception::YoError("TypeError", "This operator does not support this type of operation",codes[i].line, codes[i].column); break;
-                        }
-                        break;
-                    }
-                    case vmVType::decimal: {
-                        switch (right.first) {
-                            case vmVType::integer: envPush(vmValue(vmVType::boolean, left.second > right.second)); break;
-                            case vmVType::decimal: envPush(vmValue(vmVType::boolean, left.second > right.second)); break;
-                            default: throw yoexception::YoError("TypeError", "This operator does not support this type of operation",codes[i].line, codes[i].column); break;
-                        }
-                        break;
-                    }
-                    default: break;
-                }
+
                 break;
             }
             case ygen::btc::gtet:{
                 auto right = envPop();
                 auto left = envPop();
-                switch (left.first) {
-                    case vmVType::integer: {
-                        switch (right.first) {
-                            case vmVType::integer: envPush(vmValue(vmVType::boolean, left.second >= right.second)); break;
-                            case vmVType::decimal: envPush(vmValue(vmVType::boolean, left.second >= right.second)); break;
-                            default: throw yoexception::YoError("TypeError", "This operator does not support this type of operation",codes[i].line, codes[i].column); break;
-                        }
-                        break;
-                    }
-                    case vmVType::decimal: {
-                        switch (right.first) {
-                            case vmVType::integer: envPush(vmValue(vmVType::boolean, left.second >= right.second)); break;
-                            case vmVType::decimal: envPush(vmValue(vmVType::boolean, left.second >= right.second)); break;
-                            default: throw yoexception::YoError("TypeError", "This operator does not support this type of operation",codes[i].line, codes[i].column); break;
-                        }
-                        break;
-                    }
-                    default: break;
-                }
+
                 break;
             }
             case ygen::btc::lt:{
                 auto right = envPop();
                 auto left = envPop();
-                switch (left.first) {
-                    case vmVType::integer: {
-                        switch (right.first) {
-                            case vmVType::integer: envPush(vmValue(vmVType::boolean, left.second < right.second)); break;
-                            case vmVType::decimal: envPush(vmValue(vmVType::boolean, left.second < right.second)); break;
-                            default: throw yoexception::YoError("TypeError", "This operator does not support this type of operation",codes[i].line, codes[i].column); break;
-                        }
-                        break;
-                    }
-                    case vmVType::decimal: {
-                        switch (right.first) {
-                            case vmVType::integer: envPush(vmValue(vmVType::boolean, left.second < right.second)); break;
-                            case vmVType::decimal: envPush(vmValue(vmVType::boolean, left.second < right.second)); break;
-                            default: throw yoexception::YoError("TypeError", "This operator does not support this type of operation",codes[i].line, codes[i].column); break;
-                        }
-                        break;
-                    }
-                    default: break;
-                }
+
                 break;
             }
             case ygen::btc::ltet:{
                 auto right = envPop();
                 auto left = envPop();
-                switch (left.first) {
-                    case vmVType::integer: {
-                        switch (right.first) {
-                            case vmVType::integer: envPush(vmValue(vmVType::boolean, left.second <= right.second)); break;
-                            case vmVType::decimal: envPush(vmValue(vmVType::boolean, left.second <= right.second)); break;
-                            default: throw yoexception::YoError("TypeError", "This operator does not support this type of operation",codes[i].line, codes[i].column); break;
-                        }
-                        break;
-                    }
-                    case vmVType::decimal: {
-                        switch (right.first) {
-                            case vmVType::integer: envPush(vmValue(vmVType::boolean, left.second <= right.second)); break;
-                            case vmVType::decimal: envPush(vmValue(vmVType::boolean, left.second <= right.second)); break;
-                            default: throw yoexception::YoError("TypeError", "This operator does not support this type of operation",codes[i].line, codes[i].column); break;
-                        }
-                        break;
-                    }
-                    default: break;
-                }
+
                 break;
             }
             case ygen::btc::no:{
-                envPush(vmValue(vmVType::boolean, envPop().second == true?0:1));
+
                 break;
             }
             case ygen::btc::logicand:{
                 auto right = envPop();
                 auto left = envPop();
-                envPush(vmValue(vmVType::boolean, (bool)left.second==true && (bool)right.second==true));
+
                 break;
             }
             case ygen::btc::logicor:{
                 auto right = envPop();
                 auto left = envPop();
-                envPush(vmValue(vmVType::boolean, (bool)left.second==true || (bool)right.second==true));
+
                 break;
             }
             case ygen::btc::jmp:{
@@ -1259,10 +868,10 @@ int yvm::YVM::run(std::string arg) {
                                 break;
                             }
                             case ygen::paraHelper::jmpt::outIFscope: {
-                                if(envPeek().first == vmVType::null) envPop(); // 排除潜在的null值
+                                if(envPeek().first == type::type(type::vtype::null, type::norm)) envPop(); // 排除潜在的null值
                                 auto cond = envPop();
                                 if((bool)cond.second == true) {
-                                    envPush(vmValue(vmVType::boolean, 1.0));
+                                    envPush(vmValue(type::type(type::vtype::boolean, type::norm), 1.0));
                                     elseState = false;
                                 } // 条件为真进入
                                 else {
@@ -1274,19 +883,19 @@ int yvm::YVM::run(std::string arg) {
 
                                         if(state == 0) break;
                                     }
-                                    envPush(vmValue(vmVType::boolean, 0));
+                                    envPush(vmValue(type::type(type::vtype::boolean, type::norm), 0));
                                 }
                                 break;
                             }
                             case ygen::paraHelper::jmpt::outElifscope: {
                                 auto cond = envPop();
-                                if(envPeek().first == vmVType::null) envPop(); // 排除潜在的null值
+                                if(envPeek().first == type::type(type::vtype::null, type::norm)) envPop(); // 排除潜在的null值
                                 if(runtimeStack.empty()) 
                                     throw yoexception::YoError("Syntax", "You cannot use elif statements directly without an if statement", codes[i].line, codes[i].column);
-                                else if(envPeek().first != vmVType::boolean)
+                                else if(envPeek().first != type::type(type::vtype::boolean, type::norm))
                                     throw yoexception::YoError("Syntax", "You cannot use elif statements directly without an if statement", codes[i].line, codes[i].column);
                                 if((bool)cond.second == true && (bool)envPop().second == false) {
-                                    envPush(vmValue(vmVType::boolean, 1.0));
+                                    envPush(vmValue(type::type(type::vtype::boolean, type::norm), 1.0));
                                     elseState = false;
                                 } // 条件为真进入
                                 else {
@@ -1298,17 +907,17 @@ int yvm::YVM::run(std::string arg) {
 
                                         if(state == 0) break;
                                     }
-                                    envPush(vmValue(vmVType::boolean, 0));
+                                    envPush(vmValue(type::type(type::vtype::boolean, type::norm), 0));
                                 }
                                 break;
                             }
                             case ygen::paraHelper::jmpt::outElsescope: {
-                                if(envPeek().first == vmVType::null) envPop(); // 排除潜在的null值
+                                if(envPeek().first == type::type(type::vtype::null, type::norm)) envPop(); // 排除潜在的null值
                                 if(runtimeStack.empty()) 
                                     throw yoexception::YoError("Syntax", "You cannot use else statements directly without an if statement", codes[i].line, codes[i].column);
-                                else if(envPeek().first != vmVType::boolean)
+                                else if(envPeek().first != type::type(type::vtype::boolean, type::norm))
                                     throw yoexception::YoError("Syntax", "You cannot use else statements directly without an if statement", codes[i].line, codes[i].column);
-                                if((bool)envPop().second == false && elseState == true) envPush(vmValue(vmVType::boolean, 1.0)); // 条件为真进入
+                                if((bool)envPop().second == false && elseState == true) envPush(vmValue(type::type(type::vtype::boolean, type::norm), 1.0)); // 条件为真进入
                                 else {
                                     int state = 0;
                                     while(true) {
@@ -1318,7 +927,7 @@ int yvm::YVM::run(std::string arg) {
 
                                         if(state == 0) break;
                                     }
-                                    envPush(vmValue(vmVType::boolean, 0));
+                                    envPush(vmValue(type::type(type::vtype::boolean, type::norm), 0));
                                 }
                                 break;
                             }
@@ -1353,69 +962,13 @@ int yvm::YVM::run(std::string arg) {
                     auto para = envPop();
                     auto name = constpool[codes[i].arg1];
                     if(name == "typeof") {
-                        switch (para.first)
-                        {
-                            case vmVType::integer: envPush(vmValue(vmVType::string, addString("<integer>"))); break;
-                            case vmVType::decimal: envPush(vmValue(vmVType::string, addString("<decimal>"))); break;
-                            case vmVType::boolean: envPush(vmValue(vmVType::string, addString("<boolean>"))); break;
-                            case vmVType::string: envPush(vmValue(vmVType::string, addString("<string>"))); break;
-                            case vmVType::character: envPush(vmValue(vmVType::string, addString("<char>"))); break;
-                            case vmVType::null: envPush(vmValue(vmVType::string, addString("<null>"))); break;
-                            default: break;
-                        }
-                    }
-                    else if(name == "nameof") {
-                        if(para.first != vmVType::string)
-                            throw yoexception::YoError("TypeError", "Only values of type '<string>' are accepted within this operator", codes[i].line, codes[i].column);
-                        auto iname = constpool[para.second];
-                        auto value = runtimeSpace.getValue(iname);
-                        if(value.isList()){
-                            auto list = value.getList();
-                            std::vector<vmValue> retlist;
-                            for(int i = 0; i < list.size(); i ++) {
-                                switch ((vmVType)list[i].getType())
-                                {
-                                    case vmVType::integer: retlist.push_back(vmValue(vmVType::integer, list[i].getIntValue())); break;
-                                    case vmVType::decimal: retlist.push_back(vmValue(vmVType::decimal, list[i].getDeciValue())); break;
-                                    case vmVType::boolean: retlist.push_back(vmValue(vmVType::boolean, list[i].getBoolValue())); break;
-                                    case vmVType::string: retlist.push_back(vmValue(vmVType::string, addString(list[i].getStrValue()))); break;
-                                    case vmVType::character: retlist.push_back(vmValue(vmVType::character, addChar(list[i].getCharValue()))); break;
-                                    default: break;
-                                }
-                            }
-                            envPush(vmValue(vmVType::list, addList(retlist)));
-                        }
-                        else{
-                            switch ((vmVType)value.getType())
-                            {
-                                case vmVType::integer: envPush(vmValue(vmVType::integer, value.getIntValue())); break;
-                                case vmVType::decimal: envPush(vmValue(vmVType::decimal, value.getDeciValue())); break;
-                                case vmVType::boolean: envPush(vmValue(vmVType::boolean, value.getBoolValue())); break;
-                                case vmVType::string: envPush(vmValue(vmVType::string, addString(value.getStrValue()))); break;
-                                case vmVType::character: envPush(vmValue(vmVType::character, addChar(value.getCharValue()))); break;
-                                default: break;
-                            }
-                        }
+
                     }
                 }
                 break;
             }
             case ygen::btc::out:{
-                auto content = envPop();
-                if(content.first == vmVType::string || content.first == vmVType::character)
-                    std::cout<<constpool[content.second];
-                else if(content.first == vmVType::list){
-                    auto list = listpool[content.second];
-                    for(int j = 0; j < list.size(); j++){
-                        auto elt = list[j];
-                        if(elt.first == vmVType::string || elt.first == vmVType::character)
-                            std::cout<<constpool[elt.second];
-                        else
-                            std::cout<<elt.second;
-                    }
-                }
-                else
-                    std::cout<<content.second;
+
                 break;
             }
             case ygen::btc::define:{
@@ -1430,7 +983,7 @@ int yvm::YVM::run(std::string arg) {
                 auto name = envPop();
                 if(!runtimeSpace.find(constpool[name.second]))
                     throw yoexception::YoError("NameError", "There is no identifier named: '" + constpool[name.second] + "'", codes[i].line, codes[i].column);
-                if(value.first != (vmVType)runtimeSpace.getValue(constpool[name.second]).getType() &&
+                if(value.first != runtimeSpace.getValue(constpool[name.second]).getType() &&
                         !runtimeSpace.getValue(constpool[name.second]).isNull())
                     throw yoexception::YoError("TypeError", "The type before and after assignment is inconsistent!", codes[i].line, codes[i].column);
                 if(codes[i].arg1 == 1.0) {
@@ -1441,122 +994,25 @@ int yvm::YVM::run(std::string arg) {
                     auto list = runtimeSpace.getValue(constpool[name.second]).getList();
                     if(index.second > list.size() - 1)
                         throw yoexception::YoError("ListError", "Index out of range of list", codes[i].line, codes[i].column);
-                    switch (value.first)
-                    {
-                        case vmVType::integer: list[index.second] = Space::Scope::Value((int)value.second, true, codes[i].line, codes[i].column); break;
-                        case vmVType::decimal: list[index.second] = Space::Scope::Value((float)value.second, true, codes[i].line, codes[i].column); break;
-                        case vmVType::boolean: list[index.second] = Space::Scope::Value((bool)value.second, true, codes[i].line, codes[i].column); break;
-                        case vmVType::string: list[index.second] = Space::Scope::Value(constpool[value.second], true, codes[i].line, codes[i].column); break;
-                        case vmVType::character: list[index.second] = Space::Scope::Value(constpool[value.second][0], true, codes[i].line, codes[i].column); break;
-                        default: break;
-                    }
+                    // TODO: 针对对应索引的元素的赋值
                     runtimeSpace.assignValue(constpool[name.second], list);
                 }
                 else {
                     // 普通赋值
-                    switch (value.first)
-                    {
-                        case vmVType::integer:
-                            if(runtimeSpace.getValue(constpool[name.second]).isNull()) {
-                                runtimeSpace.rmValueNull(constpool[name.second]);
-                                runtimeSpace.reWriteType(constpool[name.second], (ygen::paraHelper::type)vmVType::integer);
-                            }
-                            runtimeSpace.assignValue(constpool[name.second], (int)value.second);
-                            break;
-                        case vmVType::decimal:
-                            if(runtimeSpace.getValue(constpool[name.second]).isNull()) {
-                                runtimeSpace.rmValueNull(constpool[name.second]);
-                                runtimeSpace.reWriteType(constpool[name.second], (ygen::paraHelper::type)vmVType::decimal);
-                            }
-                            runtimeSpace.assignValue(constpool[name.second], (float)value.second);
-                            break;
-                        case vmVType::boolean:
-                            if(runtimeSpace.getValue(constpool[name.second]).isNull()) {
-                                runtimeSpace.rmValueNull(constpool[name.second]);
-                                runtimeSpace.reWriteType(constpool[name.second], (ygen::paraHelper::type)vmVType::boolean);
-                            }
-                            runtimeSpace.assignValue(constpool[name.second], (bool)value.second);
-                            break;
-                        case vmVType::string:
-                            if(runtimeSpace.getValue(constpool[name.second]).isNull()) {
-                                runtimeSpace.rmValueNull(constpool[name.second]);
-                                runtimeSpace.reWriteType(constpool[name.second], (ygen::paraHelper::type)vmVType::string);
-                            }
-                            runtimeSpace.assignValue(constpool[name.second], constpool[value.second]);
-                            break;
-                        case vmVType::character:
-                            if(runtimeSpace.getValue(constpool[name.second]).isNull()) {
-                                runtimeSpace.rmValueNull(constpool[name.second]);
-                                runtimeSpace.reWriteType(constpool[name.second], (ygen::paraHelper::type)vmVType::character);
-                            }
-                            runtimeSpace.assignValue(constpool[name.second], constpool[value.second][0]);
-                            break;
-                        case vmVType::list: {
-                            if(runtimeSpace.getValue(constpool[name.second]).isNull())
-                                runtimeSpace.toggleList(constpool[name.second]);
-                            auto list = listpool[value.second];
-                            if(list.size() > runtimeSpace.getValue(constpool[name.second]).getList().size() && !runtimeSpace.getValue(constpool[name.second]).isNull())
-                                throw yoexception::YoError("AssignError", "An array cannot be resized at will", codes[i].line, codes[i].column);
-                            std::vector<Space::Scope::Value> retlist;
-                            for(auto elt: list) {
-                                switch (elt.first)
-                                {
-                                    case vmVType::integer:
-                                        if(runtimeSpace.getValue(constpool[name.second]).isNull()) {
-                                            runtimeSpace.rmValueNull(constpool[name.second]);
-                                            runtimeSpace.reWriteType(constpool[name.second], (ygen::paraHelper::type)vmVType::integer);
-                                        }
-                                        retlist.push_back(Space::Scope::Value((int)elt.second, false, codes[i].line, codes[i].column));
-                                        break;
-                                    case vmVType::decimal:
-                                        if(runtimeSpace.getValue(constpool[name.second]).isNull()) {
-                                            runtimeSpace.rmValueNull(constpool[name.second]);
-                                            runtimeSpace.reWriteType(constpool[name.second], (ygen::paraHelper::type)vmVType::decimal);
-                                        }
-                                        retlist.push_back(Space::Scope::Value((float)elt.second, false, codes[i].line, codes[i].column));
-                                        break;
-                                    case vmVType::boolean:
-                                        if(runtimeSpace.getValue(constpool[name.second]).isNull()) {
-                                            runtimeSpace.rmValueNull(constpool[name.second]);
-                                            runtimeSpace.reWriteType(constpool[name.second], (ygen::paraHelper::type)vmVType::boolean);
-                                        }
-                                        retlist.push_back(Space::Scope::Value((bool)elt.second, false, codes[i].line, codes[i].column));
-                                        break;
-                                    case vmVType::string:
-                                        if(runtimeSpace.getValue(constpool[name.second]).isNull()) {
-                                            runtimeSpace.rmValueNull(constpool[name.second]);
-                                            runtimeSpace.reWriteType(constpool[name.second], (ygen::paraHelper::type)vmVType::string);
-                                        }
-                                        retlist.push_back(Space::Scope::Value(constpool[elt.second], false, codes[i].line, codes[i].column));
-                                        break;
-                                    case vmVType::character:
-                                        if(runtimeSpace.getValue(constpool[name.second]).isNull()) {
-                                            runtimeSpace.rmValueNull(constpool[name.second]);
-                                            runtimeSpace.reWriteType(constpool[name.second], (ygen::paraHelper::type)vmVType::character);
-                                        }
-                                        retlist.push_back(Space::Scope::Value(constpool[elt.second][0], false, codes[i].line, codes[i].column));
-                                        break;
-                                    default: break;
-                                }
-                            }
-                            runtimeSpace.assignValue(constpool[name.second], retlist); break;
-                        }
-                    default: break;
-                    }
                 }
-                envPush(vmValue(vmVType::null, 0.0));
+                envPush(vmValue(type::type(type::vtype::null, type::norm), 0.0));
                 break;
             }     
             case ygen::btc::init:{
                 auto name = constpool[codes[i].arg1];
                 if(constpool[codes[i].arg2] == "function") {
                     int line = codes[i].line, column = codes[i].column;
-                    std::vector<std::pair<ygen::paraHelper::type, std::string>> paras;
+                    std::vector<std::pair<type::vtypeUnit, std::string>> paras;
                     while(constpool[envPeek().second] != "PARAENDFLAG") {
-                        std::pair<ygen::paraHelper::type, std::string> para;
+                        std::pair<type::vtypeUnit , std::string> para;
                         auto pname = envPop();
                         auto ptype = envPop();
-                        para.first = string2Type(constpool[ptype.second]);
+                        // para.first = string2Type(constpool[ptype.second]); // string2Type函数的重写
                         para.second = constpool[pname.second];
                         paras.push_back(para);
                     }
@@ -1583,7 +1039,7 @@ int yvm::YVM::run(std::string arg) {
                         //type-checker
                         if(codes[i].arg4 == 1.0){
                             auto reqType = constpool[codes[i].arg3];
-                            if(value.first == vmVType::null){
+                            if(value.first == type::type(type::vtype::null, type::norm)){
                                 // null 如果给了类型指定，存储在量中
                                 if(reqType == "integer")
                                     runtimeSpace.createValue(name, Space::Scope::Value(0, constpool[codes[i].arg2] == "var"?false:true, codes[i].line, codes[i].column));
@@ -1598,90 +1054,10 @@ int yvm::YVM::run(std::string arg) {
                                 break;
                             }
                             else{
-                                if(reqType == "integer" && value.first == vmVType::integer);
-                                else if(reqType == "decimal" && value.first == vmVType::decimal);
-                                else if(reqType == "string" && value.first == vmVType::string);
-                                else if(reqType == "char" && value.first == vmVType::character);
-                                else if(reqType == "boolean" && value.first == vmVType::boolean);
-                                else {
-                                    auto v = listpool[value.second];
-                                    if(reqType == "integer[]" && v[0].first == vmVType::integer);
-                                    else if(reqType == "decima[]l" && v[0].first == vmVType::decimal);
-                                    else if(reqType == "string[]" && v[0].first == vmVType::string);
-                                    else if(reqType == "char[]" && v[0].first == vmVType::character);
-                                    else if(reqType == "boolean[]" && v[0].first == vmVType::boolean);
-                                    else{
-                                        error_type:
-                                        // 不允许创建该变量，于是删除对应memberlist中的元素
-                                        auto &scope = runtimeSpace.current();
-                                        for(int i = 0; i < scope.memberlist.size(); i++) {
-                                            if(scope.memberlist[i] == name)
-                                                scope.memberlist.erase(scope.memberlist.begin() + i);
-                                        }
-                                        throw yoexception::YoError("TypeError", "The expected type does not match the type given by the actual expression", codes[i].line, codes[i].column);
-                                    }
-                                }
+                                // TODO：类型标注系统的重写
                             }
                         }
-                        //
-                        if(value.first == vmVType::integer)
-                            runtimeSpace.createValue(name, Space::Scope::Value((int)value.second, constpool[codes[i].arg2] == "var"?false:true, codes[i].line, codes[i].column));
-                        else if(value.first == vmVType::decimal)
-                            runtimeSpace.createValue(name, Space::Scope::Value((float)value.second, constpool[codes[i].arg2] == "var"?false:true, codes[i].line, codes[i].column));
-                        else if(value.first == vmVType::boolean)
-                            runtimeSpace.createValue(name, Space::Scope::Value((bool)value.second, constpool[codes[i].arg2] == "var"?false:true, codes[i].line, codes[i].column));
-                        else if(value.first == vmVType::string)
-                            runtimeSpace.createValue(name, Space::Scope::Value(constpool[value.second], constpool[codes[i].arg2] == "var"?false:true, codes[i].line, codes[i].column));
-                        else if(value.first == vmVType::character)
-                            runtimeSpace.createValue(name, Space::Scope::Value(constpool[value.second][0], constpool[codes[i].arg2] == "var"?false:true, codes[i].line, codes[i].column));
-                        else if(value.first == vmVType::null)
-                            runtimeSpace.createValue(name, Space::Scope::Value(constpool[codes[i].arg2] == "var"?false:true, codes[i].line, codes[i].column));
-                        else if(value.first == vmVType::ref){
-                            auto refName = constpool[value.second];
-                            runtimeSpace.createValue(name, Space::Scope::Value(runtimeSpace.getValueSelfRef(refName), constpool[codes[i].arg2] == "var"?false:true, codes[i].line, codes[i].column));
-                        }
-                        else if(value.first == vmVType::list) {
-                            auto list = listpool[value.second];
-                            std::vector<Space::Scope::Value> newlist;
-                            if(list.empty())
-                                throw yoexception::YoError("InitError", "Initializing an empty list is currently not allowed", codes[i].line, codes[i].column);
-                            if(list[0].first == vmVType::integer){
-                                for(int j = 0; j < list.size(); j++){
-                                    if(list[j].first != list[j - 1].first && j > 0) // 当前后类型不一致时，报错
-                                        throw yoexception::YoError("TypeError", "All elements in the list must be of the same type", codes[i].line, codes[i].column);
-                                    newlist.push_back(Space::Scope::Value((int)list[j].second, constpool[codes[i].arg2] == "var"?false:true, codes[i].line, codes[i].column));
-                                }
-                            }
-                            else if(list[0].first == vmVType::boolean){
-                                for(int j = 0; j < list.size(); j++){
-                                    if(list[j].first != list[j - 1].first && j > 0) // 当前后类型不一致时，报错
-                                        throw yoexception::YoError("TypeError", "All elements in the list must be of the same type", codes[i].line, codes[i].column);
-                                    newlist.push_back(Space::Scope::Value((bool)list[j].second, constpool[codes[i].arg2] == "var"?false:true, codes[i].line, codes[i].column));
-                                }
-                            }
-                            else if(list[0].first == vmVType::decimal){
-                                for(int j = 0; j < list.size(); j++){
-                                    if(list[j].first != list[j - 1].first && j > 0) // 当前后类型不一致时，报错
-                                        throw yoexception::YoError("TypeError", "All elements in the list must be of the same type", codes[i].line, codes[i].column);
-                                    newlist.push_back(Space::Scope::Value((float)list[j].second, constpool[codes[i].arg2] == "var"?false:true, codes[i].line, codes[i].column));
-                                }
-                            }
-                            else if(list[0].first == vmVType::string){
-                                for(int j = 0; j < list.size(); j++){
-                                    if(list[j].first != list[j - 1].first && j > 0) // 当前后类型不一致时，报错
-                                        throw yoexception::YoError("TypeError", "All elements in the list must be of the same type", codes[i].line, codes[i].column);
-                                    newlist.push_back(Space::Scope::Value(constpool[list[j].second], constpool[codes[i].arg2] == "var"?false:true, codes[i].line, codes[i].column));
-                                }
-                            }
-                            else if(list[0].first == vmVType::character){
-                                for(int j = 0; j < list.size(); j++){
-                                    if(list[j].first != list[j - 1].first && j > 0) // 当前后类型不一致时，报错
-                                        throw yoexception::YoError("TypeError", "All elements in the list must be of the same type", codes[i].line, codes[i].column);
-                                    newlist.push_back(Space::Scope::Value(constpool[list[j].second][0], constpool[codes[i].arg2] == "var"?false:true, codes[i].line, codes[i].column));
-                                }
-                            }
-                            runtimeSpace.createValue(name, Space::Scope::Value(newlist, constpool[codes[i].arg2] == "var"?false:true, codes[i].line, codes[i].column));
-                        }
+                        //TODO: 创建变量的逻辑重写
                     }
                 }
                 break;

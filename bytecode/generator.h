@@ -24,7 +24,8 @@ namespace ygen{
         extern modifier list;
         extern modifier dict;
 
-        float type(vtype t, modifier m); // 构造type对应的数字
+        // 新类型系统的类型构造器
+        float type(vtype t, modifier m);
         int getType(vtypeUnit unit);
         float getModifier(vtypeUnit unit);
 
