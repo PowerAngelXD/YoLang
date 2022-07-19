@@ -33,9 +33,9 @@
 #define IDENEND(line, column) minCtor(btc::idenend, line, column);
 #define CALL minCtor(btc::call, node->left->line, node->left->column);
 
-ygen::type::modifier norm = 0.0;
-ygen::type::modifier list = 0.1;
-ygen::type::modifier dict = 0.2;
+ygen::type::modifier ygen::type::norm = 0.1;
+ygen::type::modifier ygen::type::list = 0.2;
+ygen::type::modifier ygen::type::dict = 0.3;
 
 float ygen::type::type(vtype t, modifier m) {
     return t + m;

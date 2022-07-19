@@ -20,6 +20,7 @@ namespace ygen{
         enum vtype {integer = 1, boolean, decimal, string, null, object, iden, flag}; // iden类型只是为了标记为标识符所代表的值
         typedef float modifier;
         typedef float vtypeUnit;
+
         extern modifier norm;
         extern modifier list;
         extern modifier dict;

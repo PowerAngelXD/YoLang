@@ -113,7 +113,6 @@ std::string AST::PrimExprNode::toString() {
     else{
         if(number != nullptr) ret += number->toString() + ", ";
         else if(string != nullptr) ret += string->toString() + ", ";
-        else if(character != nullptr) ret += character->toString() + ", ";
         else if(iden != nullptr) ret += iden->toString() + ", ";
         else if(fcall != nullptr) ret += fcall->toString() + ", ";
         else if(siad != nullptr) ret += siad->toString() + ", ";

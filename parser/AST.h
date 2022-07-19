@@ -38,7 +38,6 @@ namespace AST{
         yolexer::yoToken* number = nullptr;
         yolexer::yoToken* string = nullptr;
         yolexer::yoToken* null = nullptr;
-        yolexer::yoToken* character = nullptr;
         yolexer::yoToken* boolconst = nullptr;
         IdentifierNode* iden = nullptr;
         StfOpNode* stf = nullptr;

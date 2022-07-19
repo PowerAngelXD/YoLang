@@ -13,7 +13,7 @@ yolexer::yoToken* parser::Parser::token(){
 // CHECKER
 
 bool parser::Parser::isPrim() {
-    return peek()->type == yolexer::yoTokType::Character || peek()->type == yolexer::yoTokType::String ||
+    return peek()->type == yolexer::yoTokType::String ||
             peek()->type == yolexer::yoTokType::Integer || peek()->type == yolexer::yoTokType::Decimal ||
             peek()->type == yolexer::yoTokType::Identifier || isStfOp() || 
             peek()->content == "null" || peek()->content == "true" || peek()->content == "false" ||
@@ -293,7 +293,6 @@ AST::PrimExprNode* parser::Parser::parsePrimExprNode(){
     if(isFnCallExpr()) node->fcall = parseFuncCallNode();
     else if(peek()->type == yolexer::yoTokType::Integer ||
             peek()->type == yolexer::yoTokType::Decimal) node->number = token();
-    else if(peek()->type == yolexer::yoTokType::Character) node->character = token();
     else if(peek()->type == yolexer::yoTokType::String) node->string = token();
     else if(peek()->content == "null") node->null = token();
     else if(peek()->content == "true" || peek()->content == "false") node->boolconst = token();

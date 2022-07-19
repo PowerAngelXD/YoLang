@@ -213,32 +213,7 @@ void ysh::insEVAL(std::vector<std::string> paras) {
         yovm.reload(bcg.getCodes(), bcg.getConstPool());
         yovm.run("repl");
 
-        // 返回值输出
-        std::cout<<"(return) ";
-        if(yovm.envPeek().first == yovm.string || yovm.envPeek().first == yovm.character)
-            std::cout<<yovm.getConstPool()[yovm.envPop().second];
-        else if(yovm.envPeek().first == yovm.null)
-            std::cout<<"null";
-        else if(yovm.envPeek().first == yovm.list) {
-            auto list = yovm.getListPool()[yovm.envPop().second];
-            std::cout<<"[";
-            for(int i = 0; i < list.size(); i ++){
-                auto elt = list[i];
-                if(elt.first == yovm.string || elt.first == yovm.character) {
-                    std::cout<<"\"";
-                    std::cout<<yovm.getConstPool()[elt.second];
-                    std::cout<<"\"";
-                }
-                else if(elt.first == yovm.null)
-                    std::cout<<"null";
-                else
-                    std::cout<<elt.second;
-                if(i != list.size() - 1) std::cout<<", ";
-            }
-            std::cout<<"]";
-        }
-        else
-            std::cout<<yovm.envPop().second;
+        // TODO：返回值输出
     }
     else {
         auto stmts = p.parse();
