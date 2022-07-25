@@ -2,10 +2,19 @@
 #include "../../../bytecode/generator.h"
 
 namespace ytype {
-    /*
-     * YOVM中得类型的基类，其他类型将依此为基础
-     */
+    enum objectKind {typable, function};
+
     class YObject {
-        std::vector<std::string> members; // Object的所有成员的名称列表
+        objectKind kind; // Object的类型
+
+        std::vector<std::string> members; // only "typable"
+        std::vector<std::pair<ygen::type::vtypeUnit, std::string>> args; // 参数类型:参数名 only "function"
+        std::vector<ygen::byteCode> codes; // 储存的代码片段（包含scopestart scopeend） only "function"
+
+    public:
+        bool isTypable();
+        bool isFunction();
+
+        void loadInVM(); // 将代码片段加载进VM中
     };
 }

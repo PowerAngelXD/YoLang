@@ -7,10 +7,10 @@ namespace ytype {
 
     public:
         std::string toString();
-        float toDecimal();
+        int toInteger();
         bool toBoolean();
 
-        int get();
-        void set(int v);
+        float get();
+        void set(float v);
     };
 }

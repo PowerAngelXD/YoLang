@@ -2,15 +2,15 @@
 #include "YObject.h"
 
 namespace ytype {
-    class YInteger {
-        int value = 0;
+    class YBoolean {
+        bool value = false;
 
     public:
         std::string toString();
+        int toInteger();
         float toDecimal();
-        bool toBoolean();
 
-        int get();
-        void set(int v);
+        bool get();
+        void set(bool v);
     };
 }
