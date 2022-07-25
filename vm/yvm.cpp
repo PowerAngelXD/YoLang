@@ -745,13 +745,28 @@ int yvm::YVM::run(std::string arg) {
                 auto right = envPop();
                 auto left = envPop();
                 if(left.first == type::type(type::vtype::integer, type::norm)) {
+                    if(right.first == type::type(type::vtype::integer, type::norm)) {
 
+                    }
+                    else if(right.first == type::type(type::vtype::decimal, type::norm)) {
+
+                    }
+                    else throw yoexception::YoError("TypeError", "This operator does not support this type of operation",codes[i].line, codes[i].column);
                 }
                 else if(left.first == type::type(type::vtype::decimal, type::norm)) {
+                    if(right.first == type::type(type::vtype::integer, type::norm)) {
 
+                    }
+                    else if(right.first == type::type(type::vtype::decimal, type::norm)) {
+
+                    }
+                    else throw yoexception::YoError("TypeError", "This operator does not support this type of operation",codes[i].line, codes[i].column);
                 }
                 else if(left.first == type::type(type::vtype::string, type::norm)) {
+                    if(right.first == type::type(type::vtype::string, type::norm)) {
 
+                    }
+                    else throw yoexception::YoError("TypeError", "This operator does not support this type of operation",codes[i].line, codes[i].column);
                 }
                 break;
             }
