@@ -6,6 +6,8 @@ namespace ytype {
         float value = 0;
 
     public:
+        YDecimal(float v);
+
         std::string toString();
         int toInteger();
         bool toBoolean();

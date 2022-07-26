@@ -12,6 +12,10 @@ namespace ytype {
         std::vector<ygen::byteCode> codes; // 储存的代码片段（包含scopestart scopeend） only "function"
 
     public:
+        YObject(objectKind k);
+        // 构造一个函数Object的方法
+        YObject(std::vector<ygen::byteCode> cs, std::vector<std::pair<ygen::type::vtypeUnit, std::string>> as);
+
         bool isTypable();
         bool isFunction();
 
