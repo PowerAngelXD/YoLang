@@ -28,25 +28,13 @@ namespace ysto {
 
         ygen::type::vtypeUnit getType(); // 获取Valu对应的完整Type
 
-        ytype::YObject getObjectValue();
-        ytype::YInteger getIntegerValue();
-        ytype::YDecimal getDecimalValue();
-        ytype::YBoolean getBooleanValue();
-        ytype::YString getStringValue();
+        ytype::YObject& getObjectValue();
+        ytype::YInteger& getIntegerValue();
+        ytype::YDecimal& getDecimalValue();
+        ytype::YBoolean& getBooleanValue();
+        ytype::YString& getStringValue();
 
-        std::vector<Value> getList();
-
-        void setObjectValue(const ytype::YObject& v);
-        void setIntegerValue(const ytype::YInteger& v);
-        void setDecimalValue(const ytype::YDecimal& v);
-        void setBooleanValue(const ytype::YBoolean& v);
-        void setStringValue(const ytype::YString& v);
-
-        void setObjectValueInList(const ytype::YObject& v, int pos);
-        void setIntegerValueInList(const ytype::YInteger& v, int pos);
-        void setDecimalValueInList(const ytype::YDecimal& v, int pos);
-        void setBooleanValueInList(const ytype::YBoolean& v, int pos);
-        void setStringValueInList(const ytype::YString& v, int pos);
+        std::vector<Value>& getList();
 
         void coverList(std::vector<Value> ls);
     };
