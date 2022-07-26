@@ -12,12 +12,7 @@ namespace ysto {
         ytype::YDecimal decimalValue;
         ytype::YBoolean booleanValue;
         ytype::YString stringValue;
-
-        std::vector<ytype::YObject> objectList;
-        std::vector<ytype::YInteger> integerList;
-        std::vector<ytype::YDecimal> decimalList;
-        std::vector<ytype::YBoolean> booleanList;
-        std::vector<ytype::YString> stringList;
+        std::vector<Value> list;
 
         // 属性
         bool isConstant = false; // 是否为常量
@@ -29,11 +24,7 @@ namespace ysto {
         Value(ytype::YString v, bool isc);
         Value(ytype::YDecimal v, bool isc);
         Value(ytype::YObject v, bool isc);
-        Value(std::vector<ytype::YInteger> v, bool isc);
-        Value(std::vector<ytype::YBoolean> v, bool isc);
-        Value(std::vector<ytype::YString> v, bool isc);
-        Value(std::vector<ytype::YDecimal> v, bool isc);
-        Value(std::vector<ytype::YObject> v, bool isc);
+        Value(std::vector<Value> v, bool isc);
 
         ygen::type::vtypeUnit getType(); // 获取Valu对应的完整Type
 
@@ -43,11 +34,7 @@ namespace ysto {
         ytype::YBoolean getBooleanValue();
         ytype::YString getStringValue();
 
-        std::vector<ytype::YObject> getObjectList();
-        std::vector<ytype::YInteger> getIntegerList();
-        std::vector<ytype::YDecimal> getDecimalList();
-        std::vector<ytype::YBoolean> getBooleanList();
-        std::vector<ytype::YString> getStringList();
+        std::vector<Value> getList();
 
         void setObjectValue(const ytype::YObject& v);
         void setIntegerValue(const ytype::YInteger& v);
@@ -61,10 +48,6 @@ namespace ysto {
         void setBooleanValueInList(const ytype::YBoolean& v, int pos);
         void setStringValueInList(const ytype::YString& v, int pos);
 
-        void coverObjectList(std::vector<ytype::YObject> ls);
-        void coverIntegerList(std::vector<ytype::YInteger> ls);
-        void coverDecimalList(std::vector<ytype::YDecimal> ls);
-        void coverBooleanList(std::vector<ytype::YBoolean> ls);
-        void coverStringList(std::vector<ytype::YString> ls);
+        void coverList(std::vector<Value> ls);
     };
 }
