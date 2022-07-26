@@ -36,6 +36,7 @@ namespace ysto {
         Value(std::vector<ytype::YObject> v, bool isc);
 
         ygen::type::vtypeUnit getType(); // 获取Valu对应的完整Type
+
         ytype::YObject getObjectValue();
         ytype::YInteger getIntegerValue();
         ytype::YDecimal getDecimalValue();
@@ -47,5 +48,23 @@ namespace ysto {
         std::vector<ytype::YDecimal> getDecimalList();
         std::vector<ytype::YBoolean> getBooleanList();
         std::vector<ytype::YString> getStringList();
+
+        void setObjectValue(ytype::YObject v);
+        void setIntegerValue(ytype::YInteger v);
+        void setDecimalValue(ytype::YDecimal v);
+        void setBooleanValue(ytype::YBoolean v);
+        void setStringValue(ytype::YString v);
+
+        void setObjectValueInList(ytype::YObject v, int pos);
+        void setIntegerValueInList(ytype::YInteger v, int pos);
+        void setDecimalValueInList(ytype::YDecimal v, int pos);
+        void setBooleanValueInList(ytype::YBoolean v, int pos);
+        void setStringValueInList(ytype::YString v, int pos);
+
+        void coverObjectList(std::vector<ytype::YObject> ls);
+        void coverIntegerList(std::vector<ytype::YInteger> ls);
+        void coverDecimalList(std::vector<ytype::YDecimal> ls);
+        void coverBooleanList(std::vector<ytype::YBoolean> ls);
+        void coverStringList(std::vector<ytype::YString> ls);
     };
 }
