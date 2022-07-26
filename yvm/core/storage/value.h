@@ -49,17 +49,17 @@ namespace ysto {
         std::vector<ytype::YBoolean> getBooleanList();
         std::vector<ytype::YString> getStringList();
 
-        void setObjectValue(ytype::YObject v);
-        void setIntegerValue(ytype::YInteger v);
-        void setDecimalValue(ytype::YDecimal v);
-        void setBooleanValue(ytype::YBoolean v);
-        void setStringValue(ytype::YString v);
+        void setObjectValue(const ytype::YObject& v);
+        void setIntegerValue(const ytype::YInteger& v);
+        void setDecimalValue(const ytype::YDecimal& v);
+        void setBooleanValue(const ytype::YBoolean& v);
+        void setStringValue(const ytype::YString& v);
 
-        void setObjectValueInList(ytype::YObject v, int pos);
-        void setIntegerValueInList(ytype::YInteger v, int pos);
-        void setDecimalValueInList(ytype::YDecimal v, int pos);
-        void setBooleanValueInList(ytype::YBoolean v, int pos);
-        void setStringValueInList(ytype::YString v, int pos);
+        void setObjectValueInList(const ytype::YObject& v, int pos);
+        void setIntegerValueInList(const ytype::YInteger& v, int pos);
+        void setDecimalValueInList(const ytype::YDecimal& v, int pos);
+        void setBooleanValueInList(const ytype::YBoolean& v, int pos);
+        void setStringValueInList(const ytype::YString& v, int pos);
 
         void coverObjectList(std::vector<ytype::YObject> ls);
         void coverIntegerList(std::vector<ytype::YInteger> ls);
