@@ -1,4 +1,6 @@
 #include "../parser/parser.h"
+#ifndef __GENERATOR_H__
+#define __GENERATOR_H__
 #include <fstream>
 #include <sstream>
 #include <cstring>
@@ -140,3 +142,5 @@ namespace ygen{
         void visit(std::vector<AST::StmtNode*> stmts); // 特殊的visitor，visit的是整个stmts
     };
 }
+
+#endif
