@@ -20,5 +20,7 @@ namespace ysto {
         void createScope(std::string name);
         // 删除一个scope，深度-1
         void deleteScope();
+        // 获取当前scope
+        Scope& getCurrent();
     };
 }
