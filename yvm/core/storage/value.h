@@ -1,9 +1,9 @@
 #pragma once
+#include "../type/YObject.h"
+#include "../type/YInteger.h"
+#include "../type/YDecimal.h"
 #include "../type/YBoolean.h"
 #include "../type/YString.h"
-#include "../type/YDecimal.h"
-#include "../type/YInteger.h"
-#include "../type/YObject.h"
 
 namespace ysto {
     class Value {
@@ -13,7 +13,6 @@ namespace ysto {
         ytype::YBoolean booleanValue;
         ytype::YString stringValue;
         std::vector<Value> list;
-
         // 属性
         bool isConstant = false; // 是否为常量
         bool isList = false; // 是否为列表
