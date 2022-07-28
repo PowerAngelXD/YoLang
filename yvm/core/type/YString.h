@@ -1,5 +1,8 @@
 #pragma once
-#include "YObject.h"
+#ifndef __YSTRING_H__
+#define __YSTRING_H__
+#include <iostream>
+#include <sstream>
 
 namespace ytype {
     class YString {
@@ -7,6 +10,7 @@ namespace ytype {
 
     public:
         YString(std::string v);
+        YString()=default;
 
         float toDecimal();
         int toInteger();
@@ -16,3 +20,5 @@ namespace ytype {
         void set(std::string v);
     };
 }
+
+#endif

@@ -1,5 +1,8 @@
 #pragma once
-#include "YObject.h"
+#ifndef __YBOOLEAN_H__
+#define __YBOOLEAN_H__
+#include <iostream>
+#include <sstream>
 
 namespace ytype {
     class YBoolean {
@@ -7,6 +10,7 @@ namespace ytype {
 
     public:
         YBoolean(bool v);
+        YBoolean()=default;
 
         std::string toString();
         int toInteger();
@@ -16,3 +20,5 @@ namespace ytype {
         void set(bool v);
     };
 }
+
+#endif

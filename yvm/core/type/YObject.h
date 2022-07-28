@@ -1,4 +1,6 @@
 #pragma once
+#ifndef __YOBJECT_H__
+#define __YOBJECT_H__
 #include "../../../bytecode/generator.h"
 
 namespace ytype {
@@ -13,6 +15,7 @@ namespace ytype {
 
     public:
         YObject(objectKind k);
+        YObject()=default;
         // 构造一个函数Object的方法
         YObject(std::vector<ygen::byteCode> cs, std::vector<std::pair<ygen::type::vtypeUnit, std::string>> as);
 
@@ -22,3 +25,5 @@ namespace ytype {
         void loadInVM(); // 将代码片段加载进VM中
     };
 }
+
+#endif

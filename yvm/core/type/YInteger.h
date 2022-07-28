@@ -1,5 +1,8 @@
 #pragma once
-#include "YObject.h"
+#ifndef __YINTEGER_H__
+#define __YINTEGER_H__
+#include <iostream>
+#include <sstream>
 
 namespace ytype {
     class YInteger {
@@ -7,6 +10,7 @@ namespace ytype {
 
     public:
         YInteger(int v);
+        YInteger()=default;
 
         std::string toString();
         float toDecimal();
@@ -16,3 +20,5 @@ namespace ytype {
         void set(int v);
     };
 }
+
+#endif
