@@ -14,5 +14,6 @@ namespace ysto {
         Value get(std::string name);
         void deleteValue(std::string name);
         void createValue(std::string name, Value v);
+        std::string getIdentifier();
     };
 }
