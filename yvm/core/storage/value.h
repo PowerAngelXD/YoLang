@@ -16,14 +16,17 @@ namespace ysto {
         // 属性
         bool isConstant = false; // 是否为常量
         bool isList = false; // 是否为列表
+
+        int line, column; // 行，列
+
         ygen::type::vtype type; // 值类型（无修饰符）
     public:
-        Value(ytype::YInteger v, bool isc);
-        Value(ytype::YBoolean v, bool isc);
-        Value(ytype::YString v, bool isc);
-        Value(ytype::YDecimal v, bool isc);
-        Value(ytype::YObject v, bool isc);
-        Value(std::vector<Value> v, bool isc);
+        Value(ytype::YInteger v, bool isc, int ln, int col);
+        Value(ytype::YBoolean v, bool isc, int ln, int col);
+        Value(ytype::YString v, bool isc, int ln, int col);
+        Value(ytype::YDecimal v, bool isc, int ln, int col);
+        Value(ytype::YObject v, bool isc, int ln, int col);
+        Value(std::vector<Value> v, bool isc, int ln, int col);
 
         ygen::type::vtypeUnit getType(); // 获取Valu对应的完整Type
 
@@ -34,7 +37,5 @@ namespace ysto {
         ytype::YString& getStringValue();
 
         std::vector<Value>& getList();
-
-        void coverList(std::vector<Value> ls);
     };
 }
