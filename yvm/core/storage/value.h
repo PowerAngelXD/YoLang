@@ -17,10 +17,9 @@ namespace ysto {
         bool isConstant = false; // 是否为常量
         bool isList = false; // 是否为列表
 
-        int line, column; // 行，列
-
         ygen::type::vtype type; // 值类型（无修饰符）
     public:
+        int line, column; // 行，列
         Value(ytype::YInteger v, bool isc, int ln, int col);
         Value(ytype::YBoolean v, bool isc, int ln, int col);
         Value(ytype::YString v, bool isc, int ln, int col);
