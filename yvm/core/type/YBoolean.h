@@ -18,6 +18,7 @@ namespace ytype {
 
         bool get();
         void set(bool v);
+        void operator=(bool v);
     };
 }
 

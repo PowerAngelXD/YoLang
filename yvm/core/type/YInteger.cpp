@@ -25,3 +25,7 @@ int ytype::YInteger::get() {
 void ytype::YInteger::set(int v) {
     value = v;
 }
+
+void ytype::YInteger::operator=(int v) {
+    value = v;
+}

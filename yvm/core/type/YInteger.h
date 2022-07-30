@@ -18,6 +18,7 @@ namespace ytype {
 
         int get();
         void set(int v);
+        void operator=(int v);
     };
 }
 

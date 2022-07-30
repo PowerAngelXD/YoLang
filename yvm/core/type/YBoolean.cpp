@@ -23,3 +23,7 @@ bool ytype::YBoolean::get() {
 void ytype::YBoolean::set(bool v) {
     value = v;
 }
+
+void ytype::YBoolean::operator=(bool v) {
+    value = v;
+}

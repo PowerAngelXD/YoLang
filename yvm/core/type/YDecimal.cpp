@@ -25,3 +25,7 @@ float ytype::YDecimal::get() {
 void ytype::YDecimal::set(float v) {
     value = v;
 }
+
+void ytype::YDecimal::operator=(float v) {
+    value = v;
+}

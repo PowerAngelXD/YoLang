@@ -18,6 +18,7 @@ namespace ytype {
 
         float get();
         void set(float v);
+        void operator=(float v);
     };
 }
 

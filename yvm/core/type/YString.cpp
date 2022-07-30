@@ -23,3 +23,7 @@ std::string ytype::YString::get() {
 void ytype::YString::set(std::string v) {
     value = v;
 }
+
+void ytype::YString::operator=(std::string v) {
+    value = v;
+}
