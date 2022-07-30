@@ -24,6 +24,18 @@ namespace vmcore {
 
         // 指令对应的函数实现
         void add(ygen::byteCode code);
+        void sub(ygen::byteCode code);
+        void div(ygen::byteCode code);
+        void mul(ygen::byteCode code);
+        void mod(ygen::byteCode code);
+        void stf(ygen::byteCode code);
+        void lt(ygen::byteCode code);
+        void gt(ygen::byteCode code);
+        void ltet(ygen::byteCode code);
+        void gtet(ygen::byteCode code);
+        void no(ygen::byteCode code);
+        void logicAnd(ygen::byteCode code);
+        void logicOr(ygen::byteCode code);
         void push(ygen::byteCode code);
         //
 
