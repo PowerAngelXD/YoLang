@@ -109,11 +109,43 @@ void vmcore::vm::add(ygen::byteCode code) {
     auto left = valueStack.pop();
     if(left.getType() == ygen::type::vtype::integer) {
         if(right.getType() == ygen::type::vtype::integer) {
-            valueStack.push(ysto::Value(ytype::YInteger(left.getIntegerValue().get() + right.getIntegerValue().get()), false, -1, -1));
+            valueStack.push(ysto::Value(ytype::YInteger(left.getIntegerValue().get() + right.getIntegerValue().get()), true, code.line, code.column));
         }
+        else if(right.getType() == ygen::type::vtype::decimal) {
+            valueStack.push(ysto::Value(ytype::YDecimal(left.getIntegerValue().get() + right.getDecimalValue().get()), true, code.line, code.column));
+        }
+        else throw yoexception::YoError("TypeError", "This operator does not support this type of operation",code.line, code.column);
+    }
+    else if(left.getType() == ygen::type::vtype::decimal) {
+        if(right.getType() == ygen::type::vtype::integer) {
+            valueStack.push(ysto::Value(ytype::YDecimal(left.getDecimalValue().get() + right.getIntegerValue().get()), true, code.line, code.column));
+        }
+        else if(right.getType() == ygen::type::vtype::decimal) {
+            valueStack.push(ysto::Value(ytype::YDecimal(left.getDecimalValue().get() + right.getDecimalValue().get()), true, code.line, code.column));
+        }
+        else throw yoexception::YoError("TypeError", "This operator does not support this type of operation",code.line, code.column);
+    }
+    else if(left.getType() == ygen::type::vtype::string) {
+        if(right.getType() == ygen::type::vtype::string) {
+            valueStack.push(ysto::Value(ytype::YString(left.getStringValue().get() + right.getStringValue().get()), true, code.line, code.column));
+        }
+        else throw yoexception::YoError("TypeError", "This operator does not support this type of operation",code.line, code.column);
     }
 }
 
 void vmcore::vm::push(ygen::byteCode code) {
-    valueStack.push(ysto::Value(ytype::YInteger(code.arg1), false, -1, -1));
+    switch (ygen::type::getType(code.arg2)) {
+        case ygen::type::vtype::integer: {
+            valueStack.push(ysto::Value(ytype::YInteger(code.arg1), true, code.line, code.column));
+            break;
+        }
+        case ygen::type::vtype::decimal: {
+            valueStack.push(ysto::Value(ytype::YDecimal(code.arg1), true, code.line, code.column));
+            break;
+        }
+        case ygen::type::vtype::string: {
+            valueStack.push(ysto::Value(ytype::YString(constPool[code.arg1]), true, code.line, code.column));
+            break;
+        }
+    }
 }
