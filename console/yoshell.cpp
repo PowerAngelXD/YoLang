@@ -208,9 +208,14 @@ void ysh::insEVAL(std::vector<std::string> paras) {
 
         yvm = vmcore::vm(bcg.getCodes(), bcg.getConstPool());
         yvm.run("null");
-
-        std::cout<<yvm.getResult().getIntegerValue().get()<<std::endl;
-        // TODO：返回值输出
+        auto result = yvm.getResult();
+        // 返回值输出
+        if(result.getType() == ygen::type::vtype::integer)
+            std::cout<<result.getIntegerValue().get()<<std::endl;
+        else if(result.getType() == ygen::type::vtype::decimal)
+            std::cout<<result.getDecimalValue().get()<<std::endl;
+        else if(result.getType() == ygen::type::vtype::string)
+            std::cout<<result.getStringValue().get()<<std::endl;
     }
     else {
         auto stmts = p.parse();
