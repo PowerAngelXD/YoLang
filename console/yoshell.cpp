@@ -102,8 +102,6 @@ void ysh::insRun(std::vector<std::string> paras) {
         auto name = paras[0];
         if(tools::compareFileType(name, ".yvmc")) {
             // 是vm文件
-            yovm.loadVMFile(name);
-            yovm.run("null");
         }
         else if(tools::compareFileType(name, ".yo")) {
             std::ifstream file(name);
@@ -120,9 +118,7 @@ void ysh::insRun(std::vector<std::string> paras) {
 
             ygen::ByteCodeGenerator bcg(stmts);
             bcg.visit(stmts);
-        
-            yovm.reload(bcg.getCodes(), bcg.getConstPool());
-            yovm.run("null");
+
         }
         else
             throw yoexception::YoError("FileError", "Not any file that can be run", -1, -1);
@@ -210,9 +206,10 @@ void ysh::insEVAL(std::vector<std::string> paras) {
         ygen::ByteCodeGenerator bcg(expr);
         bcg.visitExpr(expr);
 
-        yovm.reload(bcg.getCodes(), bcg.getConstPool());
-        yovm.run("repl");
+        yvm = vmcore::vm(bcg.getCodes(), bcg.getConstPool());
+        yvm.run("null");
 
+        std::cout<<yvm.getResult().getIntegerValue().get()<<std::endl;
         // TODO：返回值输出
     }
     else {
@@ -220,9 +217,7 @@ void ysh::insEVAL(std::vector<std::string> paras) {
 
         ygen::ByteCodeGenerator bcg(stmts);
         bcg.visit(stmts);
-        
-        yovm.reload(bcg.getCodes(), bcg.getConstPool());
-        yovm.run("null");
+
     }
 }
 void ysh::insEnv(std::vector<std::string> paras) {
@@ -230,7 +225,7 @@ void ysh::insEnv(std::vector<std::string> paras) {
     else {
         if(paras.size() == 1) {
             if(paras[0] == "clear") {
-                yovm.clear();
+                // clear
                 std::cout<<"[YVM SUCCESS] Operation execution completed";
             }
             else std::cout<<"[YVM ERROR] Unknown operation on virtual machine: '" + paras[0] + "'";

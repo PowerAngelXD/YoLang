@@ -1,5 +1,5 @@
 #pragma once
-#include "../vm/yvm.h"
+#include "../yvm/core/yvm.h"
 #define INSPARAS std::vector<std::string> paras
 
 namespace ysh{
@@ -63,7 +63,7 @@ namespace ysh{
                                   };
 
     // vm实例
-    static yvm::YVM yovm;
+    static vmcore::vm yvm;
     
     void runYoShell();
 }
