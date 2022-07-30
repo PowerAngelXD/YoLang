@@ -37,6 +37,12 @@ ygen::type::modifier ygen::type::norm = 0.1;
 ygen::type::modifier ygen::type::list = 0.2;
 ygen::type::modifier ygen::type::dict = 0.3;
 
+const ygen::type::vtypeUnit ygen::type::Integer = ygen::type::type(ygen::type::vtype::integer, ygen::type::norm);
+const ygen::type::vtypeUnit ygen::type::Decimal = ygen::type::type(ygen::type::vtype::decimal, ygen::type::norm);
+const ygen::type::vtypeUnit ygen::type::String = ygen::type::type(ygen::type::vtype::string, ygen::type::norm);
+const ygen::type::vtypeUnit ygen::type::Boolean = ygen::type::type(ygen::type::vtype::boolean, ygen::type::norm);
+const ygen::type::vtypeUnit ygen::type::Object = ygen::type::type(ygen::type::vtype::object, ygen::type::norm);
+
 float ygen::type::type(vtype t, modifier m) {
     return t + m;
 }

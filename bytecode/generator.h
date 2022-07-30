@@ -23,10 +23,6 @@ namespace ygen{
         typedef float modifier;
         typedef float vtypeUnit;
 
-        extern modifier norm;
-        extern modifier list;
-        extern modifier dict;
-
         // 新类型系统的类型构造器
         float type(vtype t, modifier m);
         int getType(vtypeUnit unit);
@@ -37,6 +33,18 @@ namespace ygen{
 
         vtype string2Vtype(std::string s);
         modifier string2Modifier(std::string s);
+
+        //
+        extern modifier norm;
+        extern modifier list;
+        extern modifier dict;
+
+        //类型常量
+        extern const vtypeUnit Integer;
+        extern const vtypeUnit Decimal;
+        extern const vtypeUnit String;
+        extern const vtypeUnit Boolean;
+        extern const vtypeUnit Object;
     }
 
     // ByteCode的参数帮助，可以快捷的写一些参数。内部均为枚举，以XXXXHelper的形式存在
