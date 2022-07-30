@@ -6,7 +6,7 @@ namespace ysto {
         std::vector<Scope> scopePool;
         int deepCount = 0;
     public:
-        Space()=default;
+        Space();
         // 创建一个value
         void createValue(std::string name, Value v);
         // 查找指定value

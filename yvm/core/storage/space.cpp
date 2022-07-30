@@ -1,5 +1,9 @@
 #include "space.h"
 
+ysto::Space::Space() {
+    scopePool.push_back(Scope("global", 1, 1));
+}
+
 void ysto::Space::createValue(std::string name, ysto::Value v) {
     // createValue函数只会在当前Scope中创建新的值
     scopePool[deepCount].createValue(name, v);
@@ -16,10 +20,10 @@ bool ysto::Space::findValue(std::string name) {
 }
 
 ysto::Value &ysto::Space::getValue(std::string name) {
-    if(scopePool[deepCount].find(name)) return scopePool[deepCount].get(name);
+    if(scopePool[deepCount].find(name)) return scopePool[deepCount].getV(name);
     int temp = deepCount; // temp寄存
     while(temp != -1) {
-        if(scopePool[temp].find(name)) return scopePool[temp].get(name);
+        if(scopePool[temp].find(name)) return scopePool[temp].getV(name);
         temp --;
     }
     throw yoexception::YoError("NameError","The value of the identifier named '" + name + "' does not exist in '" + scopePool[deepCount].getIdentifier() + "'",

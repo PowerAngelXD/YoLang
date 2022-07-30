@@ -16,7 +16,7 @@ int ysto::Scope::findPosition(std::string name) {
     return -1;
 }
 
-ysto::Value ysto::Scope::get(std::string name) {
+ysto::Value& ysto::Scope::getV(std::string name) {
     for(int i = 0; i < childNames.size(); i ++) {
         if(name == childNames[i]) return child[i];
     }
