@@ -1,9 +1,7 @@
 # YoLang
 ![yopic.png](yopic.png)
-Yolang是一个轻量级的，简单易上手的解释性编程语言，目前由PowerAngelXD（在gitee上名为CatBall）开发，后续可能还会有更多的开发者加入到Yolang项目的开发中
-### 关于仓库
-Yolang已做出调整，目前停止了对Gitee的Yolang仓库支持\
-目前只有Github上有Yolang的仓库
+Yolang是一个轻量级的，简单易上手的解释性编程语言\
+通过Yolang源码生成中间码并递交到YOVM进行运行，新版的YOVM在原版的基础上代码构架更清晰，效率也提高了不少
 ### 构建
 本项目由CMake构建，请您开发前确保您已经在您的设备上准备好开发环境，关于构建这里就不深入介绍了，您可以通过搜索引擎了解如何通过CMake构建项目
 ### 许可证
@@ -44,11 +42,8 @@ Yolang的发行版本号遵循以下规则：\
 - [x] null值
 - [x] 变量默认初始化
 - [x] 完善的vm管理
-- [ ] 变量初始化列表
-- [ ] 三元运算符
-- [ ] Objects和对应操作
-- [ ] 函数的声明与调用
-- [ ] Lambda
+- [x] Objects和对应操作
+- [x] 函数的声明与调用
 
 ### 鸣谢
 通过 Clion 开发 ![clion.png](clion.png)\
