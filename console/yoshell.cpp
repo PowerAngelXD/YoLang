@@ -216,6 +216,15 @@ void ysh::insEVAL(std::vector<std::string> paras) {
             std::cout<<result.getDecimalValue().get()<<std::endl;
         else if(result.getType() == ygen::type::vtype::string)
             std::cout<<result.getStringValue().get()<<std::endl;
+        else if(result.getType() == ygen::type::vtype::boolean) {
+            if(result.getBooleanValue().get())
+                std::cout<<"true"<<std::endl;
+            else
+                std::cout<<"false"<<std::endl;
+        }
+        else if(result.getType() == ygen::type::vtype::null) {
+            std::cout<<"<null>"<<std::endl;
+        }
     }
     else {
         auto stmts = p.parse();
