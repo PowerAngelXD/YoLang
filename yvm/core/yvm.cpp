@@ -102,129 +102,186 @@ ysto::Value vmcore::vm::getResult() {
 void vmcore::vm::add(ygen::byteCode code) {
     auto right = valueStack.pop();
     auto left = valueStack.pop();
-    if(left.getType() == ygen::type::vtype::integer) {
-        if(right.getType() == ygen::type::vtype::integer) {
-            valueStack.push(ysto::Value(ytype::YInteger(left.getIntegerValue().get() + right.getIntegerValue().get()), true, code.line, code.column));
+    switch (left.getType()) {
+        case ygen::type::vtype::integer: {
+            switch (right.getType()) {
+                case ygen::type::vtype::integer: {
+                    valueStack.push(ysto::Value(ytype::YInteger(left.getIntegerValue().get() + right.getIntegerValue().get()),true, code.line, code.column));
+                    break;
+                }
+                case ygen::type::vtype::decimal: {
+                    valueStack.push(ysto::Value(ytype::YDecimal(left.getIntegerValue().get() + right.getDecimalValue().get()), true, code.line, code.column));
+                    break;
+                }
+                default: throw yoexception::YoError("TypeError", "This operator does not support this type of operation",code.line, code.column); break;
+            }
+            break;
         }
-        else if(right.getType() == ygen::type::vtype::decimal) {
-            valueStack.push(ysto::Value(ytype::YDecimal(left.getIntegerValue().get() + right.getDecimalValue().get()), true, code.line, code.column));
+        case ygen::type::vtype::decimal: {
+            switch (right.getType()) {
+                case ygen::type::vtype::integer: {
+                    valueStack.push(ysto::Value(ytype::YDecimal(left.getDecimalValue().get() + right.getIntegerValue().get()),true, code.line, code.column));
+                    break;
+                }
+                case ygen::type::vtype::decimal: {
+                    valueStack.push(ysto::Value(ytype::YDecimal(left.getDecimalValue().get() + right.getDecimalValue().get()), true, code.line, code.column));
+                    break;
+                }
+                default: throw yoexception::YoError("TypeError", "This operator does not support this type of operation",code.line, code.column); break;
+            }
+            break;
         }
-        else throw yoexception::YoError("TypeError", "This operator does not support this type of operation",code.line, code.column);
+        case ygen::type::vtype::string: {
+            switch (right.getType()) {
+                case ygen::type::vtype::string: {
+                    valueStack.push(ysto::Value(ytype::YString(left.getStringValue().get() + right.getStringValue().get()),true, code.line, code.column));
+                    break;
+                }
+                default: throw yoexception::YoError("TypeError", "This operator does not support this type of operation",code.line, code.column); break;
+            }
+            break;
+        }
+        default: throw yoexception::YoError("TypeError", "This operator does not support this type of operation",code.line, code.column); break;
     }
-    else if(left.getType() == ygen::type::vtype::decimal) {
-        if(right.getType() == ygen::type::vtype::integer) {
-            valueStack.push(ysto::Value(ytype::YDecimal(left.getDecimalValue().get() + right.getIntegerValue().get()), true, code.line, code.column));
-        }
-        else if(right.getType() == ygen::type::vtype::decimal) {
-            valueStack.push(ysto::Value(ytype::YDecimal(left.getDecimalValue().get() + right.getDecimalValue().get()), true, code.line, code.column));
-        }
-        else throw yoexception::YoError("TypeError", "This operator does not support this type of operation",code.line, code.column);
-    }
-    else if(left.getType() == ygen::type::vtype::string) {
-        if(right.getType() == ygen::type::vtype::string) {
-            valueStack.push(ysto::Value(ytype::YString(left.getStringValue().get() + right.getStringValue().get()), true, code.line, code.column));
-        }
-        else throw yoexception::YoError("TypeError", "This operator does not support this type of operation",code.line, code.column);
-    }
-    else throw yoexception::YoError("TypeError", "This operator does not support this type of operation",code.line, code.column);
 }
 
 void vmcore::vm::sub(ygen::byteCode code) {
     auto right = valueStack.pop();
     auto left = valueStack.pop();
-    if(left.getType() == ygen::type::vtype::integer) {
-        if(right.getType() == ygen::type::vtype::integer) {
-            valueStack.push(ysto::Value(ytype::YInteger(left.getIntegerValue().get() - right.getIntegerValue().get()), true, code.line, code.column));
+    switch (left.getType()) {
+        case ygen::type::vtype::integer: {
+            switch (right.getType()) {
+                case ygen::type::vtype::integer: {
+                    valueStack.push(ysto::Value(ytype::YInteger(left.getIntegerValue().get() + right.getIntegerValue().get()), true, code.line, code.column));
+                    break;
+                }
+                case ygen::type::vtype::decimal: {
+                    valueStack.push(ysto::Value(ytype::YDecimal(left.getIntegerValue().get() + right.getDecimalValue().get()), true, code.line, code.column));
+                    break;
+                }
+                default: throw yoexception::YoError("TypeError", "This operator does not support this type of operation",code.line, code.column); break;
+            }
+            break;
         }
-        else if(right.getType() == ygen::type::vtype::decimal) {
-            valueStack.push(ysto::Value(ytype::YDecimal(left.getIntegerValue().get() - right.getDecimalValue().get()), true, code.line, code.column));
+        case ygen::type::vtype::decimal: {
+            switch (right.getType()) {
+                case ygen::type::vtype::integer: {
+                    valueStack.push(ysto::Value(ytype::YDecimal(left.getDecimalValue().get() + right.getIntegerValue().get()), true, code.line, code.column));
+                    break;
+                }
+                case ygen::type::vtype::decimal: {
+                    valueStack.push(ysto::Value(ytype::YDecimal(left.getDecimalValue().get() + right.getDecimalValue().get()), true, code.line, code.column));
+                    break;
+                }
+                default: throw yoexception::YoError("TypeError", "This operator does not support this type of operation",code.line, code.column); break;
+            }
+            break;
         }
-        else throw yoexception::YoError("TypeError", "This operator does not support this type of operation",code.line, code.column);
+        default: throw yoexception::YoError("TypeError", "This operator does not support this type of operation",code.line, code.column); break;
     }
-    else if(left.getType() == ygen::type::vtype::decimal) {
-        if(right.getType() == ygen::type::vtype::integer) {
-            valueStack.push(ysto::Value(ytype::YDecimal(left.getDecimalValue().get() - right.getIntegerValue().get()), true, code.line, code.column));
-        }
-        else if(right.getType() == ygen::type::vtype::decimal) {
-            valueStack.push(ysto::Value(ytype::YDecimal(left.getDecimalValue().get() - right.getDecimalValue().get()), true, code.line, code.column));
-        }
-        else throw yoexception::YoError("TypeError", "This operator does not support this type of operation",code.line, code.column);
-    }
-    else throw yoexception::YoError("TypeError", "This operator does not support this type of operation",code.line, code.column);
 }
 
 void vmcore::vm::mul(ygen::byteCode code) {
     auto right = valueStack.pop();
     auto left = valueStack.pop();
-    if(left.getType() == ygen::type::vtype::integer) {
-        if(right.getType() == ygen::type::vtype::integer) {
-            valueStack.push(ysto::Value(ytype::YInteger(left.getIntegerValue().get() * right.getIntegerValue().get()), true, code.line, code.column));
-        }
-        else if(right.getType() == ygen::type::vtype::decimal) {
-            valueStack.push(ysto::Value(ytype::YDecimal(left.getIntegerValue().get() * right.getDecimalValue().get()), true, code.line, code.column));
-        }
-        else if(right.getType() == ygen::type::vtype::string) {
-            std::string ret;
-            for(int i = 0; i < left.getIntegerValue().get(); i ++) {
-                ret += right.getStringValue().get();
+    switch (left.getType()) {
+        case ygen::type::vtype::integer: {
+            switch (right.getType()) {
+                case ygen::type::vtype::integer: {
+                    valueStack.push(ysto::Value(ytype::YInteger(left.getIntegerValue().get() * right.getIntegerValue().get()), true, code.line, code.column));
+                    break;
+                }
+                case ygen::type::vtype::decimal: {
+                    valueStack.push(ysto::Value(ytype::YDecimal(left.getIntegerValue().get() * right.getDecimalValue().get()), true, code.line, code.column));
+                    break;
+                }
+                case ygen::type::vtype::string: {
+                    std::string ret;
+                    for(int i = 0; i < left.getIntegerValue().get(); i ++) {
+                        ret += right.getStringValue().get();
+                    }
+                    valueStack.push(ysto::Value(ytype::YString(ret), true, code.line, code.column));
+                    break;
+                }
+                default: throw yoexception::YoError("TypeError", "This operator does not support this type of operation",code.line, code.column); break;
             }
-            valueStack.push(ysto::Value(ytype::YString(ret), true, code.line, code.column));
+            break;
         }
-        else throw yoexception::YoError("TypeError", "This operator does not support this type of operation",code.line, code.column);
-    }
-    else if(left.getType() == ygen::type::vtype::decimal) {
-        if(right.getType() == ygen::type::vtype::integer) {
-            valueStack.push(ysto::Value(ytype::YDecimal(left.getDecimalValue().get() * right.getIntegerValue().get()), true, code.line, code.column));
-        }
-        else if(right.getType() == ygen::type::vtype::decimal) {
-            valueStack.push(ysto::Value(ytype::YDecimal(left.getDecimalValue().get() * right.getDecimalValue().get()), true, code.line, code.column));
-        }
-        else throw yoexception::YoError("TypeError", "This operator does not support this type of operation",code.line, code.column);
-    }
-    else if(left.getType() == ygen::type::vtype::string) {
-        if(right.getType() == ygen::type::vtype::integer) {
-            std::string ret;
-            for(int i = 0; i < right.getIntegerValue().get(); i ++) {
-                ret += left.getStringValue().get();
+        case ygen::type::vtype::decimal: {
+            switch (right.getType()) {
+                case ygen::type::vtype::integer: {
+                    valueStack.push(ysto::Value(ytype::YDecimal(left.getDecimalValue().get() * right.getIntegerValue().get()), true, code.line, code.column));
+                    break;
+                }
+                case ygen::type::vtype::decimal: {
+                    valueStack.push(ysto::Value(ytype::YDecimal(left.getDecimalValue().get() * right.getDecimalValue().get()), true, code.line, code.column));
+                    break;
+                }
+                default: throw yoexception::YoError("TypeError", "This operator does not support this type of operation",code.line, code.column); break;
             }
-            valueStack.push(ysto::Value(ytype::YString(ret), true, code.line, code.column));
+            break;
         }
-        else throw yoexception::YoError("TypeError", "This operator does not support this type of operation",code.line, code.column);
+        case ygen::type::vtype::string: {
+            switch (right.getType()) {
+                case ygen::type::vtype::integer: {
+                    std::string ret;
+                    for(int i = 0; i < right.getIntegerValue().get(); i ++) {
+                        ret += left.getStringValue().get();
+                    }
+                    valueStack.push(ysto::Value(ytype::YString(ret), true, code.line, code.column));
+                    break;
+                }
+                default: throw yoexception::YoError("TypeError", "This operator does not support this type of operation",code.line, code.column); break;
+            }
+            break;
+        }
+        default: throw yoexception::YoError("TypeError", "This operator does not support this type of operation",code.line, code.column); break;
     }
-    else throw yoexception::YoError("TypeError", "This operator does not support this type of operation",code.line, code.column);
 }
 
 void vmcore::vm::div(ygen::byteCode code) {
     auto right = valueStack.pop();
     auto left = valueStack.pop();
-    if(left.getType() == ygen::type::vtype::integer) {
-        if(right.getType() == ygen::type::vtype::integer) {
-            std::ostringstream oss;
-            oss<<(float)left.getIntegerValue().get() / right.getIntegerValue().get();
-            if(oss.str().find('.') == oss.str().npos) {
-                // 整数
-                valueStack.push(ysto::Value(ytype::YInteger(left.getIntegerValue().get() / right.getIntegerValue().get()), true, code.line, code.column));
+    switch (left.getType()) {
+        case ygen::type::vtype::integer: {
+            switch (right.getType()) {
+                case ygen::type::vtype::integer: {
+                    std::ostringstream oss;
+                    oss<<(float)left.getIntegerValue().get() / right.getIntegerValue().get();
+                    if(oss.str().find('.') == oss.str().npos) {
+                        // 整数
+                        valueStack.push(ysto::Value(ytype::YInteger(left.getIntegerValue().get() / right.getIntegerValue().get()), true, code.line, code.column));
+                    }
+                    else {
+                        // 小数
+                        valueStack.push(ysto::Value(ytype::YDecimal((float)left.getIntegerValue().get() / right.getIntegerValue().get()), true, code.line, code.column));
+                    }
+                    break;
+                }
+                case ygen::type::vtype::decimal: {
+                    valueStack.push(ysto::Value(ytype::YDecimal(left.getIntegerValue().get() / right.getDecimalValue().get()), true, code.line, code.column));
+                    break;
+                }
+                default: throw yoexception::YoError("TypeError", "This operator does not support this type of operation",code.line, code.column); break;
             }
-            else {
-                // 小数
-                valueStack.push(ysto::Value(ytype::YDecimal((float)left.getIntegerValue().get() / right.getIntegerValue().get()), true, code.line, code.column));
+            break;
+        }
+        case ygen::type::vtype::decimal: {
+            switch (right.getType()) {
+                case ygen::type::vtype::integer: {
+                    valueStack.push(ysto::Value(ytype::YDecimal(left.getDecimalValue().get() / right.getIntegerValue().get()), true, code.line, code.column));
+                    break;
+                }
+                case ygen::type::vtype::decimal: {
+                    valueStack.push(ysto::Value(ytype::YDecimal(left.getDecimalValue().get() / right.getDecimalValue().get()), true, code.line, code.column));
+                    break;
+                }
+                default: throw yoexception::YoError("TypeError", "This operator does not support this type of operation",code.line, code.column); break;
             }
+            break;
         }
-        else if(right.getType() == ygen::type::vtype::decimal) {
-            valueStack.push(ysto::Value(ytype::YDecimal(left.getIntegerValue().get() / right.getDecimalValue().get()), true, code.line, code.column));
-        }
-        else throw yoexception::YoError("TypeError", "This operator does not support this type of operation",code.line, code.column);
+        default: throw yoexception::YoError("TypeError", "This operator does not support this type of operation",code.line, code.column); break;
     }
-    else if(left.getType() == ygen::type::vtype::decimal) {
-        if(right.getType() == ygen::type::vtype::integer) {
-            valueStack.push(ysto::Value(ytype::YDecimal(left.getDecimalValue().get() / right.getIntegerValue().get()), true, code.line, code.column));
-        }
-        else if(right.getType() == ygen::type::vtype::decimal) {
-            valueStack.push(ysto::Value(ytype::YDecimal(left.getDecimalValue().get() / right.getDecimalValue().get()), true, code.line, code.column));
-        }
-        else throw yoexception::YoError("TypeError", "This operator does not support this type of operation",code.line, code.column);
-    }
-    else throw yoexception::YoError("TypeError", "This operator does not support this type of operation",code.line, code.column);
 }
 
 void vmcore::vm::mod(ygen::byteCode code) {
