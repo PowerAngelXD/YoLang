@@ -280,5 +280,13 @@ void vmcore::vm::push(ygen::byteCode code) {
             valueStack.push(ysto::Value(ytype::YString(constPool[code.arg1]), true, code.line, code.column));
             break;
         }
+        case ygen::type::vtype::boolean: {
+            valueStack.push(ysto::Value(ytype::YBoolean(code.arg1), true, code.line, code.column));
+            break;
+        }
+        case ygen::type::vtype::null: {
+            valueStack.push(ysto::Value(code.line, code.column));
+            break;
+        }
     }
 }
