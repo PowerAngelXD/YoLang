@@ -28,7 +28,7 @@ namespace ysto {
         Value(std::vector<Value> v, bool isc, int ln, int col);
         Value(std::string content); // 用于初始化flag类型的构造函数（flag只用于内部
 
-        ygen::type::vtypeUnit getType(); // 获取Valu对应的完整Type
+        ygen::type::vtype getType(); // 获取Valu对应的完整Type
         bool isConst();
 
         ytype::YObject& getObjectValue();

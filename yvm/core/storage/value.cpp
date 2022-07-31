@@ -10,7 +10,7 @@ ysto::Value::Value(std::string content) {
 }
 ysto::Value::Value(std::vector<Value> v, bool isc, int ln, int col): list(v), isConstant(isc), line(ln), column(col) {}
 
-ygen::type::vtypeUnit ysto::Value::getType() {
+ygen::type::vtype ysto::Value::getType() {
     return type;
 }
 
