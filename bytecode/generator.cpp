@@ -22,7 +22,7 @@
 #define LOGIC_AND normalCtor(btc::logicand, 0, 0, node->op->line, node->op->column);
 #define LOGIC_OR normalCtor(btc::logicor, 0, 0, node->op->line, node->op->column);
 #define NO normalCtor(btc::no, 0, 0, node->op->line, node->op->column);
-#define STF(sname) normalCtor(btc::selfsub, sname, 0, node->name->line, node->name->column);
+#define STF(sname) normalCtor(btc::stf, sname, 0, node->name->line, node->name->column);
 #define OUT normalCtor(btc::out, 0, 0, node->mark->line, node->mark->column);
 #define DEFINE(name) normalCtor(btc::define, name, 0, node->mark->line, node->mark->column);
 #define INIT(name, type, vtype, vsign) completeCtor(btc::init, name, type, vtype, vsign, node->mark->line, node->mark->column);
