@@ -43,8 +43,7 @@ void vmcore::vm::run(std::string arg) {
             case ygen::sub: sub(code); break;
             case ygen::div: div(code); break;
             case ygen::mul: mul(code); break;
-            case ygen::tmo:
-                break;
+            case ygen::tmo: mod(code); break;
             case ygen::idx:
                 break;
             case ygen::lst:
@@ -69,8 +68,7 @@ void vmcore::vm::run(std::string arg) {
                 break;
             case ygen::gmem:
                 break;
-            case ygen::stf:
-                break;
+            case ygen::stf: stf(code); break;
             case ygen::listend:
                 break;
             case ygen::paraend:
@@ -227,6 +225,45 @@ void vmcore::vm::div(ygen::byteCode code) {
         else throw yoexception::YoError("TypeError", "This operator does not support this type of operation",code.line, code.column);
     }
     else throw yoexception::YoError("TypeError", "This operator does not support this type of operation",code.line, code.column);
+}
+
+void vmcore::vm::mod(ygen::byteCode code) {
+    auto right = valueStack.pop();
+    auto left = valueStack.pop();
+    if(left.getType() == ygen::type::vtype::integer) {
+        if(right.getType() == ygen::type::vtype::integer) {
+            valueStack.push(ysto::Value(ytype::YInteger(left.getIntegerValue().get() % right.getIntegerValue().get()), true, code.line, code.column));
+        }
+        else throw yoexception::YoError("TypeError", "This operator does not support this type of operation",code.line, code.column);
+    }
+    else throw yoexception::YoError("TypeError", "This operator does not support this type of operation",code.line, code.column);
+}
+
+void vmcore::vm::stf(ygen::byteCode code) {
+    std::string name = constPool[code.arg1];
+    if(name == "typeof") {
+        auto value = valueStack.pop();
+        switch (value.getType()) {
+            case ygen::type::integer:
+                valueStack.push(ysto::Value(ytype::YString("Integer"), true, code.line, code.column));
+                break;
+            case ygen::type::boolean:
+                valueStack.push(ysto::Value(ytype::YString("Boolean"), true, code.line, code.column));
+                break;
+            case ygen::type::decimal:
+                valueStack.push(ysto::Value(ytype::YString("Decimal"), true, code.line, code.column));
+                break;
+            case ygen::type::string:
+                valueStack.push(ysto::Value(ytype::YString("String"), true, code.line, code.column));
+                break;
+            case ygen::type::null:
+                valueStack.push(ysto::Value(ytype::YString("Null"), true, code.line, code.column));
+                break;
+            case ygen::type::object:
+                valueStack.push(ysto::Value(ytype::YString("Object"), true, code.line, code.column));
+                break;
+        }
+    }
 }
 
 void vmcore::vm::push(ygen::byteCode code) {
