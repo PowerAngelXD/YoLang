@@ -8,6 +8,11 @@ ysto::Value::Value(ytype::YObject v, bool isc, int ln, int col): objectValue(v),
 ysto::Value::Value(std::string content) {
     stringValue = ytype::YString(content);
 }
+ysto::Value::Value(int ln, int col) {
+    isNull = true;
+    type = ygen::type::vtype::null;
+    line = ln, column = col;
+}
 ysto::Value::Value(std::vector<Value> v, bool isc, int ln, int col): list(v), isConstant(isc), line(ln), column(col) {}
 
 ygen::type::vtype ysto::Value::getType() {

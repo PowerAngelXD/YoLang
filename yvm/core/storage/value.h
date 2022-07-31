@@ -16,6 +16,7 @@ namespace ysto {
         // 属性
         bool isConstant = false; // 是否为常量
         bool isList = false; // 是否为列表
+        bool isNull = false;
 
         ygen::type::vtype type; // 值类型（无修饰符）
     public:
@@ -26,6 +27,7 @@ namespace ysto {
         Value(ytype::YDecimal v, bool isc, int ln, int col);
         Value(ytype::YObject v, bool isc, int ln, int col);
         Value(std::vector<Value> v, bool isc, int ln, int col);
+        Value(int ln, int col); // 初始化null
         Value(std::string content); // 用于初始化flag类型的构造函数（flag只用于内部
 
         ygen::type::vtype getType(); // 获取Valu对应的完整Type
