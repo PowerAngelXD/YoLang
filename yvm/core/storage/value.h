@@ -14,12 +14,12 @@ namespace ysto {
         ytype::YString stringValue;
         std::vector<Value> list;
         // 属性
-        bool isConstant = false; // 是否为常量
-        bool isList = false; // 是否为列表
-        bool isNull = false;
 
         ygen::type::vtype type; // 值类型（无修饰符）
     public:
+        bool isConstant = false; // 是否为常量
+        bool isList = false; // 是否为列表
+        bool isNull = false;
         int line, column; // 行，列
         Value(ytype::YInteger v, bool isc, int ln, int col);
         Value(ytype::YBoolean v, bool isc, int ln, int col);

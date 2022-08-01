@@ -7,13 +7,14 @@ ysto::Value::Value(ytype::YDecimal v, bool isc, int ln, int col): decimalValue(v
 ysto::Value::Value(ytype::YObject v, bool isc, int ln, int col): objectValue(v), isConstant(isc), line(ln), column(col), type(ygen::type::vtype::object) {}
 ysto::Value::Value(std::string content) {
     stringValue = ytype::YString(content);
+    type = ygen::type::vtype::flag;
 }
 ysto::Value::Value(int ln, int col) {
     isNull = true;
     type = ygen::type::vtype::null;
     line = ln, column = col;
 }
-ysto::Value::Value(std::vector<Value> v, bool isc, int ln, int col): list(v), isConstant(isc), line(ln), column(col) {}
+ysto::Value::Value(std::vector<Value> v, bool isc, int ln, int col): list(v), isConstant(isc), line(ln), column(col), type(v[0].getType()), isList(true) {}
 
 ygen::type::vtype ysto::Value::getType() {
     return type;
