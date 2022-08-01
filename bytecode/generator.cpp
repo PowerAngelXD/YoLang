@@ -408,27 +408,27 @@ void ygen::ByteCodeGenerator::visitBlockStmt(AST::BlockStmtNode* node) {
 }
 void ygen::ByteCodeGenerator::visitWhileStmt(AST::WhileStmtNode* node) {
     visitBoolExpr(node->cond);
-    JMP(paraHelper::jmpt::reqTrue, paraHelper::jmpt::outWscope, node->mark->line, node->mark->column)
+    JMP(paraHelper::jmpt::reqTrue, paraHelper::jmpt::outScope, node->mark->line, node->mark->column)
     SCOPE_BEGIN{
         visit(node->body->stmts);
         // 下面的指令用于检测表达式是否还成立，成立则jmp到下一个循环，否则向前偏移
         visitBoolExpr(node->cond);
     }
     SCOPE_END
-    JMP(paraHelper::jmpt::reqTrue, paraHelper::jmpt::findSStart, node->mark->line, node->mark->column)
+    JMP(paraHelper::jmpt::reqTrue, paraHelper::jmpt::backScope, node->mark->line, node->mark->column)
 }
 void ygen::ByteCodeGenerator::visitIfStmt(AST::IfStmtNode* node) {
     visitBoolExpr(node->cond);
-    JMP(paraHelper::reqTrue, paraHelper::jmpt::outIFscope, node->mark->line, node->mark->column)
+    JMP(paraHelper::reqTrue, paraHelper::jmpt::outScope, node->mark->line, node->mark->column)
     visitBlockStmt(node->body);
 }
 void ygen::ByteCodeGenerator::visitElifStmt(AST::ElifStmtNode* node) {
     visitBoolExpr(node->cond);
-    JMP(paraHelper::reqTrue, paraHelper::jmpt::outElifscope, node->mark->line, node->mark->column)
+    JMP(paraHelper::reqFalse, paraHelper::jmpt::outScope, node->mark->line, node->mark->column)
     visitBlockStmt(node->body);
 }
 void ygen::ByteCodeGenerator::visitElseStmt(AST::ElseStmtNode* node) {
-    JMP(paraHelper::reqTrue, paraHelper::jmpt::outElsescope, node->mark->line, node->mark->column)
+    JMP(paraHelper::reqFalse, paraHelper::jmpt::outScope, node->mark->line, node->mark->column)
     visitBlockStmt(node->body);
 }
 
@@ -445,7 +445,7 @@ void ygen::ByteCodeGenerator::visitRepeatStmt(AST::RepeatStmtNode *node) {
     SUB(node->left->line, node->left->column)
 
     LT(node->right->line, node->right->column)
-    JMP(paraHelper::jmpt::reqTrue, paraHelper::jmpt::outWscope, node->mark->line, node->mark->column)
+    JMP(paraHelper::jmpt::reqTrue, paraHelper::jmpt::outScope, node->mark->line, node->mark->column)
 
     SCOPE_BEGIN{
         PUSH(addPara("__repit" + std::to_string(repit) + "__"), type::type(type::vtype::string, type::norm), node->mark->line,
@@ -462,7 +462,7 @@ void ygen::ByteCodeGenerator::visitRepeatStmt(AST::RepeatStmtNode *node) {
     }
     SCOPE_END
 
-    JMP(paraHelper::jmpt::reqTrue, paraHelper::jmpt::findSStart, node->mark->line, node->mark->column)
+    JMP(paraHelper::jmpt::reqTrue, paraHelper::jmpt::backScope, node->mark->line, node->mark->column)
     // repit的处理
     DEL(addPara("__repit" + std::to_string(repit) + "__"), 1.0)
     repit --;
@@ -476,7 +476,7 @@ void ygen::ByteCodeGenerator::visitForStmt(AST::ForStmtNode* node) {
         visitBoolExpr(node->cond);
     else
         PUSH(1.0, type::type(type::vtype::boolean, type::norm), node->mark->line, node->mark->column)
-    JMP(paraHelper::jmpt::reqTrue, paraHelper::jmpt::outWscope, node->mark->line, node->mark->column)
+    JMP(paraHelper::jmpt::reqTrue, paraHelper::jmpt::outScope, node->mark->line, node->mark->column)
     SCOPE_BEGIN{
         visit(node->body->stmts);
         if (node->assign != nullptr)
@@ -489,7 +489,7 @@ void ygen::ByteCodeGenerator::visitForStmt(AST::ForStmtNode* node) {
         else
             PUSH(1.0, type::type(type::vtype::boolean, type::norm), node->mark->line, node->mark->column)
     }SCOPE_END
-    JMP(paraHelper::jmpt::reqTrue, paraHelper::jmpt::findSStart, node->mark->line, node->mark->column)
+    JMP(paraHelper::jmpt::unconditional, paraHelper::jmpt::backScope, node->mark->line, node->mark->column)
     // 释放局部变量
     if(node->hasVorc)
         DEL(addPara(node->vorc->name->content), 1.0)
@@ -502,7 +502,7 @@ void ygen::ByteCodeGenerator::visitDeleteStmt(AST::DeleteStmtNode* node) {
 
 void ygen::ByteCodeGenerator::visitBreakStmt(AST::BreakStmtNode* node) {
     PUSH(0.0, type::type(type::vtype::boolean, type::norm), node->mark->line, node->mark->column)
-    JMP(paraHelper::jmpt::reqTrue, paraHelper::jmpt::outScopeDirectly, node->mark->line, node->mark->column)
+    JMP(paraHelper::jmpt::reqTrue, paraHelper::jmpt::outScope, node->mark->line, node->mark->column)
 }
 
 void ygen::ByteCodeGenerator::visitFuncDefStmt(AST::FuncDefStmtNode* node) {
