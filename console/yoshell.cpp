@@ -210,20 +210,48 @@ void ysh::insEVAL(std::vector<std::string> paras) {
         yvm.run("null");
         auto result = yvm.getResult();
         // 返回值输出
-        if(result.getType() == ygen::type::vtype::integer)
-            std::cout<<result.getIntegerValue().get()<<std::endl;
-        else if(result.getType() == ygen::type::vtype::decimal)
-            std::cout<<result.getDecimalValue().get()<<std::endl;
-        else if(result.getType() == ygen::type::vtype::string)
-            std::cout<<result.getStringValue().get()<<std::endl;
-        else if(result.getType() == ygen::type::vtype::boolean) {
-            if(result.getBooleanValue().get())
-                std::cout<<"true"<<std::endl;
-            else
-                std::cout<<"false"<<std::endl;
+        if(result.isList) {
+            std::cout<<"[";
+            for(int i = 0; i < result.getList().size(); i ++) {
+                auto elt = result.getList()[i];
+                if(elt.getType() == ygen::type::vtype::integer)
+                    std::cout<<elt.getIntegerValue().get();
+                else if(elt.getType() == ygen::type::vtype::decimal)
+                    std::cout<<elt.getDecimalValue().get();
+                else if(elt.getType() == ygen::type::vtype::string)
+                    std::cout<<elt.getStringValue().get();
+                else if(elt.getType() == ygen::type::vtype::boolean) {
+                    if(elt.getBooleanValue().get())
+                        std::cout<<"true";
+                    else
+                        std::cout<<"false";
+                }
+                else if(elt.getType() == ygen::type::vtype::null) {
+                    std::cout<<"<null>";
+                }
+
+                if(i != result.getList().size() - 1) {
+                    std::cout<<", ";
+                }
+            }
+            std::cout<<"]";
         }
-        else if(result.getType() == ygen::type::vtype::null) {
-            std::cout<<"<null>"<<std::endl;
+        else{
+            if(result.getType() == ygen::type::vtype::integer)
+                std::cout<<result.getIntegerValue().get()<<std::endl;
+            else if(result.getType() == ygen::type::vtype::decimal)
+                std::cout<<result.getDecimalValue().get()<<std::endl;
+            else if(result.getType() == ygen::type::vtype::string)
+                std::cout<<result.getStringValue().get()<<std::endl;
+            else if(result.getType() == ygen::type::vtype::boolean) {
+                if(result.getBooleanValue().get())
+                    std::cout<<"true"<<std::endl;
+                else
+                    std::cout<<"false"<<std::endl;
+            }
+            else if(result.getType() == ygen::type::vtype::null) {
+                std::cout<<"<null>"<<std::endl;
+            }
         }
     }
     else {
