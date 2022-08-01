@@ -38,6 +38,9 @@ namespace vmcore {
         void logicOr(ygen::byteCode code);
         void equ(ygen::byteCode code);
         void noequ(ygen::byteCode code);
+        void out(ygen::byteCode code);
+        void lst(ygen::byteCode code);
+        void lstend(ygen::byteCode code);
         void push(ygen::byteCode code);
         //
 

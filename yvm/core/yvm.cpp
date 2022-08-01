@@ -46,8 +46,7 @@ void vmcore::vm::run(std::string arg) {
             case ygen::tmo: mod(code); break;
             case ygen::idx:
                 break;
-            case ygen::lst:
-                break;
+            case ygen::lst: lst(code); break;
             case ygen::logicand: logicAnd(code); break;
             case ygen::logicor: logicOr(code); break;
             case ygen::no: no(code); break;
@@ -60,8 +59,7 @@ void vmcore::vm::run(std::string arg) {
             case ygen::gmem:
                 break;
             case ygen::stf: stf(code); break;
-            case ygen::listend:
-                break;
+            case ygen::listend: lstend(code); break;
             case ygen::paraend:
                 break;
             case ygen::scopestart:
@@ -596,4 +594,18 @@ void vmcore::vm::noequ(ygen::byteCode code) {
         }
         default: throw yoexception::YoError("TypeError", "This operator does not support this type of operation",code.line, code.column); break;
     }
+}
+
+void vmcore::vm::lstend(ygen::byteCode code) {
+     valueStack.push(ysto::Value("flag:list_end"));
+}
+
+void vmcore::vm::lst(ygen::byteCode code) {
+    std::vector<ysto::Value> list;
+    while(valueStack.peek().getType() != ygen::type::vtype::flag && valueStack.peek().getStringValue().get() != "flag:list_end") {
+        list.push_back(valueStack.pop());
+    }
+    valueStack.pop(); // flag抛出去
+    std::reverse(list.begin(), list.end());
+    valueStack.push(ysto::Value(list, true, code.line, code.column));
 }
