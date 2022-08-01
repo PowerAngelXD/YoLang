@@ -68,8 +68,7 @@ void vmcore::vm::run(std::string arg) {
                 break;
             case ygen::idenend:
                 break;
-            case ygen::out:
-                break;
+            case ygen::out: out(code); break;
             case ygen::define:
                 break;
             case ygen::init:
@@ -166,11 +165,11 @@ void vmcore::vm::sub(ygen::byteCode code) {
         case ygen::type::vtype::integer: {
             switch (right.getType()) {
                 case ygen::type::vtype::integer: {
-                    valueStack.push(ysto::Value(ytype::YInteger(left.getIntegerValue().get() + right.getIntegerValue().get()), true, code.line, code.column));
+                    valueStack.push(ysto::Value(ytype::YInteger(left.getIntegerValue().get() - right.getIntegerValue().get()), true, code.line, code.column));
                     break;
                 }
                 case ygen::type::vtype::decimal: {
-                    valueStack.push(ysto::Value(ytype::YDecimal(left.getIntegerValue().get() + right.getDecimalValue().get()), true, code.line, code.column));
+                    valueStack.push(ysto::Value(ytype::YDecimal(left.getIntegerValue().get() - right.getDecimalValue().get()), true, code.line, code.column));
                     break;
                 }
                 default: throw yoexception::YoError("TypeError", "This operator does not support this type of operation",code.line, code.column); break;
@@ -180,11 +179,11 @@ void vmcore::vm::sub(ygen::byteCode code) {
         case ygen::type::vtype::decimal: {
             switch (right.getType()) {
                 case ygen::type::vtype::integer: {
-                    valueStack.push(ysto::Value(ytype::YDecimal(left.getDecimalValue().get() + right.getIntegerValue().get()), true, code.line, code.column));
+                    valueStack.push(ysto::Value(ytype::YDecimal(left.getDecimalValue().get() - right.getIntegerValue().get()), true, code.line, code.column));
                     break;
                 }
                 case ygen::type::vtype::decimal: {
-                    valueStack.push(ysto::Value(ytype::YDecimal(left.getDecimalValue().get() + right.getDecimalValue().get()), true, code.line, code.column));
+                    valueStack.push(ysto::Value(ytype::YDecimal(left.getDecimalValue().get() - right.getDecimalValue().get()), true, code.line, code.column));
                     break;
                 }
                 default: throw yoexception::YoError("TypeError", "This operator does not support this type of operation",code.line, code.column); break;
@@ -608,4 +607,51 @@ void vmcore::vm::lst(ygen::byteCode code) {
     valueStack.pop(); // flag抛出去
     std::reverse(list.begin(), list.end());
     valueStack.push(ysto::Value(list, true, code.line, code.column));
+}
+
+void vmcore::vm::out(ygen::byteCode code) {
+    auto result = valueStack.pop();
+    if(result.isList) {
+        std::cout<<"[";
+        for(int i = 0; i < result.getList().size(); i ++) {
+            auto elt = result.getList()[i];
+            if(elt.getType() == ygen::type::vtype::integer)
+                std::cout<<elt.getIntegerValue().get();
+            else if(elt.getType() == ygen::type::vtype::decimal)
+                std::cout<<elt.getDecimalValue().get();
+            else if(elt.getType() == ygen::type::vtype::string)
+                std::cout<<elt.getStringValue().get();
+            else if(elt.getType() == ygen::type::vtype::boolean) {
+                if(elt.getBooleanValue().get())
+                    std::cout<<"true";
+                else
+                    std::cout<<"false";
+            }
+            else if(elt.getType() == ygen::type::vtype::null) {
+                std::cout<<"<null>";
+            }
+
+            if(i != result.getList().size() - 1) {
+                std::cout<<", ";
+            }
+        }
+        std::cout<<"]";
+    }
+    else{
+        if(result.getType() == ygen::type::vtype::integer)
+            std::cout<<result.getIntegerValue().get()<<std::endl;
+        else if(result.getType() == ygen::type::vtype::decimal)
+            std::cout<<result.getDecimalValue().get()<<std::endl;
+        else if(result.getType() == ygen::type::vtype::string)
+            std::cout<<result.getStringValue().get()<<std::endl;
+        else if(result.getType() == ygen::type::vtype::boolean) {
+            if(result.getBooleanValue().get())
+                std::cout<<"true"<<std::endl;
+            else
+                std::cout<<"false"<<std::endl;
+        }
+        else if(result.getType() == ygen::type::vtype::null) {
+            std::cout<<"<null>"<<std::endl;
+        }
+    }
 }
