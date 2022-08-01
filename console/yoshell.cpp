@@ -207,7 +207,7 @@ void ysh::insEVAL(std::vector<std::string> paras) {
         bcg.visitExpr(expr);
 
         yvm = vmcore::vm(bcg.getCodes(), bcg.getConstPool());
-        yvm.run("null");
+        yvm.run("repl");
         auto result = yvm.getResult();
         // 返回值输出
         if(result.isList) {
@@ -260,6 +260,8 @@ void ysh::insEVAL(std::vector<std::string> paras) {
         ygen::ByteCodeGenerator bcg(stmts);
         bcg.visit(stmts);
 
+        yvm = vmcore::vm(bcg.getCodes(), bcg.getConstPool());
+        yvm.run("normal");
     }
 }
 void ysh::insEnv(std::vector<std::string> paras) {
