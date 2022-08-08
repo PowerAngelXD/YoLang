@@ -42,9 +42,11 @@ namespace vmcore {
         void lst(ygen::byteCode code);
         void lstend(ygen::byteCode code);
         void push(ygen::byteCode code);
+        void create(ygen::byteCode code);
         //
 
         void run(std::string arg);
         ysto::Value getResult();
+        void load(std::vector<std::string> cp, std::vector<ygen::byteCode> cs);
     };
 }

@@ -27,6 +27,11 @@ vmcore::vm::vm(std::vector<ygen::byteCode> cs, std::vector<std::string> cp) {
     constPool = cp;
 }
 
+void vmcore::vm::load(std::vector<std::string> cp, std::vector<ygen::byteCode> cs) {
+    codes = cs;
+    constPool = cp;
+}
+
 void vmcore::vm::run(std::string arg) {
     for(auto code: codes) {
         switch (code.code) {
@@ -69,10 +74,7 @@ void vmcore::vm::run(std::string arg) {
             case ygen::idenend:
                 break;
             case ygen::out: out(code); break;
-            case ygen::define:
-                break;
-            case ygen::init:
-                break;
+            case ygen::create: create(code); break;
             case ygen::assign:
                 break;
             case ygen::del:
@@ -108,6 +110,36 @@ void vmcore::vm::push(ygen::byteCode code) {
         case ygen::type::vtype::null: {
             valueStack.push(ysto::Value(code.line, code.column));
             break;
+        }
+        case ygen::type::vtype::iden: {
+            std::string name = constPool[code.arg1];
+            if(space.getValue(name).isListValue()) {
+
+            }
+            else {
+                switch (space.getValue(name).getType()) {
+                    case ygen::type::vtype::integer: {
+                        valueStack.push(ysto::Value(ytype::YInteger(space.getValue(name).getIntegerValue().get()), true, code.line, code.column));
+                        break;
+                    }
+                    case ygen::type::vtype::decimal: {
+                        valueStack.push(ysto::Value(ytype::YDecimal(space.getValue(name).getDecimalValue().get()), true, code.line, code.column));
+                        break;
+                    }
+                    case ygen::type::vtype::string: {
+                        valueStack.push(ysto::Value(ytype::YString(space.getValue(name).getStringValue().get()), true, code.line, code.column));
+                        break;
+                    }
+                    case ygen::type::vtype::boolean: {
+                        valueStack.push(ysto::Value(ytype::YBoolean(space.getValue(name).getBooleanValue().get()), true, code.line, code.column));
+                        break;
+                    }
+                    case ygen::type::vtype::null: {
+                        valueStack.push(ysto::Value(code.line, code.column));
+                        break;
+                    }
+                }
+            }
         }
     }
 }
@@ -652,6 +684,57 @@ void vmcore::vm::out(ygen::byteCode code) {
         }
         else if(result.getType() == ygen::type::vtype::null) {
             std::cout<<"<null>"<<std::endl;
+        }
+    }
+}
+
+void vmcore::vm::create(ygen::byteCode code) {
+    std::string name = constPool[code.arg1];
+    std::string state = constPool[code.arg2]; // 初始化的类型，变量还是常量
+    auto value = valueStack.pop();
+
+    if(code.arg4 == 1) {
+        // 类型声明
+        std::string type = constPool[code.arg3];
+        if(ygen::type::string2Vtype(type) == value.getType()) ;
+        else throw yoexception::YoError("TypeError", "The expected type does not match the type given by the actual expression", code.line, code.column);
+    }
+    else ;
+
+    if(value.isListValue()) {
+        space.createValue(name, ysto::Value(value.getList(), state == "var"?false:true, code.line, code.column));
+    }
+    else {
+        switch (value.getType()) {
+
+            case ygen::type::integer:
+                space.createValue(name, ysto::Value(ytype::YInteger(value.getIntegerValue().get()),
+                                                    state == "var"?false:true,
+                                                    code.line,
+                                                    code.column));
+                break;
+            case ygen::type::boolean:
+                space.createValue(name, ysto::Value(ytype::YBoolean(value.getBooleanValue().get()),
+                                                    state == "var"?false:true,
+                                                    code.line,
+                                                    code.column));
+                break;
+            case ygen::type::decimal:
+                space.createValue(name, ysto::Value(ytype::YDecimal(value.getDecimalValue().get()),
+                                                    state == "var"?false:true,
+                                                    code.line,
+                                                    code.column));
+                break;
+            case ygen::type::string:
+                space.createValue(name, ysto::Value(ytype::YString(value.getStringValue().get()),
+                                                    state == "var"?false:true,
+                                                    code.line,
+                                                    code.column));
+                break;
+            case ygen::type::null:
+                space.createValue(name, ysto::Value(code.line, code.column));
+                break;
+
         }
     }
 }
