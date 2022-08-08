@@ -24,6 +24,10 @@ bool ysto::Value::isConst() {
     return isConstant;
 }
 
+bool ysto::Value::isListValue() {
+    return isList;
+}
+
 ytype::YObject &ysto::Value::getObjectValue() {
     return objectValue;
 }

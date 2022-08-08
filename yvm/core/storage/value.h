@@ -32,6 +32,7 @@ namespace ysto {
 
         ygen::type::vtype getType(); // 获取Valu对应的完整Type
         bool isConst();
+        bool isListValue();
 
         ytype::YObject& getObjectValue();
         ytype::YInteger& getIntegerValue();
