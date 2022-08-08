@@ -15,7 +15,7 @@ namespace ygen{
         // 标志类
         listend, paraend, scopestart, scopeend, idenend,
         // 功能类
-        out, define, init, assign, del, call
+        out, create, assign, del, call
     };
 
     namespace type{

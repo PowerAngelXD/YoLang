@@ -24,8 +24,7 @@
 #define NO normalCtor(btc::no, 0, 0, node->op->line, node->op->column);
 #define STF(sname) normalCtor(btc::stf, sname, 0, node->name->line, node->name->column);
 #define OUT normalCtor(btc::out, 0, 0, node->mark->line, node->mark->column);
-#define DEFINE(name) normalCtor(btc::define, name, 0, node->mark->line, node->mark->column);
-#define INIT(name, type, vtype, vsign) completeCtor(btc::init, name, type, vtype, vsign, node->mark->line, node->mark->column);
+#define CREATE(name, type, vtype, vsign) completeCtor(btc::create, name, type, vtype, vsign, node->mark->line, node->mark->column);
 #define ASSIGN(isidx) normalCtor(btc::assign, isidx, 0.0, node->equ->line, node->equ->column);
 #define DEL(name, type) normalCtor(btc::del, name, type, node->mark->line, node->mark->column);
 #define LISTEND minCtor(btc::listend, node->right->line, node->right->column);
@@ -386,12 +385,11 @@ void ygen::ByteCodeGenerator::visitOutStmt(AST::OutStmtNode* node) {
     OUT
 }
 void ygen::ByteCodeGenerator::visitVorcStmt(AST::VorcStmtNode* node) {
-    DEFINE(addPara(node->name->content))
     if (node->expr == nullptr)
         PUSH(0.0, type::type(type::vtype::null, type::norm), node->mark->line, node->mark->column)
     else
         visitExpr(node->expr);
-    INIT(addPara(node->name->content),
+    CREATE(addPara(node->name->content),
          addPara(node->mark->content),
          node->separate != nullptr ? addPara(node->type->content) : 0.0,
          node->separate != nullptr ? 1.0 : 0.0);
@@ -434,9 +432,8 @@ void ygen::ByteCodeGenerator::visitElseStmt(AST::ElseStmtNode* node) {
 
 void ygen::ByteCodeGenerator::visitRepeatStmt(AST::RepeatStmtNode *node) {
     repit ++;
-    DEFINE(addPara("__repit" + std::to_string(repit) + "__"))
     PUSH(-1, type::type(type::vtype::integer, type::norm), node->mark->line, node->mark->column)
-    INIT(addPara("__repit" + std::to_string(repit) + "__"), addPara("var"), addPara("integer"), 1.0); // 创建迭代器，初始值设置为1
+    CREATE(addPara("__repit" + std::to_string(repit) + "__"), addPara("var"), addPara("integer"), 1.0); // 创建迭代器，初始值设置为1
 
     PUSH(addPara("__repit" + std::to_string(repit) + "__"), type::type(type::vtype::iden, type::norm), node->mark->line, node->mark->column)
     IDENEND(node->mark->line, node->mark->column);
@@ -514,8 +511,7 @@ void ygen::ByteCodeGenerator::visitFuncDefStmt(AST::FuncDefStmtNode* node) {
             PUSH(addPara(node->paras[i]->paraname->content), type::type(type::vtype::string, type::norm), node->paras[i]->paraname->line, node->paras[i]->paraname->column);
         }
     }
-    DEFINE(addPara(node->name->content)) // 符号定义
-    INIT(addPara(node->name->content), addPara(node->mark->content), addPara(node->rettype->content), 1.0)
+    CREATE(addPara(node->name->content), addPara(node->mark->content), addPara(node->rettype->content), 1.0)
     visitBlockStmt(node->body);
 }
 
