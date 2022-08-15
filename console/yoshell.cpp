@@ -279,7 +279,7 @@ void ysh::insEnv(std::vector<std::string> paras) {
 
 void ysh::runYoShell() {
     // 输出欢迎页面
-    std::cout<<"Yolang "<<ysh::completeVersion<<"("<<ysh::version<<")\nGCC version: 8.1.0 (x86_64-posix-seh-rev0, Built by MinGW-W64 project)"<<" \nWe recommend that you enter \"help\" for help"<<std::endl;
+    std::cout<<"Yolang "<<ysh::completeVersion<<"("<<ysh::version<<")\nGCC version: 12.1.0 (x86_64-posix-seh-rev0, Built by MinGW-W64 project)"<<" \nWe recommend that you enter \"help\" for help"<<std::endl;
     std::string in; // 输入内容
     auto pool = insPool;
 
