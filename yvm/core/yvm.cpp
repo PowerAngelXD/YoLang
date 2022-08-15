@@ -41,16 +41,13 @@ void vmcore::vm::run(std::string arg) {
                 break;
             case ygen::jmp:
                 break;
-            case ygen::selfadd:
-                break;
-            case ygen::selfsub:
-                break;
+            case ygen::selfadd: selfadd(code); break;
+            case ygen::selfsub: selfsub(code); break;
             case ygen::sub: sub(code); break;
             case ygen::div: div(code); break;
             case ygen::mul: mul(code); break;
             case ygen::tmo: mod(code); break;
-            case ygen::idx:
-                break;
+            case ygen::idx: idx(code); break;
             case ygen::lst: lst(code); break;
             case ygen::logicand: logicAnd(code); break;
             case ygen::logicor: logicOr(code); break;
@@ -113,8 +110,12 @@ void vmcore::vm::push(ygen::byteCode code) {
         }
         case ygen::type::vtype::iden: {
             std::string name = constPool[code.arg1];
-            if(space.getValue(name).isListValue()) {
 
+            if(!space.findValue(name))
+                throw yoexception::YoError("NameError", "Unknown identifier: '" + name + "'", code.line, code.column);
+
+            if(space.getValue(name).isListValue()) {
+                valueStack.push(ysto::Value(space.getValue(name).getList(), true, code.line, code.column));
             }
             else {
                 switch (space.getValue(name).getType()) {
@@ -736,5 +737,56 @@ void vmcore::vm::create(ygen::byteCode code) {
                 break;
 
         }
+    }
+}
+
+void vmcore::vm::idx(ygen::byteCode code) {
+    auto idx = valueStack.pop();
+    auto value = valueStack.pop();
+    if(value.isListValue()) {
+        if(idx.getIntegerValue().get() > value.getList().size() - 1)
+            throw yoexception::YoError("ListError", "The referenced index is out of range",code.line, code.column);
+        valueStack.push(ysto::Value(value.getList()[idx.getIntegerValue().get()]));
+    }
+    else throw yoexception::YoError("TypeError", "This operator does not support this type of operation",code.line, code.column);
+}
+
+void vmcore::vm::selfadd(ygen::byteCode code) {
+    auto name = valueStack.pop().getStringValue().get();
+
+    if(!space.findValue(name))
+        throw yoexception::YoError("NameError", "Unknown identifier: '" + name + "'", code.line, code.column);
+    if(!(space.getValue(name).getType() == ygen::type::vtype::integer))
+        throw yoexception::YoError("TypeError", "This operator does not support this type of operation",code.line, code.column);
+
+    if(code.arg1) {
+        // 是前置运算
+        space.getValue(name).getIntegerValue() = ytype::YInteger(space.getValue(name).getIntegerValue().get() + 1);
+        valueStack.push(ysto::Value(ytype::YInteger(space.getValue(name).getIntegerValue().get()), false, code.line, code.column));
+    }
+    else {
+        // 后置运算
+        valueStack.push(ysto::Value(ytype::YInteger(space.getValue(name).getIntegerValue().get()), false, code.line, code.column));
+        space.getValue(name).getIntegerValue() = ytype::YInteger(space.getValue(name).getIntegerValue().get() + 1);
+    }
+}
+
+void vmcore::vm::selfsub(ygen::byteCode code) {
+    auto name = valueStack.pop().getStringValue().get();
+
+    if(!space.findValue(name))
+        throw yoexception::YoError("NameError", "Unknown identifier: '" + name + "'", code.line, code.column);
+    if(!(space.getValue(name).getType() == ygen::type::vtype::integer))
+        throw yoexception::YoError("TypeError", "This operator does not support this type of operation",code.line, code.column);
+
+    if(code.arg1) {
+        // 是前置运算
+        space.getValue(name).getIntegerValue() = ytype::YInteger(space.getValue(name).getIntegerValue().get() - 1);
+        valueStack.push(ysto::Value(ytype::YInteger(space.getValue(name).getIntegerValue().get()), false, code.line, code.column));
+    }
+    else {
+        // 后置运算
+        valueStack.push(ysto::Value(ytype::YInteger(space.getValue(name).getIntegerValue().get()), false, code.line, code.column));
+        space.getValue(name).getIntegerValue() = ytype::YInteger(space.getValue(name).getIntegerValue().get() - 1);
     }
 }
