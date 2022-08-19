@@ -214,19 +214,19 @@ void ysh::insEVAL(std::vector<std::string> paras) {
             std::cout<<"[";
             for(int i = 0; i < result.getList().size(); i ++) {
                 auto elt = result.getList()[i];
-                if(elt.getType() == ygen::type::vtype::integer)
+                if(elt.getType() == ytype::vtype::integer)
                     std::cout<<elt.getIntegerValue().get();
-                else if(elt.getType() == ygen::type::vtype::decimal)
+                else if(elt.getType() == ytype::vtype::decimal)
                     std::cout<<elt.getDecimalValue().get();
-                else if(elt.getType() == ygen::type::vtype::string)
+                else if(elt.getType() == ytype::vtype::string)
                     std::cout<<elt.getStringValue().get();
-                else if(elt.getType() == ygen::type::vtype::boolean) {
+                else if(elt.getType() == ytype::vtype::boolean) {
                     if(elt.getBooleanValue().get())
                         std::cout<<"true";
                     else
                         std::cout<<"false";
                 }
-                else if(elt.getType() == ygen::type::vtype::null) {
+                else if(elt.getType() == ytype::vtype::null) {
                     std::cout<<"<null>";
                 }
 
@@ -237,19 +237,19 @@ void ysh::insEVAL(std::vector<std::string> paras) {
             std::cout<<"]";
         }
         else{
-            if(result.getType() == ygen::type::vtype::integer)
+            if(result.getType() == ytype::vtype::integer)
                 std::cout<<result.getIntegerValue().get()<<std::endl;
-            else if(result.getType() == ygen::type::vtype::decimal)
+            else if(result.getType() == ytype::vtype::decimal)
                 std::cout<<result.getDecimalValue().get()<<std::endl;
-            else if(result.getType() == ygen::type::vtype::string)
+            else if(result.getType() == ytype::vtype::string)
                 std::cout<<result.getStringValue().get()<<std::endl;
-            else if(result.getType() == ygen::type::vtype::boolean) {
+            else if(result.getType() == ytype::vtype::boolean) {
                 if(result.getBooleanValue().get())
                     std::cout<<"true"<<std::endl;
                 else
                     std::cout<<"false"<<std::endl;
             }
-            else if(result.getType() == ygen::type::vtype::null) {
+            else if(result.getType() == ytype::vtype::null) {
                 std::cout<<"<null>"<<std::endl;
             }
         }
