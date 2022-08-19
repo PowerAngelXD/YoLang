@@ -1,9 +1,5 @@
 #pragma once
-#include "../type/YObject.h"
-#include "../type/YInteger.h"
-#include "../type/YDecimal.h"
-#include "../type/YBoolean.h"
-#include "../type/YString.h"
+#include "../../../bytecode/generator.h"
 
 namespace ysto {
     class Value {
@@ -15,7 +11,7 @@ namespace ysto {
         std::vector<Value> list;
         // 属性
 
-        ygen::type::vtype type; // 值类型（无修饰符）
+        ytype::vtype type; // 值类型（无修饰符）
     public:
         bool isConstant = false; // 是否为常量
         bool isList = false; // 是否为列表
@@ -30,7 +26,7 @@ namespace ysto {
         Value(int ln, int col); // 初始化null
         Value(std::string content); // 用于初始化flag类型的构造函数（flag只用于内部
 
-        ygen::type::vtype getType(); // 获取Valu对应的完整Type
+        ytype::vtype getType(); // 获取Valu对应的完整Type
         bool isConst();
         bool isListValue();
 
