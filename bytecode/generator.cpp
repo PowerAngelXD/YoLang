@@ -32,83 +32,6 @@
 #define IDENEND(line, column) minCtor(btc::idenend, line, column);
 #define CALL minCtor(btc::call, node->left->line, node->left->column);
 
-ygen::type::modifier ygen::type::norm = 0.1;
-ygen::type::modifier ygen::type::list = 0.2;
-ygen::type::modifier ygen::type::dict = 0.3;
-
-const ygen::type::vtypeUnit ygen::type::Integer = ygen::type::type(ygen::type::vtype::integer, ygen::type::norm);
-const ygen::type::vtypeUnit ygen::type::Decimal = ygen::type::type(ygen::type::vtype::decimal, ygen::type::norm);
-const ygen::type::vtypeUnit ygen::type::String = ygen::type::type(ygen::type::vtype::string, ygen::type::norm);
-const ygen::type::vtypeUnit ygen::type::Boolean = ygen::type::type(ygen::type::vtype::boolean, ygen::type::norm);
-const ygen::type::vtypeUnit ygen::type::Object = ygen::type::type(ygen::type::vtype::object, ygen::type::norm);
-
-float ygen::type::type(vtype t, modifier m) {
-    return t + m;
-}
-int ygen::type::getType(vtypeUnit unit) {
-    type::vtype t = static_cast<type::vtype>(unit);
-    return t;
-}
-float ygen::type::getModifier(vtypeUnit unit) {
-    type::vtype t = static_cast<type::vtype>(unit);
-    type::modifier m = unit - t;
-    return m;
-}
-
-ygen::type::vtype ygen::type::string2Vtype(std::string s) {
-    type::vtype t;
-    if(s == "integer") t = type::vtype::integer;
-    else if(s == "decimal") t = type::vtype::decimal;
-    else if(s == "string") t = type::vtype::string;
-    else if(s == "object") t = type::vtype::object;
-    else if(s == "boolean") t = type::vtype::boolean;
-    else if(s == "null") t = type::vtype::null;
-    else throw yoexception::YoError("GneratorError", "Wrong string: " + s + "to initialize a vtype!", -1, -1);
-    return t;
-}
-ygen::type::modifier ygen::type::string2Modifier(std::string s) {
-    modifier m;
-    if(s == "norm") m = norm;
-    else if(s == "list") m = list;
-    else if(s == "dict") m = dict;
-    else throw yoexception::YoError("GneratorError", "Wrong string: " + s + "to initialize a vtype!", -1, -1);
-    return m;
-}
-
-std::string ygen::type::modifier2String(modifier m) {
-    std::string ret;
-    if(m == norm) ret = "norm";
-    else if(m == list) ret = "list";
-    else if(m == dict) ret = "dict";
-    return ret;
-}
-std::string ygen::type::vtype2String(ygen::type::vtype t) {
-    std::string ret = "null";
-    switch (t) {
-        case integer:
-            ret = "integer";
-            break;
-        case boolean:
-            ret = "boolean";
-            break;
-        case decimal:
-            ret = "decimal";
-            break;
-        case string:
-            ret = "string";
-            break;
-        case null:
-            ret = "null";
-            break;
-        case object:
-            ret = "obj";
-            break;
-        default:
-            break;
-    }
-    return ret;
-}
-
 ygen::ByteCodeGenerator::ByteCodeGenerator(std::vector<AST::StmtNode*> _stmts): stmts(_stmts) {}
 ygen::ByteCodeGenerator::ByteCodeGenerator(AST::WholeExprNode* _expr): expr(_expr) {}
 std::string ygen::ByteCodeGenerator::removeZero(float content) {
@@ -158,21 +81,21 @@ void ygen::ByteCodeGenerator::genFile(std::string name) {
 
 void ygen::ByteCodeGenerator::visitBoolean(yolexer::yoToken* token){
     if(token->content == "false")
-        PUSH(0, type::type(type::vtype::boolean, type::norm), token->line, token->column)
+        PUSH(0, ytype::type(ytype::vtype::boolean, ytype::norm), token->line, token->column)
     else if(token->content == "true")
-        PUSH(1, type::type(type::vtype::boolean, type::norm), token->line, token->column);
+        PUSH(1, ytype::type(ytype::vtype::boolean, ytype::norm), token->line, token->column);
 }
 void ygen::ByteCodeGenerator::visitNumber(yolexer::yoToken* token){
     if(token->type == yolexer::yoTokType::Integer)
-        PUSH(atoi(token->content.c_str()), type::type(type::vtype::integer, type::norm), token->line, token->column)
+        PUSH(atoi(token->content.c_str()), ytype::type(ytype::vtype::integer, ytype::norm), token->line, token->column)
     else if(token->type == yolexer::yoTokType::Decimal)
-        PUSH(atof(token->content.c_str()), type::type(type::vtype::decimal, type::norm), token->line, token->column)
+        PUSH(atof(token->content.c_str()), ytype::type(ytype::vtype::decimal, ytype::norm), token->line, token->column)
 }
 void ygen::ByteCodeGenerator::buildIntegerNumber(std::string number, int line, int column) {
-    PUSH(atoi(number.c_str()), type::type(type::vtype::integer, type::norm), line, column)
+    PUSH(atoi(number.c_str()), ytype::type(ytype::vtype::integer, ytype::norm), line, column)
 }
 void ygen::ByteCodeGenerator::buildDecimalNumber(std::string number, int line, int column) {
-    PUSH(atof(number.c_str()), type::type(type::vtype::decimal, type::norm), line, column)
+    PUSH(atof(number.c_str()), ytype::type(ytype::vtype::decimal, ytype::norm), line, column)
 }
 void ygen::ByteCodeGenerator::visitString(yolexer::yoToken* token) {
     std::string content = token->content;
@@ -198,19 +121,19 @@ void ygen::ByteCodeGenerator::visitString(yolexer::yoToken* token) {
             }
         } else ret.push_back(content[i]);
     }
-    PUSH(addPara(ret), type::type(type::vtype::string, type::norm), token->line, token->column);
+    PUSH(addPara(ret), ytype::type(ytype::vtype::string, ytype::norm), token->line, token->column);
 }
 void ygen::ByteCodeGenerator::visitNull(yolexer::yoToken* token){
-    PUSH(0.0, type::type(type::vtype::null, type::norm), token->line, token->column);
+    PUSH(0.0, ytype::type(ytype::vtype::null, ytype::norm), token->line, token->column);
 }
 void ygen::ByteCodeGenerator::visitIdentifier(AST::IdentifierNode* node){
     if(node->dots.empty()){
-        PUSH(addPara(node->idens[0]->content), type::type(type::vtype::iden, type::norm), node->idens[0]->line, node->idens[0]->column)
+        PUSH(addPara(node->idens[0]->content), ytype::type(ytype::vtype::iden, ytype::norm), node->idens[0]->line, node->idens[0]->column)
         IDENEND(node->idens[0]->line, node->idens[0]->column)
     }
     else{
         for(int i = 0; i < node->idens.size(); i++) {
-            PUSH(addPara(node->idens[i]->content), type::type(type::vtype::iden, type::norm), node->idens[i]->line, node->idens[i]->column);
+            PUSH(addPara(node->idens[i]->content), ytype::type(ytype::vtype::iden, ytype::norm), node->idens[i]->line, node->idens[i]->column);
             if(i == node->idens.size() - 1); // 防止末尾还添加gmem
             else GMEM
         }
@@ -224,7 +147,7 @@ void ygen::ByteCodeGenerator::visitIdentifierText(AST::IdentifierNode* node, boo
         text += node->dots[i]->content;
         text += node->idens[i + 1]->content;
     }
-    PUSH(addPara(text), type::type(type::vtype::string, type::norm), node->idens[0]->line, node->idens[0]->column);
+    PUSH(addPara(text), ytype::type(ytype::vtype::string, ytype::norm), node->idens[0]->line, node->idens[0]->column);
 }
 void ygen::ByteCodeGenerator::visitSiadExpr(AST::SiadExprNode* node){
     if(node->isFront){
@@ -386,7 +309,7 @@ void ygen::ByteCodeGenerator::visitOutStmt(AST::OutStmtNode* node) {
 }
 void ygen::ByteCodeGenerator::visitVorcStmt(AST::VorcStmtNode* node) {
     if (node->expr == nullptr)
-        PUSH(0.0, type::type(type::vtype::null, type::norm), node->mark->line, node->mark->column)
+        PUSH(0.0, ytype::type(ytype::vtype::null, ytype::norm), node->mark->line, node->mark->column)
     else
         visitExpr(node->expr);
     CREATE(addPara(node->name->content),
@@ -432,10 +355,10 @@ void ygen::ByteCodeGenerator::visitElseStmt(AST::ElseStmtNode* node) {
 
 void ygen::ByteCodeGenerator::visitRepeatStmt(AST::RepeatStmtNode *node) {
     repit ++;
-    PUSH(-1, type::type(type::vtype::integer, type::norm), node->mark->line, node->mark->column)
+    PUSH(-1, ytype::type(ytype::vtype::integer, ytype::norm), node->mark->line, node->mark->column)
     CREATE(addPara("__repit" + std::to_string(repit) + "__"), addPara("var"), addPara("integer"), 1.0); // 创建迭代器，初始值设置为1
 
-    PUSH(addPara("__repit" + std::to_string(repit) + "__"), type::type(type::vtype::iden, type::norm), node->mark->line, node->mark->column)
+    PUSH(addPara("__repit" + std::to_string(repit) + "__"), ytype::type(ytype::vtype::iden, ytype::norm), node->mark->line, node->mark->column)
     IDENEND(node->mark->line, node->mark->column);
     visitAddExpr(node->times);
     buildIntegerNumber("1", node->left->line, node->left->column);
@@ -445,12 +368,12 @@ void ygen::ByteCodeGenerator::visitRepeatStmt(AST::RepeatStmtNode *node) {
     JMP(paraHelper::jmpt::reqTrue, paraHelper::jmpt::outScope, node->mark->line, node->mark->column)
 
     SCOPE_BEGIN{
-        PUSH(addPara("__repit" + std::to_string(repit) + "__"), type::type(type::vtype::string, type::norm), node->mark->line,
+        PUSH(addPara("__repit" + std::to_string(repit) + "__"), ytype::type(ytype::vtype::string, ytype::norm), node->mark->line,
                    node->mark->column);
         SELF_ADD(0.0, node->left->line, node->left->column)
         visit(node->body->stmts);
 
-        PUSH(addPara("__repit" + std::to_string(repit) + "__"), type::type(type::vtype::iden, type::norm), node->mark->line, node->mark->column)
+        PUSH(addPara("__repit" + std::to_string(repit) + "__"), ytype::type(ytype::vtype::iden, ytype::norm), node->mark->line, node->mark->column)
         IDENEND(node->left->line, node->left->column)
         visitAddExpr(node->times);
         buildIntegerNumber("1", node->left->line, node->left->column);
@@ -472,7 +395,7 @@ void ygen::ByteCodeGenerator::visitForStmt(AST::ForStmtNode* node) {
     if (node->hasCond)
         visitBoolExpr(node->cond);
     else
-        PUSH(1.0, type::type(type::vtype::boolean, type::norm), node->mark->line, node->mark->column)
+        PUSH(1.0, ytype::type(ytype::vtype::boolean, ytype::norm), node->mark->line, node->mark->column)
     JMP(paraHelper::jmpt::reqTrue, paraHelper::jmpt::outScope, node->mark->line, node->mark->column)
     SCOPE_BEGIN{
         visit(node->body->stmts);
@@ -484,7 +407,7 @@ void ygen::ByteCodeGenerator::visitForStmt(AST::ForStmtNode* node) {
         if (node->hasCond)
             visitBoolExpr(node->cond);
         else
-            PUSH(1.0, type::type(type::vtype::boolean, type::norm), node->mark->line, node->mark->column)
+            PUSH(1.0, ytype::type(ytype::vtype::boolean, ytype::norm), node->mark->line, node->mark->column)
     }SCOPE_END
     JMP(paraHelper::jmpt::unconditional, paraHelper::jmpt::backScope, node->mark->line, node->mark->column)
     // 释放局部变量
@@ -498,17 +421,17 @@ void ygen::ByteCodeGenerator::visitDeleteStmt(AST::DeleteStmtNode* node) {
 }
 
 void ygen::ByteCodeGenerator::visitBreakStmt(AST::BreakStmtNode* node) {
-    PUSH(0.0, type::type(type::vtype::boolean, type::norm), node->mark->line, node->mark->column)
+    PUSH(0.0, ytype::type(ytype::vtype::boolean, ytype::norm), node->mark->line, node->mark->column)
     JMP(paraHelper::jmpt::reqTrue, paraHelper::jmpt::outScope, node->mark->line, node->mark->column)
 }
 
 void ygen::ByteCodeGenerator::visitFuncDefStmt(AST::FuncDefStmtNode* node) {
-    PUSH(addPara(node->rettype->content), type::type(type::vtype::string, type::norm), node->mark->line, node->mark->column); // 将要定义的函数的返回值类型入栈
+    PUSH(addPara(node->rettype->content), ytype::type(ytype::vtype::string, ytype::norm), node->mark->line, node->mark->column); // 将要定义的函数的返回值类型入栈
     PARAEND // 因为栈的原因，flag应该置后
     if(node->hasPara) {
         for(int i = 0; i < node->paras.size(); i++) {
-            PUSH(addPara(node->paras[i]->paratype->content), type::type(type::vtype::string, type::norm), node->paras[i]->paratype->line, node->paras[i]->paratype->column);
-            PUSH(addPara(node->paras[i]->paraname->content), type::type(type::vtype::string, type::norm), node->paras[i]->paraname->line, node->paras[i]->paraname->column);
+            PUSH(addPara(node->paras[i]->paratype->content), ytype::type(ytype::vtype::string, ytype::norm), node->paras[i]->paratype->line, node->paras[i]->paratype->column);
+            PUSH(addPara(node->paras[i]->paraname->content), ytype::type(ytype::vtype::string, ytype::norm), node->paras[i]->paraname->line, node->paras[i]->paraname->column);
         }
     }
     CREATE(addPara(node->name->content), addPara(node->mark->content), addPara(node->rettype->content), 1.0)
