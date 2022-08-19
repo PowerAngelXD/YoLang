@@ -16,7 +16,7 @@ bool ytype::YString::toBoolean() {
     return value == "true"?true:false;
 }
 
-std::string ytype::YString::get() {
+std::string& ytype::YString::get() {
     return value;
 }
 

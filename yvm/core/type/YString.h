@@ -16,7 +16,7 @@ namespace ytype {
         int toInteger();
         bool toBoolean();
 
-        std::string get();
+        std::string& get();
         void set(std::string v);
         void operator=(std::string v);
     };
