@@ -18,7 +18,7 @@ bool ytype::YDecimal::toBoolean() {
     return value == 1?true:false;
 }
 
-float ytype::YDecimal::get() {
+float& ytype::YDecimal::get() {
     return value;
 }
 
