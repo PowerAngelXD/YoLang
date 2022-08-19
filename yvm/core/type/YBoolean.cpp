@@ -16,7 +16,7 @@ float ytype::YBoolean::toDecimal() {
     return static_cast<float>(value?1:0);
 }
 
-bool ytype::YBoolean::get() {
+bool& ytype::YBoolean::get() {
     return value;
 }
 

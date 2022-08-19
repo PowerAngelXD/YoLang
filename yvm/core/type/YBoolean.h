@@ -16,7 +16,7 @@ namespace ytype {
         int toInteger();
         float toDecimal();
 
-        bool get();
+        bool& get();
         void set(bool v);
         void operator=(bool v);
     };
