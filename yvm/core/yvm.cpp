@@ -64,10 +64,8 @@ void vmcore::vm::run(std::string arg) {
             case ygen::listend: lstend(code); break;
             case ygen::paraend:
                 break;
-            case ygen::scopestart:
-                break;
-            case ygen::scopeend:
-                break;
+            case ygen::scopestart: scopestart(code); break;
+            case ygen::scopeend: scopeend(code); break;
             case ygen::idenend:
                 break;
             case ygen::out: out(code); break;
@@ -793,6 +791,8 @@ void vmcore::vm::selfsub(ygen::byteCode code) {
 void vmcore::vm::assign(ygen::byteCode code) {
     auto value = valueStack.pop();
     auto name = valueStack.pop().getStringValue().get();
+    if(space.getValue(name).isConst())
+        throw yoexception::YoError("AssignError", "You cannot assign value to a constant", code.line, code.column);
     if(code.arg1) {
         // index assignment
         auto index = valueStack.pop().getIntegerValue().get();
@@ -801,4 +801,12 @@ void vmcore::vm::assign(ygen::byteCode code) {
     else {
         space.getValue(name) = value;
     }
+}
+
+void vmcore::vm::scopestart(ygen::byteCode code) {
+    space.createScope("vm_created_scope", code.line, code.column);
+}
+
+void vmcore::vm::scopeend(ygen::byteCode code) {
+    space.deleteScope();
 }
