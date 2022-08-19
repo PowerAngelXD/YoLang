@@ -18,7 +18,7 @@ bool ytype::YInteger::toBoolean() {
     return value == 1?true:false;
 }
 
-int ytype::YInteger::get() {
+int& ytype::YInteger::get() {
     return value;
 }
 
