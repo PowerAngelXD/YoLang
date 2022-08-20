@@ -358,9 +358,9 @@ void ygen::ByteCodeGenerator::visitElseStmt(AST::ElseStmtNode* node) {
 void ygen::ByteCodeGenerator::visitRepeatStmt(AST::RepeatStmtNode *node) {
     repit ++;
     PUSH(-1, ytype::type(ytype::vtype::integer, ytype::norm), node->mark->line, node->mark->column)
-    CREATE(addPara("__repit" + std::to_string(repit) + "__"), addPara("var"), addPara("integer"), 1.0); // 创建迭代器，初始值设置为1
+    CREATE(addPara("_rit" + std::to_string(repit) + "_"), addPara("var"), addPara("integer"), 1.0); // 创建迭代器，初始值设置为1
 
-    PUSH(addPara("__repit" + std::to_string(repit) + "__"), ytype::type(ytype::vtype::iden, ytype::norm), node->mark->line, node->mark->column)
+    PUSH(addPara("_rit" + std::to_string(repit) + "_"), ytype::type(ytype::vtype::iden, ytype::norm), node->mark->line, node->mark->column)
     IDENEND(node->mark->line, node->mark->column);
     visitAddExpr(node->times);
     buildIntegerNumber("1", node->left->line, node->left->column);
@@ -368,14 +368,15 @@ void ygen::ByteCodeGenerator::visitRepeatStmt(AST::RepeatStmtNode *node) {
 
     LT(node->right->line, node->right->column)
     JMP(paraHelper::jmpt::reqTrue, paraHelper::jmpt::outScope, node->mark->line, node->mark->column)
+    DEL_VAL
 
     SCOPE_BEGIN{
-        PUSH(addPara("__repit" + std::to_string(repit) + "__"), ytype::type(ytype::vtype::string, ytype::norm), node->mark->line,
+        PUSH(addPara("_rit" + std::to_string(repit) + "_"), ytype::type(ytype::vtype::string, ytype::norm), node->mark->line,
                    node->mark->column);
         SELF_ADD(0.0, node->left->line, node->left->column)
         visit(node->body->stmts);
 
-        PUSH(addPara("__repit" + std::to_string(repit) + "__"), ytype::type(ytype::vtype::iden, ytype::norm), node->mark->line, node->mark->column)
+        PUSH(addPara("_rit" + std::to_string(repit) + "_"), ytype::type(ytype::vtype::iden, ytype::norm), node->mark->line, node->mark->column)
         IDENEND(node->left->line, node->left->column)
         visitAddExpr(node->times);
         buildIntegerNumber("1", node->left->line, node->left->column);
@@ -385,8 +386,9 @@ void ygen::ByteCodeGenerator::visitRepeatStmt(AST::RepeatStmtNode *node) {
     SCOPE_END
 
     JMP(paraHelper::jmpt::reqTrue, paraHelper::jmpt::backScope, node->mark->line, node->mark->column)
+    DEL_VAL
     // repit的处理
-    DEL(addPara("__repit" + std::to_string(repit) + "__"), 1.0)
+    DEL(addPara("_rit" + std::to_string(repit) + "_"), 1.0)
     repit --;
 }
 
@@ -399,6 +401,7 @@ void ygen::ByteCodeGenerator::visitForStmt(AST::ForStmtNode* node) {
     else
         PUSH(1.0, ytype::type(ytype::vtype::boolean, ytype::norm), node->mark->line, node->mark->column)
     JMP(paraHelper::jmpt::reqTrue, paraHelper::jmpt::outScope, node->mark->line, node->mark->column)
+    DEL_VAL
     SCOPE_BEGIN{
         visit(node->body->stmts);
         if (node->assign != nullptr)
@@ -411,7 +414,8 @@ void ygen::ByteCodeGenerator::visitForStmt(AST::ForStmtNode* node) {
         else
             PUSH(1.0, ytype::type(ytype::vtype::boolean, ytype::norm), node->mark->line, node->mark->column)
     }SCOPE_END
-    JMP(paraHelper::jmpt::unconditional, paraHelper::jmpt::backScope, node->mark->line, node->mark->column)
+    JMP(paraHelper::jmpt::reqTrue, paraHelper::jmpt::backScope, node->mark->line, node->mark->column)
+    DEL_VAL
     // 释放局部变量
     if(node->hasVorc)
         DEL(addPara(node->vorc->name->content), 1.0)
