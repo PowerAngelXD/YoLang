@@ -72,8 +72,7 @@ void vmcore::vm::run(std::string arg) {
             case ygen::out: out(code); break;
             case ygen::create: create(code); break;
             case ygen::assign: assign(code); break;
-            case ygen::del:
-                break;
+            case ygen::del: del(code); break;
             case ygen::call:
                 break;
         }
@@ -922,5 +921,21 @@ int vmcore::vm::jmp(ygen::byteCode code, int current) {
 }
 
 void vmcore::vm::del(ygen::byteCode code) {
-
+    if(code.arg2 == 1.0) {
+        // 判断是否启用了不传入push名称的模式
+        auto name = constPool[code.arg1];
+        if(space.findValue(name)) {
+            space.deleteValue(name);
+        }
+        else
+            throw yoexception::YoError("NameError", "There is no identifier named: '" + name + "'", code.line, code.column);
+    }
+    else {
+        auto name = valueStack.pop().getStringValue().get();
+        if(space.findValue(name)) {
+            space.deleteValue(name);
+        }
+        else
+            throw yoexception::YoError("NameError", "There is no identifier named: '" + name + "'", code.line, code.column);
+    }
 }
