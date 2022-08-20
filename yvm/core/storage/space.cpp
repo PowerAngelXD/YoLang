@@ -32,13 +32,16 @@ ysto::Value &ysto::Space::getValue(std::string name) {
 }
 
 void ysto::Space::deleteValue(std::string name) {
-    if(scopePool[deepCount].find(name)) scopePool[deepCount].deleteValue(name);
-    int temp = deepCount; // temp寄存
-    while(temp != -1) {
-        if(scopePool[temp].find(name)) scopePool[temp].deleteValue(name);
-        temp --;
+    bool state = false;
+    if(scopePool[deepCount].find(name)) state = scopePool[deepCount].deleteValue(name);
+    else {
+        int temp = deepCount; // temp寄存
+        while(temp != -1) {
+            if(scopePool[temp].find(name)) state = scopePool[temp].deleteValue(name);
+            temp --;
+        }
     }
-    throw yoexception::YoError("NameError","The value of the identifier named '" + name + "' does not exist in '" + scopePool[deepCount].getIdentifier() + "'",
+    if(!state) throw yoexception::YoError("NameError","The value of the identifier named '" + name + "' does not exist in '" + scopePool[deepCount].getIdentifier() + "'",
                                scopePool[deepCount].line,
                                scopePool[deepCount].column);
 }
