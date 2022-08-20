@@ -14,7 +14,7 @@ namespace ysto {
         bool find(std::string name);
         int findPosition(std::string name);
         Value& getV(std::string name);
-        void deleteValue(std::string name);
+        bool deleteValue(std::string name);
         void createValue(std::string name, Value v);
         std::string getIdentifier();
     };

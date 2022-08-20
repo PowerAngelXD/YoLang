@@ -23,14 +23,15 @@ ysto::Value& ysto::Scope::getV(std::string name) {
     throw yoexception::YoError("NameError","The value of the identifier named '" + name + "' does not exist in '" + identifier + "'", line, column);
 }
 
-void ysto::Scope::deleteValue(std::string name) {
+bool ysto::Scope::deleteValue(std::string name) {
     for(int i = 0; i < childNames.size(); i ++) {
         if(name == childNames[i]) {
             childNames.erase(childNames.begin() + i);
             child.erase(child.begin() + i);
+            return true;
         }
     }
-    throw yoexception::YoError("NameError","The value of the identifier named '" + name + "' does not exist in '" + identifier + "'", line, column);
+    return false;
 }
 
 void ysto::Scope::createValue(std::string name, ysto::Value v) {
