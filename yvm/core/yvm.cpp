@@ -33,14 +33,15 @@ void vmcore::vm::load(std::vector<std::string> cp, std::vector<ygen::byteCode> c
 }
 
 void vmcore::vm::run(std::string arg) {
-    for(auto code: codes) {
+    for(int i = 0; i < codes.size(); i ++) {
+        auto code  = codes[i];
         switch (code.code) {
+            case ygen::del_val: del_val(); break;
             case ygen::add: add(code); break;
             case ygen::push: push(code); break;
             case ygen::gto:
                 break;
-            case ygen::jmp:
-                break;
+            case ygen::jmp: i = jmp(code, i); break;
             case ygen::selfadd: selfadd(code); break;
             case ygen::selfsub: selfsub(code); break;
             case ygen::sub: sub(code); break;
@@ -809,4 +810,113 @@ void vmcore::vm::scopestart(ygen::byteCode code) {
 
 void vmcore::vm::scopeend(ygen::byteCode code) {
     space.deleteScope();
+}
+
+void vmcore::vm::del_val() {
+    valueStack.pop();
+}
+
+int vmcore::vm::jmp(ygen::byteCode code, int current) {
+    switch ((int)code.arg1) {
+        case ygen::paraHelper::jmpt::reqTrue: {
+            if(valueStack.pop().getBooleanValue().get() == true) {
+                switch ((int)code.arg2) {
+                    case ygen::paraHelper::jmpt::outScope: {
+                        int flag = 0;
+                        bool first = false;
+                        while(flag != 0 || !first) {
+                            first = true;
+                            current ++;
+                            if(codes[current].code == ygen::btc::scopestart) flag ++;
+                            else if(codes[current].code == ygen::btc::scopeend) flag --;
+                            else ;
+                        }
+                        valueStack.push(ysto::Value(ytype::YBoolean(false), true, code.line, code.column));
+                        break;
+                    }
+                    case ygen::paraHelper::jmpt::backScope: {
+                        int flag = 0;
+                        bool first = false;
+                        while(flag != 0 || !first) {
+                            first = true;
+                            current --;
+                            if(codes[current].code == ygen::btc::scopestart) flag --;
+                            else if(codes[current].code == ygen::btc::scopeend) flag ++;
+                            else ;
+                        }
+                        break;
+                    }
+                    default: break;
+                }
+            }
+            else valueStack.push(ysto::Value(ytype::YBoolean(true), true, code.line, code.column));
+            break;
+        }
+        case ygen::paraHelper::jmpt::reqFalse: {
+            if(valueStack.pop().getBooleanValue().get() == false) {
+                switch ((int)code.arg2) {
+                    case ygen::paraHelper::jmpt::outScope: {
+                        int flag = 0;
+                        bool first = false;
+                        while(flag != 0 || !first) {
+                            first = true;
+                            current ++;
+                            if(codes[current].code == ygen::btc::scopestart) flag ++;
+                            else if(codes[current].code == ygen::btc::scopeend) flag --;
+                            else ;
+                        }
+                        valueStack.push(ysto::Value(ytype::YBoolean(true), true, code.line, code.column));
+                        break;
+                    }
+                    case ygen::paraHelper::jmpt::backScope: {
+                        int flag = 0;
+                        bool first = false;
+                        while(flag != 0 || !first) {
+                            first = true;
+                            current --;
+                            if(codes[current].code == ygen::btc::scopestart) flag --;
+                            else if(codes[current].code == ygen::btc::scopeend) flag ++;
+                            else ;
+                        }
+                        break;
+                    }
+                    default: break;
+                }
+            }
+            else valueStack.push(ysto::Value(ytype::YBoolean(false), true, code.line, code.column));
+            break;
+        }
+        case ygen::paraHelper::jmpt::unconditional: {
+            switch ((int)code.arg2) {
+                case ygen::paraHelper::jmpt::outScope: {
+                    int flag = 0;
+                    bool first = false;
+                    while(flag != 0 || !first) {
+                        first = true;
+                        current ++;
+                        if(codes[current].code == ygen::btc::scopestart) flag ++;
+                        else if(codes[current].code == ygen::btc::scopeend) flag --;
+                        else ;
+                    }
+                    break;
+                }
+                case ygen::paraHelper::jmpt::backScope: {
+                    int flag = 0;
+                    bool first = false;
+                    while(flag != 0 || !first) {
+                        first = true;
+                        current --;
+                        if(codes[current].code == ygen::btc::scopestart) flag --;
+                        else if(codes[current].code == ygen::btc::scopeend) flag ++;
+                        else ;
+                    }
+                    break;
+                }
+                default: break;
+            }
+            break;
+        }
+        default: break;
+    }
+    return current;
 }

@@ -49,6 +49,8 @@ namespace vmcore {
         void assign(ygen::byteCode code);
         void scopestart(ygen::byteCode code);
         void scopeend(ygen::byteCode code);
+        int jmp(ygen::byteCode code, int current);
+        void del_val();
         //
 
         void run(std::string arg);
