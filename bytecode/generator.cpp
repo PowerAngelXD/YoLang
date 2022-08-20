@@ -31,6 +31,7 @@
 #define PARAEND minCtor(btc::paraend, node->right->line, node->left->column);
 #define IDENEND(line, column) minCtor(btc::idenend, line, column);
 #define CALL minCtor(btc::call, node->left->line, node->left->column);
+#define DEL_VAL minCtor(btc::del_val, node->mark->line, node->mark->column);
 
 ygen::ByteCodeGenerator::ByteCodeGenerator(std::vector<AST::StmtNode*> _stmts): stmts(_stmts) {}
 ygen::ByteCodeGenerator::ByteCodeGenerator(AST::WholeExprNode* _expr): expr(_expr) {}
@@ -329,7 +330,8 @@ void ygen::ByteCodeGenerator::visitBlockStmt(AST::BlockStmtNode* node) {
 }
 void ygen::ByteCodeGenerator::visitWhileStmt(AST::WhileStmtNode* node) {
     visitBoolExpr(node->cond);
-    JMP(paraHelper::jmpt::reqTrue, paraHelper::jmpt::outScope, node->mark->line, node->mark->column)
+    JMP(paraHelper::jmpt::reqFalse, paraHelper::jmpt::outScope, node->mark->line, node->mark->column)
+    DEL_VAL
     SCOPE_BEGIN{
         visit(node->body->stmts);
         // 下面的指令用于检测表达式是否还成立，成立则jmp到下一个循环，否则向前偏移
@@ -340,7 +342,7 @@ void ygen::ByteCodeGenerator::visitWhileStmt(AST::WhileStmtNode* node) {
 }
 void ygen::ByteCodeGenerator::visitIfStmt(AST::IfStmtNode* node) {
     visitBoolExpr(node->cond);
-    JMP(paraHelper::reqTrue, paraHelper::jmpt::outScope, node->mark->line, node->mark->column)
+    JMP(paraHelper::reqFalse, paraHelper::jmpt::outScope, node->mark->line, node->mark->column)
     visitBlockStmt(node->body);
 }
 void ygen::ByteCodeGenerator::visitElifStmt(AST::ElifStmtNode* node) {

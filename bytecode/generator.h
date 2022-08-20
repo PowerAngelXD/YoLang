@@ -16,7 +16,7 @@ namespace ygen{
         // 标志类
         listend, paraend, scopestart, scopeend, idenend,
         // 功能类
-        out, create, assign, del, call
+        out, create, assign, del, call, del_val
     };
 
     // ByteCode的参数帮助，可以快捷的写一些参数。内部均为枚举，以XXXXHelper的形式存在
