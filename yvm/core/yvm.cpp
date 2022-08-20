@@ -920,3 +920,7 @@ int vmcore::vm::jmp(ygen::byteCode code, int current) {
     }
     return current;
 }
+
+void vmcore::vm::del(ygen::byteCode code) {
+
+}
