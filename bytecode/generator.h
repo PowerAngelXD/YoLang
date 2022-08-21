@@ -119,6 +119,7 @@ namespace ygen{
         void visitForStmt(AST::ForStmtNode* node);
         void visitBreakStmt(AST::BreakStmtNode* node);
         void visitFuncDefStmt(AST::FuncDefStmtNode* node);
+        AST::StmtNode* visitDeferStmt(AST::DeferStmtNode* node);
         void visit(std::vector<AST::StmtNode*> stmts); // 特殊的visitor，visit的是整个stmts
     };
 }
