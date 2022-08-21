@@ -34,13 +34,11 @@ void vmcore::vm::load(std::vector<std::string> cp, std::vector<ygen::byteCode> c
 
 void vmcore::vm::run(std::string arg) {
     for(int i = 0; i < codes.size(); i ++) {
-        auto code  = codes[i];
+        auto& code  = codes[i];
         switch (code.code) {
             case ygen::del_val: del_val(); break;
             case ygen::add: add(code); break;
             case ygen::push: push(code); break;
-            case ygen::gto:
-                break;
             case ygen::jmp: i = jmp(code, i); break;
             case ygen::selfadd: selfadd(code); break;
             case ygen::selfsub: selfsub(code); break;
@@ -67,8 +65,7 @@ void vmcore::vm::run(std::string arg) {
                 break;
             case ygen::scopestart: scopestart(code); break;
             case ygen::scopeend: scopeend(code); break;
-            case ygen::idenend:
-                break;
+            case ygen::idenend: idenend(code); break;
             case ygen::out: out(code); break;
             case ygen::create: create(code); break;
             case ygen::assign: assign(code); break;
@@ -888,10 +885,8 @@ int vmcore::vm::jmp(ygen::byteCode code, int current) {
         case ygen::paraHelper::jmpt::unconditional: {
             switch ((int)code.arg2) {
                 case ygen::paraHelper::jmpt::outScope: {
-                    int flag = 0;
-                    bool first = false;
-                    while(flag != 0 || !first) {
-                        first = true;
+                    int flag = 1;
+                    while(flag != 0) {
                         current ++;
                         if(codes[current].code == ygen::btc::scopestart) flag ++;
                         else if(codes[current].code == ygen::btc::scopeend) flag --;
@@ -900,10 +895,8 @@ int vmcore::vm::jmp(ygen::byteCode code, int current) {
                     break;
                 }
                 case ygen::paraHelper::jmpt::backScope: {
-                    int flag = 0;
-                    bool first = false;
-                    while(flag != 0 || !first) {
-                        first = true;
+                    int flag = 1;
+                    while(flag != 0) {
                         current --;
                         if(codes[current].code == ygen::btc::scopestart) flag --;
                         else if(codes[current].code == ygen::btc::scopeend) flag ++;
@@ -938,4 +931,8 @@ void vmcore::vm::del(ygen::byteCode code) {
         else
             throw yoexception::YoError("NameError", "There is no identifier named: '" + name + "'", code.line, code.column);
     }
+}
+
+void vmcore::vm::idenend(ygen::byteCode code) {
+    valueStack.push(ysto::Value("flag:identifier_end"));
 }
