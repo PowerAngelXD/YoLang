@@ -134,7 +134,7 @@ else {
 }
 ```
 如果condition1为真，则将会进入if块并执行其内部的所有代码；然后跳出该条件控制；对于elif也是相同的\
-但是如果condition1盒condition2都不能被满足，则执行else内部的所有代码
+但是如果condition1和condition2都不能被满足，则执行else内部的所有代码
 ###### while语句
 在Yolang中，一个标准的while语句如下书写：
 ```go
@@ -150,7 +150,7 @@ while (true) {
 }
 ```
 ###### repeat语句
-为了简化部分操作，Yolang发明出了repeat这个东西，他的写法大致如下：
+为了简化部分操作，Yolang发明出了repeat这个东西，它的写法大致如下：
 ```go
 repeat (times) {
     // ..
@@ -183,3 +183,21 @@ repeat (3) {
     }
 }
 ```
+###### for语句
+和C++一样，Yolang的for语句写法如下：
+```go
+for( definition ; condition ; operation) {
+    
+}
+```
+下面来逐步讲解：\
+definition：是对for内计数器的声明，统一使用Yolang的变量声明语句；当然你也可以在外部自己声明一个计数器，然后放入到for中使用，如下：
+```go
+var count = 0;
+for (; count < 10; count ++) {
+    
+}
+```
+如您所见，definition是可以省略的\
+condition：是一个布尔表达式，与while的condition作用一样，您也可以将其省略，但是会让您的程序陷入死循环\
+operation：是对您的计数器的操作，通常可以是自增加，自减等操作
