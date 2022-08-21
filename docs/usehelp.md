@@ -114,9 +114,72 @@ line: X, column: X
 ```
 而如果将一个不是列表的变量赋值为一个列表或者将一个列表赋值为一个不是列表的量也会产生如上报错
 #### 5，条件控制
+###### if elif else语句
 在Yolang中，最简单的条件控制语句如同下面的方式书写：
 ```go
 if (condition) {
     ..... // write somthing...
+}
+```
+如您所见，这是一个ifstmt，如果您需要更加精细的条件控制，可以使用一下的结构（condition为布尔表达式）
+```go
+if (condition1) {
+    // ...
+}
+elif (condition2) {
+    // ..
+}
+else {
+    // ..
+}
+```
+如果condition1为真，则将会进入if块并执行其内部的所有代码；然后跳出该条件控制；对于elif也是相同的\
+但是如果condition1盒condition2都不能被满足，则执行else内部的所有代码
+###### while语句
+在Yolang中，一个标准的while语句如下书写：
+```go
+while (condition) {
+    // ..
+}
+```
+当while运行时，如果condition为真（condition为布尔表达式），则运行while下语句块的内容，直到condition为假，就运行下一个stmt\
+如下代码则是一个死循环，他会一直运行下去，因为括号里的布尔表达式为true
+```go
+while (true) {
+    // ..
+}
+```
+###### repeat语句
+为了简化部分操作，Yolang发明出了repeat这个东西，他的写法大致如下：
+```go
+repeat (times) {
+    // ..
+}
+```
+其中，times是一个AddExpression，这个表达式的结果将决定repeat体内的代码块被重复运行几次\
+而为了某些操作的简便，在repeatstmt中自动创建了名为 "\_ritx_"（没有反斜杠，只有两个下划线）的变量（也被称作外置计数器）；它的值随repeat内置的计数器（这个计数器的起始值为0）的变化而变化\
+例如：
+```go
+repeat (3) {
+    out _rit0_;
+}
+```
+上述代码的输出结果为：
+```
+0
+1
+2
+```
+而为了应对多个repeatstmt嵌套导致的变量重命名冲突，在每个外置计数器的后面编上了数字序号，每嵌套一层，后面的数字就会加一 \
+请看如下代码：
+```go
+repeat (3) {
+    // _rit0_
+    repeat (5) {
+        // _rit1_
+        repeat (10) {
+            // _rit2_
+        }
+    }
 }
 ```
