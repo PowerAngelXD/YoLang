@@ -17,7 +17,7 @@ namespace parser{
 
         bool isStmt(); bool isOutStmt(); bool isVorcStmt(); bool isSpExprStmt(); bool isBlockStmt();
         bool isWhileStmt(); bool isIfStmt(); bool isElifStmt(); bool isElseStmt(); bool isForStmt();
-        bool isRepeatStmt(); bool isDeleteStmt(); bool isBreakStmt(); bool isFuncDefStmt();
+        bool isRepeatStmt(); bool isDeleteStmt(); bool isBreakStmt(); bool isFuncDefStmt(); bool isDeferStmt();
         // 生成区: parseXXX ---> 生成XXXNode
         AST::SiadExprNode* parseSiadExprNode();
         AST::IdentifierNode* parseIdentifierNode();
@@ -49,6 +49,8 @@ namespace parser{
         AST::ForStmtNode* parseForStmtNode();
         AST::BreakStmtNode* parseBreakStmtNode();
         AST::FuncDefStmtNode* parseFuncDefStmtNode();
+        AST::DeferStmtNode* parseDeferStmtNode();
+        AST::StmtNode* parseStmtNode();
 
         // 特例：不是以自己的Node命名的函数，因为它有特殊的用途：用于解析所有Expression
         AST::WholeExprNode* parseExpr(); 

@@ -198,9 +198,12 @@ bool parser::Parser::isBreakStmt() {
 bool parser::Parser::isFuncDefStmt() {
     return peek()->content == "function";
 }
+bool parser::Parser::isDeferStmt() {
+    return peek()->content == "defer";
+}
 bool parser::Parser::isStmt() {
     return isOutStmt() || isVorcStmt() || isSpExprStmt() || isBlockStmt() || isWhileStmt() || isIfStmt() || isElifStmt() || isElseStmt() ||
-            isRepeatStmt() || isDeleteStmt() || isForStmt() || isBreakStmt() || isFuncDefStmt();
+            isRepeatStmt() || isDeleteStmt() || isForStmt() || isBreakStmt() || isFuncDefStmt() || isDeferStmt();
 }
 
 // EXPR
@@ -426,24 +429,31 @@ AST::WholeExprNode* parser::Parser::parseExpr(){
 
 // STMT
 
+AST::StmtNode* parser::Parser::parseStmtNode() {
+    AST::StmtNode* node = new AST::StmtNode;
+    if(isOutStmt()) node->outstmt = parseOutStmtNode();
+    else if(isBlockStmt()) node->blockstmt = parseBlockStmtNode();
+    else if(isVorcStmt()) node->vorcstmt = parseVorcStmtNode();
+    else if(isWhileStmt()) node->whilestmt = parseWhileStmtNode();
+    else if(isIfStmt()) node->ifstmt = parseIfStmtNode();
+    else if(isElifStmt()) node->elifstmt = parseElifStmtNode();
+    else if(isElseStmt()) node->elsestmt = parseElseStmtNode();
+    else if(isRepeatStmt()) node->repeatstmt = parseRepeatStmtNode();
+    else if(isDeleteStmt()) node->delstmt = parseDeleteStmtNode();
+    else if(isForStmt()) node->forstmt = parseForStmtNode();
+    else if(isSpExprStmt()) node->spexprstmt = parseSpExprStmtNode();
+    else if(isBreakStmt()) node->breakstmt = parseBreakStmtNode();
+    else if(isFuncDefStmt()) node->fdefstmt = parseFuncDefStmtNode();
+    else if(isDeferStmt()) node->deferstmt = parseDeferStmtNode();
+    else throw yoexception::YoError("SyntaxError", "Not any statement", tg[offset].line, tg[offset].column);
+    return node;
+}
+
 std::vector<AST::StmtNode*> parser::Parser::parse(){
     std::vector<AST::StmtNode*> stmts;
     while(isStmt()){
         AST::StmtNode* node = new AST::StmtNode;
-        if(isOutStmt()) node->outstmt = parseOutStmtNode();
-        else if(isBlockStmt()) node->blockstmt = parseBlockStmtNode();
-        else if(isVorcStmt()) node->vorcstmt = parseVorcStmtNode();
-        else if(isWhileStmt()) node->whilestmt = parseWhileStmtNode();
-        else if(isIfStmt()) node->ifstmt = parseIfStmtNode();
-        else if(isElifStmt()) node->elifstmt = parseElifStmtNode();
-        else if(isElseStmt()) node->elsestmt = parseElseStmtNode();
-        else if(isRepeatStmt()) node->repeatstmt = parseRepeatStmtNode();
-        else if(isDeleteStmt()) node->delstmt = parseDeleteStmtNode();
-        else if(isForStmt()) node->forstmt = parseForStmtNode();
-        else if(isSpExprStmt()) node->spexprstmt = parseSpExprStmtNode();
-        else if(isBreakStmt()) node->breakstmt = parseBreakStmtNode();
-        else if(isFuncDefStmt()) node->fdefstmt = parseFuncDefStmtNode();
-        else throw yoexception::YoError("SyntaxError", "Not any statement", tg[offset].line, tg[offset].column);
+        node = parseStmtNode();
         stmts.push_back(node);
     }
     if(stmts.empty())
@@ -620,6 +630,14 @@ AST::BreakStmtNode* parser::Parser::parseBreakStmtNode() {
     node->mark = token();
     if(peek()->content == ";") node->end = token();
     else throw yoexception::YoError("SyntaxError", "Expect ';'", tg[offset].line, tg[offset].column);
+    return node;
+}
+
+AST::DeferStmtNode* parser::Parser::parseDeferStmtNode() {
+    AST::DeferStmtNode* node = new AST::DeferStmtNode;
+    node->mark = token();
+    if(isStmt()) node->stmt = parseStmtNode();
+    else throw yoexception::YoError("SyntaxError", "Not any statement", tg[offset].line, tg[offset].column);
     return node;
 }
 

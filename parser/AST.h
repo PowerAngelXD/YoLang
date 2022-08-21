@@ -327,6 +327,14 @@ namespace AST{
         std::string toString();
     };
 
+    class DeferStmtNode {
+    public:
+        yolexer::yoToken* mark = nullptr;
+        StmtNode* stmt = nullptr;
+
+        std::string toString();
+    };
+
     class StmtNode{
     public:
         OutStmtNode* outstmt = nullptr;
@@ -342,6 +350,7 @@ namespace AST{
         DeleteStmtNode* delstmt = nullptr;
         ForStmtNode* forstmt = nullptr;
         FuncDefStmtNode* fdefstmt = nullptr;
+        DeferStmtNode* deferstmt = nullptr;
 
         std::string toString();
     };
