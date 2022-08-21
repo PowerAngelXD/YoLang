@@ -8,10 +8,9 @@
 |integer|整型|
 |decimal|小数（用C++中的float实现）|
 |boolean|布尔值|
-|char|字符|
 |string|字符串|
 
-需要注意的是，上表所罗列的类型名称在Yolang中均为关键字\
+需要注意的是，上表所罗列的类型名称在Yolang中均为关键字，同时在1.2.0版本之后，char类型已被移除\
 ***例：***
 ```go
 var str:string = "hello"; # 声明了一个字符串类型的变量
