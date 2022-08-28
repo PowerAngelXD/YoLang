@@ -128,6 +128,24 @@ bool parser::Parser::isStfOp() {
 bool parser::Parser::isListExpr() {
     return peek()->content == "[";
 }
+bool parser::Parser::isAsOp() {
+    return peek()->content == "as";
+}
+bool parser::Parser::isTypecastExpr() {
+    if(isExpr()) {
+        int temp = offset;
+        parseExpr();
+        if(isAsOp()) {
+            offset = temp;
+            return true;
+        }
+        else {
+            offset = temp;
+            return false;
+        }
+    }
+    else return false;
+}
 bool parser::Parser::isAssignmentExpr() {
     if(isIdentifier()){
         int temp = offset; // 存档记位
@@ -172,7 +190,7 @@ bool parser::Parser::isWhileStmt() {
     return peek()->content == "while";
 }
 bool parser::Parser::isSpExprStmt() {
-    return isSiadExpr() || isAssignmentExpr() || isFnCallExpr();
+    return isSiadExpr() || isAssignmentExpr() || isFnCallExpr() || isTypecastExpr();
 }
 bool parser::Parser::isIfStmt() {
     return peek()->content == "if";
@@ -247,6 +265,11 @@ AST::IndexOpNode* parser::Parser::parseIndexOpNode(){
     else throw yoexception::YoError("SyntaxError", "Expect ']'", 
                 tg[offset].line,
                 tg[offset].column);
+    return node;
+}
+AST::AsOpNode* parser::Parser::parseAsOp() {
+    AST::AsOpNode* node = new AST::AsOpNode;
+    node->op = token();
     return node;
 }
 AST::AddOpNode* parser::Parser::parseAddOpNode(){
@@ -409,6 +432,18 @@ AST::BoolExprNode* parser::Parser::parseBoolExprNode(){
     return node;
     return node;
 }
+AST::TypecastExprNode* parser::Parser::parseTypecastExprNode() {
+    AST::TypecastExprNode* node = new AST::TypecastExprNode;
+    node->expr = parseExpr();
+    node->op = parseAsOp();
+    if(std::find(yolexer::typeList.begin(),
+                 yolexer::typeList.end(),
+                 peek()->content) != yolexer::typeList.end()) {
+        node->type = token();
+    }
+    else throw yoexception::YoError("SyntaxError", "Requires a type specifier", tg[offset].line, tg[offset].column);
+    return node;
+}
 AST::AssignmentExprNode* parser::Parser::parseAssignmentExprNode() {
     AST::AssignmentExprNode* node = new AST::AssignmentExprNode;
     node->iden = parseIdentifierNode();
@@ -505,6 +540,7 @@ AST::SpExprStmtNode* parser::Parser::parseSpExprStmtNode() {
     if(isSiadExpr()) node->siad = parseSiadExprNode();
     else if(isAssignmentExpr()) node->assign = parseAssignmentExprNode();
     else if(isFnCallExpr()) node->fcall = parseFuncCallNode();
+    else if(isTypecastExpr()) node->typecast = parseTypecastExprNode();
     if(peek()->content == ";") node->end = token();
     else throw yoexception::YoError("SyntaxError", "Expect ';'", tg[offset].line, tg[offset].column);
     return node;

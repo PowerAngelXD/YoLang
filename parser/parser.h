@@ -13,7 +13,7 @@ namespace parser{
         bool isPrim(); bool isIdentifier(); bool isSiadExpr(); bool isMulExpr();
         bool isAddExpr(); bool isCmpExpr(); bool isBoolExpr(); bool isFnCallExpr();
         bool isAddOp(); bool isMulOp(); bool isCmpOp(); bool isBoolOp(); bool isIndexOp(); bool isStfOp();
-        bool isListExpr(); bool isAssignmentExpr(); bool isExpr();
+        bool isAsOp(); bool isListExpr(); bool isAssignmentExpr(); bool isTypecastExpr(); bool isExpr();
 
         bool isStmt(); bool isOutStmt(); bool isVorcStmt(); bool isSpExprStmt(); bool isBlockStmt();
         bool isWhileStmt(); bool isIfStmt(); bool isElifStmt(); bool isElseStmt(); bool isForStmt();
@@ -25,6 +25,7 @@ namespace parser{
         AST::AddOpNode* parseAddOpNode();
         AST::MulOpNode* parseMulOpNode();
         AST::CmpOpNode* parseCmpOpNode();
+        AST::AsOpNode* parseAsOp();
         AST::BoolOpNode* parseBoolOpNode();
         AST::StfOpNode* parseStfOpNode();
         AST::FuncCallNode* parseFuncCallNode();
@@ -34,6 +35,7 @@ namespace parser{
         AST::AddExprNode* parseAddExprNode();
         AST::CmpExprNode* parseCmpExprNode();
         AST::BoolExprNode* parseBoolExprNode();
+        AST::TypecastExprNode* parseTypecastExprNode();
         AST::AssignmentExprNode* parseAssignmentExprNode();
 
         AST::OutStmtNode* parseOutStmtNode();
