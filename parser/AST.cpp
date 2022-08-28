@@ -118,6 +118,7 @@ std::string AST::PrimExprNode::toString() {
         else if(siad != nullptr) ret += siad->toString() + ", ";
         else if(stf != nullptr) ret += stf->toString() + ", ";
         else if(boolconst != nullptr) ret += boolconst->toString() + ", ";
+        else if(typecast != nullptr) ret += typecast->toString() + ", ";
 
         if(op != nullptr) ret += op->toString() + "}";
         else ret += "}";
@@ -136,6 +137,8 @@ std::string AST::WholeExprNode::toString() {
 std::string AST::AssignmentExprNode::toString() {
     return "AssignmentExprNode: {" + iden->toString() + ", " + expr->toString() + (idx != nullptr? ", " + idx->toString():"") + "}";
 }
+
+
 
 std::string AST::SiadExprNode::toString(){
     return "SiadExprNode: {" + iden->toString() + ", " + op->toString() + "}";
@@ -159,6 +162,10 @@ std::string AST::CmpOpNode::toString(){
 
 std::string AST::BoolOpNode::toString(){
     return op->toString();
+}
+
+std::string AST::TypecastExprNode::toString() {
+    return "TypecastExprNode: {" + expr->toString() + ", " + type->toString() + "}";
 }
 
 // STMT
@@ -187,6 +194,7 @@ std::string AST::SpExprStmtNode::toString() {
     if(siad != nullptr) return "SpExprStmtNode: {" + siad->toString() + "}";
     else if(assign != nullptr) return "SpExprStmtNode: {" + assign->toString() + "}";
     else if(fcall != nullptr) return "SpExprStmtNode: {" + fcall->toString() + "}";
+    else if(typecast != nullptr) return "SpExprStmtNode: {" + typecast->toString() + "}";
     else return "null";
 }
 
@@ -238,6 +246,10 @@ std::string AST::BreakStmtNode::toString() {
 
 std::string AST::DeferStmtNode::toString() {
     return "DeferStmt: {" + stmt->toString() + "}";
+}
+
+std::string AST::AsOpNode::toString() {
+    return op->toString();
 }
 
 std::string AST::StmtNode::toString() {

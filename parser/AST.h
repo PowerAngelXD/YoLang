@@ -5,7 +5,9 @@
  * @brief AST树
  */
 namespace AST{
-    class AddExprNode; class FuncCallNode; class ListExprNode; class WholeExprNode; class StmtNode; class StfOpNode;
+    class AddExprNode; class FuncCallNode;
+    class ListExprNode; class WholeExprNode;
+    class StmtNode; class StfOpNode; class TypecastExprNode;
 
     class IdentifierNode{
     public:
@@ -43,6 +45,7 @@ namespace AST{
         StfOpNode* stf = nullptr;
         FuncCallNode* fcall = nullptr;
         SiadExprNode* siad = nullptr;
+        TypecastExprNode* typecast = nullptr;
 
         // 括号
         yolexer::yoToken* left = nullptr;
@@ -50,6 +53,13 @@ namespace AST{
         yolexer::yoToken* right = nullptr;
 
         IndexOpNode* op = nullptr;
+
+        std::string toString();
+    };
+
+    class AsOpNode {
+    public:
+        yolexer::yoToken* op = nullptr;
 
         std::string toString();
     };
@@ -138,6 +148,15 @@ namespace AST{
         std::string toString();
     };
 
+    class TypecastExprNode{
+    public:
+        WholeExprNode* expr = nullptr;
+        AsOpNode* op = nullptr;
+        yolexer::yoToken* type = nullptr;
+
+        std::string toString();
+    };
+
     class WholeExprNode{
     public:
         AddExprNode* addexpr = nullptr;
@@ -196,6 +215,7 @@ namespace AST{
         SiadExprNode* siad = nullptr;
         AssignmentExprNode* assign = nullptr;
         FuncCallNode* fcall = nullptr;
+        TypecastExprNode* typecast = nullptr;
         yolexer::yoToken* end = nullptr;
 
         std::string toString();
