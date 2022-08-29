@@ -81,7 +81,28 @@ void yolexer::Lexer::generate(){
                 content.push_back(input[i]);
                 i++;column++;
             }
+            std::string ret;
+            // 对于转义符的处理
+            for(int k = 0; k < content.size(); k ++) {
+                if(content[k] == '\\') {
+                    switch (content[k]) {
+                        case '\\': break;
+                        case 'b': ret += "\b"; break;
+                        case 't': ret += "\t"; break;
+                        case '0': ret += "\0"; break;
+                        case 'a': ret += "\a"; break;
+                        case 'f': ret += "\f"; break;
+                        case 'n': ret += "\n"; break;
+                        case 'r': ret += "\r"; break;
+                        case '\"': ret += "\""; break;
+                    }
+                }
+                ret += content[k];
+            }
+            //
             tokenGroup.push_back({content, yoTokType::String, line, column});
+            end:
+            ;
         }
         else if(isalpha(input[i]) || input[i] == '_' || input[i] == '$'){
             //是标识符
