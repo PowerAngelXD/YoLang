@@ -29,6 +29,7 @@
 #define DEL(name, type) normalCtor(btc::del, name, type, node->mark->line, node->mark->column);
 #define LISTEND minCtor(btc::listend, node->right->line, node->right->column);
 #define PARAEND minCtor(btc::paraend, node->right->line, node->left->column);
+#define TCAST minCtor(btc::tcast, node->op->line, node->op->column);
 #define IDENEND(line, column) minCtor(btc::idenend, line, column);
 #define CALL minCtor(btc::call, node->left->line, node->left->column);
 #define DEL_VAL minCtor(btc::del_val, node->mark->line, node->mark->column);
@@ -185,6 +186,9 @@ void ygen::ByteCodeGenerator::visitMulOp(AST::MulOpNode* node){
     else if(node->op->content == "%")
         TMO
 }
+void ygen::ByteCodeGenerator::visitAsOp(AST::AsOpNode *node) {
+    TCAST
+}
 void ygen::ByteCodeGenerator::visitCmpOp(AST::CmpOpNode* node){
     if(node->op->content == ">")
         GT(node->op->line, node->op->column)
@@ -225,8 +229,14 @@ void ygen::ByteCodeGenerator::visitPrimExpr(AST::PrimExprNode* node){
     else if(node->expr != nullptr) visitExpr(node->expr);
     else if(node->stf != nullptr) visitStfOp(node->stf);
     else if(node->fcall != nullptr) visitFuncCallExpr(node->fcall);
+    else if(node->typecast != nullptr) visitTypecastExprNode(node->typecast);
     
     if(node->op != nullptr) visitIndexOp(node->op);
+}
+void ygen::ByteCodeGenerator::visitTypecastExprNode(AST::TypecastExprNode *node) {
+    visitIdentifier(node->expr);
+    visitString(node->type);
+    visitAsOp(node->op);
 }
 void ygen::ByteCodeGenerator::visitMulExpr(AST::MulExprNode* node){
     visitPrimExpr(node->prims[0]);
@@ -321,6 +331,7 @@ void ygen::ByteCodeGenerator::visitSpExprStmt(AST::SpExprStmtNode* node) {
     if(node->assign != nullptr) visitAssignmentExpr(node->assign);
     else if(node->siad != nullptr) visitSiadExpr(node->siad);
     else if(node->fcall != nullptr) visitFuncCallExpr(node->fcall);
+    else if(node->typecast != nullptr) visitTypecastExprNode(node->typecast);
 }
 void ygen::ByteCodeGenerator::visitBlockStmt(AST::BlockStmtNode* node) {
     SCOPE_BEGIN
