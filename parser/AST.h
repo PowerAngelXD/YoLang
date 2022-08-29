@@ -150,7 +150,7 @@ namespace AST{
 
     class TypecastExprNode{
     public:
-        WholeExprNode* expr = nullptr;
+        IdentifierNode* expr = nullptr;
         AsOpNode* op = nullptr;
         yolexer::yoToken* type = nullptr;
 
