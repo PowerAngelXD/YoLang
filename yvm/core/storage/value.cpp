@@ -16,7 +16,7 @@ ysto::Value::Value(int ln, int col) {
 }
 ysto::Value::Value(std::vector<Value> v, bool isc, int ln, int col): list(v), isConstant(isc), line(ln), column(col), type(v[0].getType()), isList(true) {}
 
-ytype::vtype ysto::Value::getType() {
+ytype::vtype& ysto::Value::getType() {
     return type;
 }
 
