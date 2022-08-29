@@ -282,7 +282,7 @@ void ygen::ByteCodeGenerator::visitFuncCallExpr(AST::FuncCallNode* node) {
         for(int i = 0; i < node->paras.size(); i ++) {
             visitExpr(node->paras[i]);
         }
-        PARAEND
+        //PARAEND
     }
     visitIdentifierText(node->iden); // push一个iden的text用于调用函数
     CALL
