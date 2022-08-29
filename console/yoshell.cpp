@@ -219,7 +219,7 @@ void ysh::insEVAL(std::vector<std::string> paras) {
                 else if(elt.getType() == ytype::vtype::decimal)
                     std::cout<<elt.getDecimalValue().get();
                 else if(elt.getType() == ytype::vtype::string)
-                    std::cout<<elt.getStringValue().get();
+                    std::cout<<"\""<<elt.getStringValue().get()<<"\"";
                 else if(elt.getType() == ytype::vtype::boolean) {
                     if(elt.getBooleanValue().get())
                         std::cout<<"true";
@@ -242,7 +242,7 @@ void ysh::insEVAL(std::vector<std::string> paras) {
             else if(result.getType() == ytype::vtype::decimal)
                 std::cout<<result.getDecimalValue().get()<<std::endl;
             else if(result.getType() == ytype::vtype::string)
-                std::cout<<result.getStringValue().get()<<std::endl;
+                std::cout<<"\""<<result.getStringValue().get()<<"\""<<std::endl;
             else if(result.getType() == ytype::vtype::boolean) {
                 if(result.getBooleanValue().get())
                     std::cout<<"true"<<std::endl;
