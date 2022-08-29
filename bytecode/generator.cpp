@@ -100,30 +100,7 @@ void ygen::ByteCodeGenerator::buildDecimalNumber(std::string number, int line, i
     PUSH(atof(number.c_str()), ytype::type(ytype::vtype::decimal, ytype::norm), line, column)
 }
 void ygen::ByteCodeGenerator::visitString(yolexer::yoToken* token) {
-    std::string content = token->content;
-    std::string ret;
-    for (int i = 0; i < content.size(); i++) {
-        if (content[i] == '\\') {
-            // 开始判断
-            switch (content[++i]) {
-                case 'n':
-                    ret.push_back('\n');
-                    break;
-                case '0':
-                    ret.push_back('\0');
-                    break;
-                case 't':
-                    ret.push_back('\t');
-                    break;
-                case 'r':
-                    ret.push_back('\r');
-                    break;
-                default:
-                    break;
-            }
-        } else ret.push_back(content[i]);
-    }
-    PUSH(addPara(ret), ytype::type(ytype::vtype::string, ytype::norm), token->line, token->column);
+    PUSH(addPara(token->content), ytype::type(ytype::vtype::string, ytype::norm), token->line, token->column);
 }
 void ygen::ByteCodeGenerator::visitNull(yolexer::yoToken* token){
     PUSH(0.0, ytype::type(ytype::vtype::null, ytype::norm), token->line, token->column);
