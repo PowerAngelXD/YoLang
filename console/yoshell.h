@@ -32,11 +32,16 @@ namespace ysh{
         std::string stmtsToString(std::vector<AST::StmtNode*> stmts);
     }
     // Yolang版本号
-    static std::string version = "22.8.100";
+    static std::string version = "22.8.102";
     // 发行版本号
-    static std::string relVersion = "Yolang 1.2.0";
+    static std::string relVersion = "Yolang 1.2.1";
     // 完整版本
-    static std::string completeVersion = "Release-2022-8-0100";
+    static std::string completeVersion = "Release-2022-8-0102";
+    // 版本更新说明
+    static std::string updateIllustrate =
+            "Version: " + relVersion + " Illustrate\n" +
+            "1, updated as operator; It can only be used to convert the value corresponding to the identifier\n" +
+            "2, Optimized escape character detection and ported it to lexer";
     // 指令方法类型
     typedef void (*insMethod)(std::vector<std::string>);
     // 指令定义
