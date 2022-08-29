@@ -23,6 +23,7 @@ namespace vmcore {
         vm()=default;
 
         // 指令对应的函数实现
+        void tcast(ygen::byteCode code);
         void add(ygen::byteCode code);
         void sub(ygen::byteCode code);
         void div(ygen::byteCode code);

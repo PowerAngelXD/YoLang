@@ -36,6 +36,7 @@ void vmcore::vm::run(std::string arg) {
     for(int i = 0; i < codes.size(); i ++) {
         auto& code  = codes[i];
         switch (code.code) {
+            case ygen::tcast: tcast(code); break;
             case ygen::del_val: del_val(); break;
             case ygen::add: add(code); break;
             case ygen::push: push(code); break;
@@ -139,6 +140,92 @@ void vmcore::vm::push(ygen::byteCode code) {
     }
 }
 
+void vmcore::vm::tcast(ygen::byteCode code) {
+    auto right = valueStack.pop().getStringValue().get();
+    auto left = valueStack.pop();
+    switch (left.getType()) {
+        case ytype::integer: {
+            if(right == "integer")
+                valueStack.push(left);
+            else if(right == "decimal")
+                valueStack.push(ysto::Value(ytype::YDecimal(left.getIntegerValue().get()), false, code.line, code.column));
+            else if(right == "string") {
+                std::ostringstream oss;
+                oss << left.getIntegerValue().get();
+                valueStack.push(ysto::Value(ytype::YString(oss.str()), false, code.line, code.column));
+            }
+            else if(right == "boolean") {
+                valueStack.push(ysto::Value(ytype::YBoolean(left.getIntegerValue().get() == 0?false:true), false, code.line, code.column));
+            }
+            else if(right == "null")
+                valueStack.push(ysto::Value(code.line, code.column));
+            break;
+        }
+        case ytype::decimal: {
+            if(right == "integer")
+                valueStack.push(ysto::Value(ytype::YInteger(static_cast<int>(left.getDecimalValue().get())), false, code.line, code.column));
+            else if(right == "decimal")
+                valueStack.push(left);
+            else if(right == "string") {
+                std::ostringstream oss;
+                oss << left.getDecimalValue().get();
+                valueStack.push(ysto::Value(ytype::YString(oss.str()), false, code.line, code.column));
+            }
+            else if(right == "boolean") {
+                valueStack.push(ysto::Value(ytype::YBoolean(left.getDecimalValue().get() == 0?false:true), false, code.line, code.column));
+            }
+            else if(right == "null")
+                valueStack.push(ysto::Value(code.line, code.column));
+            break;
+        }
+        case ytype::string: {
+            if(right == "integer")
+                valueStack.push(ysto::Value(ytype::YInteger(atoi(left.getStringValue().get().c_str())), false, code.line, code.column));
+            else if(right == "decimal")
+                valueStack.push(ysto::Value(ytype::YDecimal(static_cast<float>(atof(left.getStringValue().get().c_str()))), false, code.line, code.column));
+            else if(right == "string")
+                valueStack.push(left);
+            else if(right == "boolean") {
+                valueStack.push(ysto::Value(ytype::YBoolean(left.getStringValue().get() == "false"?false:true), false, code.line, code.column));
+            }
+            else if(right == "null")
+                valueStack.push(ysto::Value(code.line, code.column));
+            break;
+        }
+        case ytype::boolean: {
+            if(right == "integer")
+                valueStack.push(ysto::Value(ytype::YInteger(static_cast<int>(left.getBooleanValue().get())), false, code.line, code.column));
+            else if(right == "decimal")
+                valueStack.push(left);
+            else if(right == "string") {
+                std::ostringstream oss;
+                oss << left.getDecimalValue().get();
+                valueStack.push(ysto::Value(ytype::YString(oss.str()), false, code.line, code.column));
+            }
+            else if(right == "boolean") {
+                valueStack.push(left);
+            }
+            else if(right == "null")
+                valueStack.push(ysto::Value(code.line, code.column));
+            break;
+        }
+        case ytype::null: {
+            if(right == "integer")
+                valueStack.push(ysto::Value(ytype::YInteger(0), false, code.line, code.column));
+            else if(right == "decimal")
+                valueStack.push(ysto::Value(ytype::YDecimal(0), false, code.line, code.column));
+            else if(right == "string") {
+                valueStack.push(ysto::Value(ytype::YString("null"), false, code.line, code.column));
+            }
+            else if(right == "boolean") {
+                valueStack.push(ysto::Value(ytype::YBoolean(false), false, code.line, code.column));
+            }
+            else if(right == "null")
+                valueStack.push(ysto::Value(code.line, code.column));
+            break;
+        }
+    }
+}
 void vmcore::vm::add(ygen::byteCode code) {
     auto right = valueStack.pop();
     auto left = valueStack.pop();
