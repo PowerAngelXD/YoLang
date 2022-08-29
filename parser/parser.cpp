@@ -17,7 +17,7 @@ bool parser::Parser::isPrim() {
             peek()->type == yolexer::yoTokType::Integer || peek()->type == yolexer::yoTokType::Decimal ||
             peek()->type == yolexer::yoTokType::Identifier || isStfOp() || 
             peek()->content == "null" || peek()->content == "true" || peek()->content == "false" ||
-            peek()->content == "++" || peek()->content == "--" || peek()->content == "(";
+            peek()->content == "++" || peek()->content == "--" || peek()->content == "(" || isTypecastExpr();
 }
 bool parser::Parser::isIdentifier() {
     if(peek()->type == yolexer::yoTokType::Identifier){
@@ -132,10 +132,10 @@ bool parser::Parser::isAsOp() {
     return peek()->content == "as";
 }
 bool parser::Parser::isTypecastExpr() {
-    if(isExpr()) {
+    if(isIdentifier()) {
         int temp = offset;
-        parseExpr();
-        if(isAsOp()) {
+        parseIdentifierNode();
+        if(peek()->content == "as") {
             offset = temp;
             return true;
         }
@@ -317,6 +317,7 @@ AST::BoolOpNode* parser::Parser::parseBoolOpNode(){
 AST::PrimExprNode* parser::Parser::parsePrimExprNode(){
     AST::PrimExprNode* node = new AST::PrimExprNode;
     if(isFnCallExpr()) node->fcall = parseFuncCallNode();
+    else if(isTypecastExpr()) node->typecast = parseTypecastExprNode();
     else if(peek()->type == yolexer::yoTokType::Integer ||
             peek()->type == yolexer::yoTokType::Decimal) node->number = token();
     else if(peek()->type == yolexer::yoTokType::String) node->string = token();
@@ -336,6 +337,7 @@ AST::PrimExprNode* parser::Parser::parsePrimExprNode(){
                 tg[offset].line,
                 tg[offset].column);
     }
+    else throw yoexception::YoError("SyntaxError", "Unsupported expression or operator", tg[offset].line, tg[offset].column);
     return node;
 }
 AST::FuncCallNode* parser::Parser::parseFuncCallNode(){
@@ -434,7 +436,7 @@ AST::BoolExprNode* parser::Parser::parseBoolExprNode(){
 }
 AST::TypecastExprNode* parser::Parser::parseTypecastExprNode() {
     AST::TypecastExprNode* node = new AST::TypecastExprNode;
-    node->expr = parseExpr();
+    node->expr = parseIdentifierNode();
     node->op = parseAsOp();
     if(std::find(yolexer::typeList.begin(),
                  yolexer::typeList.end(),
