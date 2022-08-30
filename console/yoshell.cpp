@@ -209,6 +209,7 @@ void ysh::insEVAL(std::vector<std::string> paras) {
         yvm.load(bcg.getConstPool(), bcg.getCodes());
         yvm.run("repl");
         auto result = yvm.getResult();
+        std::cout<<"(return) ";
         // 返回值输出
         if(result.isList) {
             std::cout<<"[";
