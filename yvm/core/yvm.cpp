@@ -1141,6 +1141,7 @@ void vmcore::vm::call(ygen::byteCode code) {
             args.push_back(valueStack.pop());
         }
     }
+    std::reverse(args.begin(), args.end());
     if(std::find(yolexer::bifList.begin(), yolexer::bifList.end(), fnName) != yolexer::bifList.end()) {
         // 是bif，进行bif的判断
         if(fnName == "println") valueStack.push(native.bifSet.println(args, code));
