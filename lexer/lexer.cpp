@@ -1,7 +1,5 @@
 #include "lexer.h"
 
-std::vector<std::string> yolexer::typeList = {"integer", "decimal", "char", "string", "boolean", "string[]", "decimal[]", "char[]", "integer[]", "boolean[]", "null"};
-
 std::string yolexer::yoToken::toString(){
     std::string ret = "token: {" + content + ", ";
     switch (type)

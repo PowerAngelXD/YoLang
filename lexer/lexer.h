@@ -6,7 +6,10 @@
 #include "../exception/yoexc.h"
 
 namespace yolexer{
-    extern std::vector<std::string> typeList;
+    static std::vector<std::string> typeList =
+            {"integer", "decimal", "char", "string", "boolean", "string[]", "decimal[]", "char[]", "integer[]", "boolean[]", "null"};
+    static std::vector<std::string> bifList =
+            {"print", "println", "input", "fread", "vmcode", "add_const", "substr", "system"};
     enum yoTokType{Integer, Decimal, Identifier, KeyWord, String, Symbol, Eof};
 
     struct yoToken{
