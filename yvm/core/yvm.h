@@ -2,6 +2,23 @@
 #include "storage/space.h"
 
 namespace vmcore {
+    namespace native {
+        static ysto::Value null_value(0, 0);
+
+        class BuiltInFunctionSet {
+        public:
+            ysto::Value println(std::vector<ysto::Value> args, ygen::byteCode code);
+            ysto::Value input(std::vector<ysto::Value> args, ygen::byteCode code);
+            ysto::Value fread(std::vector<ysto::Value> args, ygen::byteCode code);
+            ysto::Value substr(std::vector<ysto::Value> args, ygen::byteCode code);
+            ysto::Value system(std::vector<ysto::Value> args, ygen::byteCode code);
+        };
+
+        struct navtiveSet {
+            BuiltInFunctionSet bifSet;
+        };
+    }
+
     template <typename Type>
     class YStack {
         std::vector<Type> stack;
@@ -17,6 +34,7 @@ namespace vmcore {
         std::vector<std::string> constPool; // 存放字符串的池
         YStack<ysto::Value> valueStack; // 存放value的栈
         std::vector<ygen::byteCode> codes; // 传入的中间码序列
+        native::navtiveSet native;
         ysto::Space space; // 全局Space
     public:
         vm(std::vector<ygen::byteCode> cs, std::vector<std::string> cp);
@@ -45,6 +63,7 @@ namespace vmcore {
         void out(ygen::byteCode code);
         void lst(ygen::byteCode code);
         void lstend(ygen::byteCode code);
+        void paraend(ygen::byteCode code);
         void push(ygen::byteCode code);
         void create(ygen::byteCode code);
         void assign(ygen::byteCode code);
@@ -54,6 +73,7 @@ namespace vmcore {
         void del_val();
         void del(ygen::byteCode code);
         void idenend(ygen::byteCode code);
+        void call(ygen::byteCode code);
         //
 
         void run(std::string arg);

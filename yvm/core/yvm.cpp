@@ -1,5 +1,108 @@
 #include "yvm.h"
 
+// native
+//bif
+ysto::Value vmcore::native::BuiltInFunctionSet::println(std::vector<ysto::Value> args, ygen::byteCode code) {
+    if(args.empty())
+        throw yoexception::YoError("FunctionCallingError", "Overloaded function with no specified arguments", code.line, code.column);
+    else if(args.size() != 1)
+        throw yoexception::YoError("FunctionCallingError", "Overloaded function with no specified arguments", args[0].line, args[0].column);
+    auto content = args[0];
+    switch (content.getType()){
+        case ytype::integer:
+            std::cout << std::to_string(content.getIntegerValue().get());
+            break;
+        case ytype::boolean:
+            if (content.getBooleanValue().get()) {
+                std::cout << "true" << std::endl;
+            }else {
+                std::cout << "false" << std::endl;
+            }
+            break;
+        case ytype::decimal:
+            std::cout << std::to_string(content.getDecimalValue().get()) << std::endl;
+            break;
+        case ytype::string:
+            std::cout << content.getStringValue().get() << std::endl;
+            break;
+        case ytype::null:
+            std::cout << "<null>" << std::endl;
+            break;
+        default:
+            throw yoexception::YoError("TypeError", "Invalid Content Type", content.line, content.column);
+            break;
+    }
+    return native::null_value; // 默认返回null
+}
+
+ysto::Value vmcore::native::BuiltInFunctionSet::input(std::vector<ysto::Value> args, ygen::byteCode code){
+    std::string promptText;
+    std::string resultValue;
+    if(args.empty()) promptText = "";
+    else {
+        auto prompt = args[0];
+        if (prompt.getType() == ytype::vtype::string){
+            promptText = prompt.getStringValue().get();
+        }
+    }
+    std::cout << promptText;
+    std::getline(std::cin, resultValue);
+    return ysto::Value(ytype::YString(resultValue), false, code.line, code.column);
+}
+
+ysto::Value vmcore::native::BuiltInFunctionSet::fread(std::vector<ysto::Value> args, ygen::byteCode code) {
+    if (args.size() != 1){
+        throw yoexception::YoError("FunctionCallingError", "Overloaded function with no specified arguments", args[0].line, args[0].column);
+    }
+    auto filename = args[0];
+    if (filename.getType() != ytype::vtype::string){
+        throw yoexception::YoError("TypeError", "Invalid FileName Type", filename.line, filename.column);
+    }
+
+    std::ifstream file(filename.getStringValue().get());
+    // 编码操作
+    //
+    std::istreambuf_iterator<char> begin(file);
+    std::istreambuf_iterator<char> end;
+    std::string content(begin, end);
+    return ysto::Value(ytype::YString(content), false, filename.line, filename.column);
+}
+
+ysto::Value vmcore::native::BuiltInFunctionSet::substr(std::vector<ysto::Value> args, ygen::byteCode code){
+    if(args.empty())
+        throw yoexception::YoError("FunctionCallingError", "Overloaded function with no specified arguments", args[0].line, args[0].column);
+    else if (args.size() != 3)
+        throw yoexception::YoError("FunctionCallingError", "Overloaded function with no specified arguments", args[0].line, args[0].column);
+
+    auto string = args[0];
+    auto start = args[1];
+    auto end = args[2];
+    if (string.getType() != ytype::vtype::string){
+        throw yoexception::YoError("TypeError", "Invalid String Argument Type", string.line, string.column);
+    }
+    if (start.getType() != ytype::vtype::integer){
+        throw yoexception::YoError("TypeError", "Invalid Start Argument Type", start.line, start.column);
+    }
+    if (end.getType() != ytype::vtype::integer){
+        throw yoexception::YoError("TypeError", "Invalid End Argument Type", end.line, end.column);
+    }
+    std::string result = string.getStringValue().get().substr(start.getIntegerValue().get(),end.getIntegerValue().get());
+    return ysto::Value(ytype::YString(result), false, string.line, string.column);
+}
+
+ysto::Value vmcore::native::BuiltInFunctionSet::system(std::vector<ysto::Value> args, ygen::byteCode code) {
+    if(args.empty())
+        throw yoexception::YoError("FunctionCallingError", "Overloaded function with no specified arguments", args[0].line, args[0].column);
+    else if (args.size() != 1)
+        throw yoexception::YoError("FunctionCallingError", "Overloaded function with no specified arguments", args[0].line, args[0].column);
+    else if (args[0].getType() != ytype::vtype::string)
+        throw yoexception::YoError("TypeError", "Invalid Command Argument Type", args[0].line, args[0].column);
+    int commandResult = std::system(args[0].getStringValue().get().c_str());
+    return ysto::Value(ytype::YInteger(commandResult), false, args[0].line, args[0].column);
+}
+
+//
+
 template<typename Type>
 Type vmcore::YStack<Type>::pop() {
     if(stack.empty()) {
@@ -62,8 +165,7 @@ void vmcore::vm::run(std::string arg) {
                 break;
             case ygen::stf: stf(code); break;
             case ygen::listend: lstend(code); break;
-            case ygen::paraend:
-                break;
+            case ygen::paraend: paraend(code); break;
             case ygen::scopestart: scopestart(code); break;
             case ygen::scopeend: scopeend(code); break;
             case ygen::idenend: idenend(code); break;
@@ -71,8 +173,7 @@ void vmcore::vm::run(std::string arg) {
             case ygen::create: create(code); break;
             case ygen::assign: assign(code); break;
             case ygen::del: del(code); break;
-            case ygen::call:
-                break;
+            case ygen::call: call(code); break;
         }
     }
 }
@@ -713,6 +814,10 @@ void vmcore::vm::lstend(ygen::byteCode code) {
      valueStack.push(ysto::Value("flag:list_end"));
 }
 
+void vmcore::vm::paraend(ygen::byteCode code) {
+    valueStack.push(ysto::Value("flag:para_end"));
+}
+
 void vmcore::vm::lst(ygen::byteCode code) {
     std::vector<ysto::Value> list;
     while(valueStack.peek().getType() != ytype::vtype::flag && valueStack.peek().getStringValue().get() != "flag:list_end") {
@@ -1022,4 +1127,26 @@ void vmcore::vm::del(ygen::byteCode code) {
 
 void vmcore::vm::idenend(ygen::byteCode code) {
     valueStack.push(ysto::Value("flag:identifier_end"));
+}
+
+void vmcore::vm::call(ygen::byteCode code) {
+    std::string fnName = valueStack.pop().getStringValue().get();
+    auto temp = valueStack.pop(); // temp值，用于检测是paraend还是正常的flag
+    // 是不是无参函数: true-不是，false-是
+    bool isNopara = temp.getType() == ytype::vtype::flag && temp.getStringValue().get() == "flag:para_end";
+    std::vector<ysto::Value> args;
+    if(!isNopara) {
+        args.push_back(temp);
+        while(valueStack.peek().getType() != ytype::vtype::flag && temp.getStringValue().get() != "flag:para_end") {
+            args.push_back(valueStack.pop());
+        }
+    }
+    if(std::find(yolexer::bifList.begin(), yolexer::bifList.end(), fnName) != yolexer::bifList.end()) {
+        // 是bif，进行bif的判断
+        if(fnName == "println") valueStack.push(native.bifSet.println(args, code));
+        else if(fnName == "input") valueStack.push(native.bifSet.input(args, code));
+        else if(fnName == "fread") valueStack.push(native.bifSet.fread(args, code));
+        else if(fnName == "substr") valueStack.push(native.bifSet.substr(args, code));
+        else if(fnName == "system") valueStack.push(native.bifSet.system(args, code));
+    }
 }
