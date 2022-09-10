@@ -9,7 +9,7 @@ namespace yolexer{
     static std::vector<std::string> typeList =
             {"integer", "decimal", "char", "string", "boolean", "string[]", "decimal[]", "char[]", "integer[]", "boolean[]", "null"};
     static std::vector<std::string> bifList =
-            {"print", "println", "input", "fread", "vmcode", "add_const", "substr", "system"};
+            {"print", "println", "input", "fread", "vmcode", "add_const", "substr", "system", "fwrite"};
     enum yoTokType{Integer, Decimal, Identifier, KeyWord, String, Symbol, Eof};
 
     struct yoToken{
