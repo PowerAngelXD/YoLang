@@ -14,7 +14,7 @@ namespace ygen{
         // 运算类
         tcast, cast, selfadd, selfsub, add, sub, div, mul, tmo, idx, lst, logicand, logicor, no, lt, ltet, gt, gtet, equ, noequ, gmem, stf,
         // 标志类
-        listend, paraend, scopestart, scopeend, idenend,
+        listend, paraend, scopestart, scopeend, idenend, flag,
         // 功能类
         out, create, assign, del, call, del_val
     };
@@ -24,7 +24,8 @@ namespace ygen{
         // reqXXX代表jmp指令需要的条件以供跳转
         // outWscope指的是跳出while所属的scope外并向前偏移，如果没有则向前偏移一个单位
         // findSStart代表跳转到所属scope的scopestart处
-        enum jmpt{ reqTrue, reqFalse, unconditional, outScope, backScope};
+        enum jmpt{ reqTrue, reqFalse, unconditional, outScope, backScope, outLoop, outFn};
+        enum flagt{ loopEnd, fnEnd};
     }
 
     /**

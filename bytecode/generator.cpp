@@ -33,6 +33,7 @@
 #define IDENEND(line, column) minCtor(btc::idenend, line, column);
 #define CALL minCtor(btc::call, node->left->line, node->left->column);
 #define DEL_VAL minCtor(btc::del_val, node->mark->line, node->mark->column);
+#define FLAG(type) normalCtor(btc::flag, type, 0.0, node->mark->line, node->mark->column);
 
 ygen::ByteCodeGenerator::ByteCodeGenerator(std::vector<AST::StmtNode*> _stmts): stmts(_stmts) {}
 ygen::ByteCodeGenerator::ByteCodeGenerator(AST::WholeExprNode* _expr): expr(_expr) {}
@@ -326,6 +327,8 @@ void ygen::ByteCodeGenerator::visitWhileStmt(AST::WhileStmtNode* node) {
     }
     SCOPE_END
     JMP(paraHelper::jmpt::reqTrue, paraHelper::jmpt::backScope, node->mark->line, node->mark->column)
+
+    FLAG(paraHelper::flagt::loopEnd);
 }
 void ygen::ByteCodeGenerator::visitIfStmt(AST::IfStmtNode* node) {
     visitBoolExpr(node->cond);
@@ -373,6 +376,7 @@ void ygen::ByteCodeGenerator::visitRepeatStmt(AST::RepeatStmtNode *node) {
     JMP(paraHelper::jmpt::reqTrue, paraHelper::jmpt::backScope, node->mark->line, node->mark->column)
     DEL_VAL
     // repit的处理
+    FLAG(paraHelper::flagt::loopEnd);
     DEL(addPara("_rit" + std::to_string(repit) + "_"), 1.0)
     repit --;
 }
@@ -402,6 +406,7 @@ void ygen::ByteCodeGenerator::visitForStmt(AST::ForStmtNode* node) {
     JMP(paraHelper::jmpt::reqTrue, paraHelper::jmpt::backScope, node->mark->line, node->mark->column)
     DEL_VAL
     // 释放局部变量
+    FLAG(paraHelper::flagt::loopEnd);
     if(node->hasVorc)
         DEL(addPara(node->vorc->name->content), 1.0)
 }
@@ -412,7 +417,7 @@ void ygen::ByteCodeGenerator::visitDeleteStmt(AST::DeleteStmtNode* node) {
 }
 
 void ygen::ByteCodeGenerator::visitBreakStmt(AST::BreakStmtNode* node) {
-    JMP(paraHelper::jmpt::unconditional, paraHelper::jmpt::outScope, node->mark->line, node->mark->column)
+    JMP(paraHelper::jmpt::unconditional, paraHelper::jmpt::outLoop, node->mark->line, node->mark->column)
 }
 
 void ygen::ByteCodeGenerator::visitFuncDefStmt(AST::FuncDefStmtNode* node) {
