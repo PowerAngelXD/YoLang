@@ -10,7 +10,7 @@ ysto::Value vmcore::native::BuiltInFunctionSet::println(std::vector<ysto::Value>
     auto content = args[0];
     switch (content.getType()){
         case ytype::integer:
-            std::cout << std::to_string(content.getIntegerValue().get());
+            std::cout << std::to_string(content.getIntegerValue().get()) << std::endl;
             break;
         case ytype::boolean:
             if (content.getBooleanValue().get()) {
@@ -90,16 +90,16 @@ ysto::Value vmcore::native::BuiltInFunctionSet::substr(std::vector<ysto::Value> 
     return ysto::Value(ytype::YString(result), false, string.line, string.column);
 }
 
-ysto::Value vmcore::native::BuiltInFunctionSet::system(std::vector<ysto::Value> args, ygen::byteCode code) {
-    if(args.empty())
-        throw yoexception::YoError("FunctionCallingError", "Overloaded function with no specified arguments", args[0].line, args[0].column);
-    else if (args.size() != 1)
-        throw yoexception::YoError("FunctionCallingError", "Overloaded function with no specified arguments", args[0].line, args[0].column);
-    else if (args[0].getType() != ytype::vtype::string)
-        throw yoexception::YoError("TypeError", "Invalid Command Argument Type", args[0].line, args[0].column);
-    int commandResult = std::system(args[0].getStringValue().get().c_str());
-    return ysto::Value(ytype::YInteger(commandResult), false, args[0].line, args[0].column);
-}
+//ysto::Value vmcore::native::BuiltInFunctionSet::system(std::vector<ysto::Value> args, ygen::byteCode code) {
+//    if(args.empty())
+//        throw yoexception::YoError("FunctionCallingError", "Overloaded function with no specified arguments", args[0].line, args[0].column);
+//    else if (args.size() != 1)
+//        throw yoexception::YoError("FunctionCallingError", "Overloaded function with no specified arguments", args[0].line, args[0].column);
+//    else if (args[0].getType() != ytype::vtype::string)
+//        throw yoexception::YoError("TypeError", "Invalid Command Argument Type", args[0].line, args[0].column);
+//    ::system(args[0].getStringValue().get().c_str());
+//    return native::null_value;
+//}
 
 //
 
@@ -1148,6 +1148,6 @@ void vmcore::vm::call(ygen::byteCode code) {
         else if(fnName == "input") valueStack.push(native.bifSet.input(args, code));
         else if(fnName == "fread") valueStack.push(native.bifSet.fread(args, code));
         else if(fnName == "substr") valueStack.push(native.bifSet.substr(args, code));
-        else if(fnName == "system") valueStack.push(native.bifSet.system(args, code));
+        // else if(fnName == "system") valueStack.push(native.bifSet.system(args, code));
     }
 }
