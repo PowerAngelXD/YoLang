@@ -207,7 +207,7 @@ void ysh::insEVAL(std::vector<std::string> paras) {
         bcg.visitExpr(expr);
 
         yvm.load(bcg.getConstPool(), bcg.getCodes());
-        yvm.run("repl");
+        yvm.run(-1, "repl");
         auto result = yvm.getResult();
         std::cout<<"(return) ";
         // 返回值输出
@@ -262,7 +262,7 @@ void ysh::insEVAL(std::vector<std::string> paras) {
         bcg.visit(stmts);
 
         yvm.load(bcg.getConstPool(), bcg.getCodes());
-        yvm.run("normal");
+        yvm.run(-1, "normal");
     }
 }
 void ysh::insEnv(std::vector<std::string> paras) {
