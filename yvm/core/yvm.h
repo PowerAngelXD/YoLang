@@ -10,6 +10,7 @@ namespace vmcore {
             ysto::Value println(std::vector<ysto::Value> args, ygen::byteCode code);
             ysto::Value input(std::vector<ysto::Value> args, ygen::byteCode code);
             ysto::Value fread(std::vector<ysto::Value> args, ygen::byteCode code);
+            ysto::Value fwrite(std::vector<ysto::Value> args,ygen::byteCode code);
             ysto::Value substr(std::vector<ysto::Value> args, ygen::byteCode code);
             ysto::Value system(std::vector<ysto::Value> args, ygen::byteCode code);
         };
@@ -33,7 +34,10 @@ namespace vmcore {
     class vm {
         std::vector<std::string> constPool; // 存放字符串的池
         YStack<ysto::Value> valueStack; // 存放value的栈
-        std::vector<ygen::byteCode> codes; // 传入的中间码序列
+
+        std::vector<ygen::byteCode> mainQueue; // 主代码队列
+        std::vector<std::vector<ygen::byteCode>> codeQueue; // 代码队列
+
         native::navtiveSet native;
         ysto::Space space; // 全局Space
     public:
@@ -76,7 +80,7 @@ namespace vmcore {
         void call(ygen::byteCode code);
         //
 
-        void run(std::string arg);
+        void run(int queue_id, std::string arg); // queue指代要运行哪条栈的代码，-1为主栈
         ysto::Value getResult();
         void load(std::vector<std::string> cp, std::vector<ygen::byteCode> cs);
     };

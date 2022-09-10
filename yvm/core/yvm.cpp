@@ -68,6 +68,49 @@ ysto::Value vmcore::native::BuiltInFunctionSet::fread(std::vector<ysto::Value> a
     return ysto::Value(ytype::YString(content), false, filename.line, filename.column);
 }
 
+ysto::Value vmcore::native::BuiltInFunctionSet::fwrite(std::vector<ysto::Value> args, ygen::byteCode code) {
+    if (args.size() != 3)
+        throw yoexception::YoError("FunctionCallingError", "Overloaded function with no specified arguments", args[0].line, args[0].column);
+    if(args[0].getType() != ytype::vtype::string &&
+        args[1].getType() != ytype::vtype::string &&
+        args[2].getType() != ytype::vtype::string)
+        throw yoexception::YoError("TypeError", "The parameter type filled in the corresponding function does not match the definition", args[0].line, args[0].column);
+    std::string path = args[0].getStringValue().get();
+    std::string content = args[1].getStringValue().get();
+    std::string mode = args[2].getStringValue().get();
+    /* mode是文件打开方式，分为以下几个方式
+     * append：追加在已存在的文件后面，如果不存在则报错
+     * new：创建一个文件，当已经有同名文件存在时报错
+     * overwrite：打开一个已经存在的文件并将其里面的内容覆写，如果不存在该文件则报错
+    */
+    if(mode == "append") {
+        std::ifstream checker(path);
+        if(!checker.is_open())
+            throw yoexception::YoError("FileError", "No file with path: '" + path + "' exists", code.line, code.column);
+        std::ofstream file(path, std::ios::app);
+        file << content;
+        file.close(); file.flush();
+    }
+    else if(mode == "new") {
+        std::ifstream checker(path);
+        if(checker.is_open())
+            throw yoexception::YoError("FileError", "There is already a file that exists in path: " + path, code.line, code.column);
+        std::ofstream file(path);
+        file << content;
+        file.close(); file.flush();
+    }
+    else if(mode == "overwrite") {
+        std::ifstream checker(path);
+        if(checker.is_open())
+            throw yoexception::YoError("FileError", "There is already a file that exists in path: " + path, code.line, code.column);
+        std::ofstream file(path, std::ios::trunc);
+        file << content;
+        file.close(); file.flush();
+    }
+    else throw yoexception::YoError("FileError", "A schema named: '" + mode + "' does not exist", code.line, code.column);
+    return native::null_value;
+}
+
 ysto::Value vmcore::native::BuiltInFunctionSet::substr(std::vector<ysto::Value> args, ygen::byteCode code){
     if(args.empty())
         throw yoexception::YoError("FunctionCallingError", "Overloaded function with no specified arguments", args[0].line, args[0].column);
@@ -126,18 +169,19 @@ void vmcore::YStack<Type>::push(Type value) {
 // VM
 
 vmcore::vm::vm(std::vector<ygen::byteCode> cs, std::vector<std::string> cp) {
-    codes = cs;
+    mainQueue = cs;
     constPool = cp;
 }
 
 void vmcore::vm::load(std::vector<std::string> cp, std::vector<ygen::byteCode> cs) {
-    codes = cs;
+    mainQueue = cs;
     constPool = cp;
 }
 
-void vmcore::vm::run(std::string arg) {
-    for(int i = 0; i < codes.size(); i ++) {
-        auto& code  = codes[i];
+void vmcore::vm::run(int queue_id, std::string arg) {
+    auto queue = queue_id == -1? mainQueue: codeQueue[queue_id];
+    for(int i = 0; i < queue.size(); i ++) {
+        auto& code  = queue[i];
         switch (code.code) {
             case ygen::tcast: tcast(code); break;
             case ygen::del_val: del_val(); break;
@@ -1015,8 +1059,8 @@ int vmcore::vm::jmp(ygen::byteCode code, int current) {
                         while(flag != 0 || !first) {
                             first = true;
                             current ++;
-                            if(codes[current].code == ygen::btc::scopestart) flag ++;
-                            else if(codes[current].code == ygen::btc::scopeend) flag --;
+                            if(mainQueue[current].code == ygen::btc::scopestart) flag ++;
+                            else if(mainQueue[current].code == ygen::btc::scopeend) flag --;
                             else ;
                         }
                         valueStack.push(ysto::Value(ytype::YBoolean(false), true, code.line, code.column));
@@ -1028,8 +1072,8 @@ int vmcore::vm::jmp(ygen::byteCode code, int current) {
                         while(flag != 0 || !first) {
                             first = true;
                             current --;
-                            if(codes[current].code == ygen::btc::scopestart) flag --;
-                            else if(codes[current].code == ygen::btc::scopeend) flag ++;
+                            if(mainQueue[current].code == ygen::btc::scopestart) flag --;
+                            else if(mainQueue[current].code == ygen::btc::scopeend) flag ++;
                             else ;
                         }
                         break;
@@ -1049,8 +1093,8 @@ int vmcore::vm::jmp(ygen::byteCode code, int current) {
                         while(flag != 0 || !first) {
                             first = true;
                             current ++;
-                            if(codes[current].code == ygen::btc::scopestart) flag ++;
-                            else if(codes[current].code == ygen::btc::scopeend) flag --;
+                            if(mainQueue[current].code == ygen::btc::scopestart) flag ++;
+                            else if(mainQueue[current].code == ygen::btc::scopeend) flag --;
                             else ;
                         }
                         valueStack.push(ysto::Value(ytype::YBoolean(true), true, code.line, code.column));
@@ -1062,8 +1106,8 @@ int vmcore::vm::jmp(ygen::byteCode code, int current) {
                         while(flag != 0 || !first) {
                             first = true;
                             current --;
-                            if(codes[current].code == ygen::btc::scopestart) flag --;
-                            else if(codes[current].code == ygen::btc::scopeend) flag ++;
+                            if(mainQueue[current].code == ygen::btc::scopestart) flag --;
+                            else if(mainQueue[current].code == ygen::btc::scopeend) flag ++;
                             else ;
                         }
                         break;
@@ -1080,8 +1124,8 @@ int vmcore::vm::jmp(ygen::byteCode code, int current) {
                     int flag = 1;
                     while(flag != 0) {
                         current ++;
-                        if(codes[current].code == ygen::btc::scopestart) flag ++;
-                        else if(codes[current].code == ygen::btc::scopeend) flag --;
+                        if(mainQueue[current].code == ygen::btc::scopestart) flag ++;
+                        else if(mainQueue[current].code == ygen::btc::scopeend) flag --;
                         else ;
                     }
                     break;
@@ -1090,8 +1134,8 @@ int vmcore::vm::jmp(ygen::byteCode code, int current) {
                     int flag = 1;
                     while(flag != 0) {
                         current --;
-                        if(codes[current].code == ygen::btc::scopestart) flag --;
-                        else if(codes[current].code == ygen::btc::scopeend) flag ++;
+                        if(mainQueue[current].code == ygen::btc::scopestart) flag --;
+                        else if(mainQueue[current].code == ygen::btc::scopeend) flag ++;
                         else ;
                     }
                     break;
@@ -1147,6 +1191,7 @@ void vmcore::vm::call(ygen::byteCode code) {
         if(fnName == "println") valueStack.push(native.bifSet.println(args, code));
         else if(fnName == "input") valueStack.push(native.bifSet.input(args, code));
         else if(fnName == "fread") valueStack.push(native.bifSet.fread(args, code));
+        else if(fnName == "fwrite") valueStack.push(native.bifSet.fwrite(args, code));
         else if(fnName == "substr") valueStack.push(native.bifSet.substr(args, code));
         // else if(fnName == "system") valueStack.push(native.bifSet.system(args, code));
     }
