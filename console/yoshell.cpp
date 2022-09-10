@@ -292,6 +292,7 @@ void ysh::runYoShell() {
         std::cout<<">>";
         std::getline(std::cin, in);
         try{
+            if(in == "\n" || in == "\0") throw 0; // 检测到非法字符，跳转到外部
             // command parser
             auto tempField = tools::split(in, ' ')[0];
             bool flag = false;
@@ -308,6 +309,7 @@ void ysh::runYoShell() {
         catch(yoexception::YoError e) {
             std::cout<<e.what();
         }
+        catch(int e) {}
         std::cout<<std::endl;
     }
 }
