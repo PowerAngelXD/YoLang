@@ -74,30 +74,26 @@ void yolexer::Lexer::generate(){
             //是字符串
             std::string content;
             i++;column++; // 跳过字符 ”
-            while(input[i] != '\"'){
+            while(input[i] != '\"' || input[i - 1] == '\\'){
                 if(input[i] == '\0') throw yoexception::YoError("SyntaxError", "Expect '\"'!", line, column);
-                content.push_back(input[i]);
+                else if(input[i] == '\\') {
+                    i++;
+                    switch (input[i]) {
+                        case '\\': content.push_back('\\'); break;
+                        case 'b': content.push_back('\b'); break;
+                        case 't': content.push_back('\t'); break;
+                        case '0': content.push_back('\0'); break;
+                        case 'a': content.push_back('\a'); break;
+                        case 'f': content.push_back('\f'); break;
+                        case 'n': content.push_back('\n'); break;
+                        case 'r': content.push_back('\r'); break;
+                        case '\"': content.push_back('\"'); break;
+                    }
+                }
+                else content.push_back(input[i]);
                 i++;column++;
             }
             std::string ret;
-            // 对于转义符的处理
-            for(int k = 0; k < content.size(); k ++) {
-                if(content[k] == '\\') {
-                    switch (content[k]) {
-                        case '\\': break;
-                        case 'b': ret += "\b"; break;
-                        case 't': ret += "\t"; break;
-                        case '0': ret += "\0"; break;
-                        case 'a': ret += "\a"; break;
-                        case 'f': ret += "\f"; break;
-                        case 'n': ret += "\n"; break;
-                        case 'r': ret += "\r"; break;
-                        case '\"': ret += "\""; break;
-                    }
-                }
-                ret += content[k];
-            }
-            //
             tokenGroup.push_back({content, yoTokType::String, line, column});
             end:
             ;
