@@ -376,8 +376,8 @@ void ygen::ByteCodeGenerator::visitRepeatStmt(AST::RepeatStmtNode *node) {
     JMP(paraHelper::jmpt::reqTrue, paraHelper::jmpt::backScope, node->mark->line, node->mark->column)
     DEL_VAL
     // repit的处理
-    FLAG(paraHelper::flagt::loopEnd);
     DEL(addPara("_rit" + std::to_string(repit) + "_"), 1.0)
+    FLAG(paraHelper::flagt::loopEnd);
     repit --;
 }
 
