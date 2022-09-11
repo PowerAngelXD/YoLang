@@ -50,8 +50,10 @@ const c="hello";      # 常量声明方式
 const d:char = '\n';  # 常量声明且规定类型
 var e=2, u:string="u";# 一次性声明多个变量
 dynamic var d=9;
+var g;
 ```
 而在Yolang中，不能以关键字为变量/常量名称，同时，标识符开头只能为：“_”，“$”或者字母\
+对于变量/常量的生命，你也可以不对其进行初始化，他的默认值将为null，且是dynamic变量
 其中，冒号后面接的是类型说明符，均为关键字，用于规定变量类型；如果传入的值不是规定的类型，Yolang解释器会报错：
 ```
 An exception is thrown when the program is running:
