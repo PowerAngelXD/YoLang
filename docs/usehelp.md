@@ -1,5 +1,6 @@
 # Yolang帮助文档
-本文档用于帮助用户快速上手yolang及其Console，将分为“Console”和“Yolang语言本体”两部分进行
+本文档用于帮助用户快速上手yolang及其Console，将分为“Console”和“Yolang语言本体”两部分进行\
+Yolang的源码文件后缀为: ".yo"
 ### Yolang语言本体
 #### 1，Yolang内置类型
 在Yolang中，内置了五种类型，请参见下面的表格：
