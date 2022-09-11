@@ -921,7 +921,7 @@ void vmcore::vm::out(ygen::byteCode code) {
 
 void vmcore::vm::create(ygen::byteCode code) {
     std::string name = constPool[code.arg1];
-    std::string state = constPool[code.arg2]; // 初始化的类型，变量还是常量
+    std::string state = constPool[code.arg2]; // 初始化的类型，变量还是常量；或者是Dynamic还是Static
     auto value = valueStack.pop();
 
     if(code.arg4 == 1) {
@@ -933,37 +933,41 @@ void vmcore::vm::create(ygen::byteCode code) {
     else ;
 
     if(value.isListValue()) {
-        space.createValue(name, ysto::Value(value.getList(), state == "var"?false:true, code.line, code.column));
+        space.createValue(name, ysto::Value(value.getList(), state == "var" || state == "dynamic"|| state == "static"?false:true, state == "dynamic"?true:false, code.line, code.column));
     }
     else {
         switch (value.getType()) {
 
             case ytype::integer:
                 space.createValue(name, ysto::Value(ytype::YInteger(value.getIntegerValue().get()),
-                                                    state == "var"?false:true,
+                                                    state == "var" || state == "dynamic"|| state == "static"?false:true,
+                                                    state == "dynamic"?true:false,
                                                     code.line,
                                                     code.column));
                 break;
             case ytype::boolean:
                 space.createValue(name, ysto::Value(ytype::YBoolean(value.getBooleanValue().get()),
-                                                    state == "var"?false:true,
+                                                    state == "var" || state == "dynamic"|| state == "static"?false:true,
+                                                    state == "dynamic"?true:false,
                                                     code.line,
                                                     code.column));
                 break;
             case ytype::decimal:
                 space.createValue(name, ysto::Value(ytype::YDecimal(value.getDecimalValue().get()),
-                                                    state == "var"?false:true,
+                                                    state == "var" || state == "dynamic"|| state == "static"?false:true,
+                                                    state == "dynamic"?true:false,
                                                     code.line,
                                                     code.column));
                 break;
             case ytype::string:
                 space.createValue(name, ysto::Value(ytype::YString(value.getStringValue().get()),
-                                                    state == "var"?false:true,
+                                                    state == "var" || state == "dynamic"|| state == "static"?false:true,
+                                                    state == "dynamic"?true:false,
                                                     code.line,
                                                     code.column));
                 break;
             case ytype::null:
-                space.createValue(name, ysto::Value(code.line, code.column));
+                space.createValue(name, ysto::Value(state == "dynamic"?true:false,code.line, code.column));
                 break;
 
         }
@@ -1026,6 +1030,8 @@ void vmcore::vm::assign(ygen::byteCode code) {
     auto name = valueStack.pop().getStringValue().get();
     if(space.getValue(name).isConst())
         throw yoexception::YoError("AssignError", "You cannot assign value to a constant", code.line, code.column);
+    if(space.getValue(name).getType()!=value.getType() && !space.getValue(name).isDyn())
+        throw yoexception::YoError("TypeError", "The type of assignment to static variable: '" + name + "' must be its original type", code.line, code.column);
     if(code.arg1) {
         // index assignment
         // 检查是否有类型不一致的存在
