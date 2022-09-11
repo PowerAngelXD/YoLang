@@ -9,6 +9,7 @@
 |decimal|小数（用C++中的float实现）|
 |boolean|布尔值|
 |string|字符串|
+|null|空类型|
 
 需要注意的是，上表所罗列的类型名称在Yolang中均为关键字，同时在1.2.0版本之后，char类型已被移除\
 ***例：***
@@ -47,6 +48,8 @@ var a=1;              # 变量声明方式
 var b:bool = true;    # 变量声明且规定类型
 const c="hello";      # 常量声明方式
 const d:char = '\n';  # 常量声明且规定类型
+var e=2, u:string="u";# 一次性声明多个变量
+dynamic var d=9;
 ```
 而在Yolang中，不能以关键字为变量/常量名称，同时，标识符开头只能为：“_”，“$”或者字母\
 其中，冒号后面接的是类型说明符，均为关键字，用于规定变量类型；如果传入的值不是规定的类型，Yolang解释器会报错：
@@ -56,6 +59,31 @@ An exception is thrown when the program is running:
     The expected type does not match the type given by the actual expression
 line: X, column: X
 ```
+同时，在新版本1.2.15中，我们引入了dynamic和static关键字，用于规定变量是否可以在赋值的时候更改类型，请看下面的例子：
+```go
+static var a=1;
+var b=5;
+dynamic c=5;
+
+a = "hello" # 报错
+b = null; # 报错
+c = false; # 不报错
+```
+如上，我们可以知道，如果不加dynamic或static关键字修饰，变量默认为static；如果对static变量进行改变类型的赋值，会触发下面的报错：
+```
+An exception is thrown when the program is running:
+{{TypeError}}:
+    The type of assignment to static variable: 'XX' must be its original type
+line: X, column: X
+```
+同时还需要注意，常量不能用dynamic或者static修饰，否则会发生下面的报错：
+```
+An exception is thrown when the program is running:
+{{SyntaxError}}:
+    Constants cannot use modifier: 'static'/'dynamic'
+line: X, column: X
+```
+下面介绍变量赋值的方法\
 变量赋值的使用方法如下（承接上文）
 ```go
 a = 2;   # pass
