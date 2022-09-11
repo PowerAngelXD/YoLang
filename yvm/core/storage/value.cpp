@@ -10,7 +10,6 @@ ysto::Value::Value(std::string content) {
     type = ytype::vtype::flag;
 }
 ysto::Value::Value(int ln, int col) {
-    isNull = true;
     type = ytype::vtype::null;
     line = ln, column = col;
 }
@@ -50,4 +49,8 @@ ytype::YString &ysto::Value::getStringValue() {
 
 std::vector<ysto::Value> &ysto::Value::getList() {
     return list;
+}
+
+ytype::YNull &ysto::Value::getNullValue() {
+    return nullValue;
 }
