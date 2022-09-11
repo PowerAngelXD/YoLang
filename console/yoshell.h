@@ -34,7 +34,7 @@ namespace ysh{
     // Yolang版本号
     static std::string version = "22.8.102";
     // 发行版本号
-    static std::string relVersion = "Yolang 1.2.14";
+    static std::string relVersion = "Yolang 1.2.15";
     // 完整版本
     static std::string completeVersion = "Release-2022-8-0102";
     // 版本更新说明
@@ -43,7 +43,8 @@ namespace ysh{
             "1, updated as operator; It can only be used to convert the value corresponding to the identifier\n" +
             "2, Optimized escape character detection and ported it to lexer\n" +
             "3, Updated bif: fwrite\n" +
-            "4, further optimize NULL";
+            "4, further optimize NULL\n" +
+            "5, Optimized for vorcstmt";
     // 指令方法类型
     typedef void (*insMethod)(std::vector<std::string>);
     // 指令定义
