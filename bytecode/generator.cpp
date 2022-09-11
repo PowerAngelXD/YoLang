@@ -296,14 +296,17 @@ void ygen::ByteCodeGenerator::visitOutStmt(AST::OutStmtNode* node) {
     OUT
 }
 void ygen::ByteCodeGenerator::visitVorcStmt(AST::VorcStmtNode* node) {
-    if (node->expr == nullptr)
-        PUSH(0.0, ytype::type(ytype::vtype::null, ytype::norm), node->mark->line, node->mark->column)
-    else
-        visitExpr(node->expr);
-    CREATE(addPara(node->name->content),
-         addPara(node->mark->content),
-         node->separate != nullptr ? addPara(node->type->content) : 0.0,
-         node->separate != nullptr ? 1.0 : 0.0);
+    for(int i = 0; i < node->defintions.size(); i++) {
+        auto def = node->defintions[i];
+        if (def->expr == nullptr)
+            PUSH(0.0, ytype::type(ytype::vtype::null, ytype::norm), node->mark->line, node->mark->column)
+        else
+            visitExpr(def->expr);
+        CREATE(addPara(def->name->content),
+               node->modifier != nullptr ? addPara(node->modifier->content):addPara(node->mark->content),
+               def->separate != nullptr ? addPara(def->type->content) : 0.0,
+               def->separate != nullptr ? 1.0 : 0.0);
+    }
 }
 void ygen::ByteCodeGenerator::visitSpExprStmt(AST::SpExprStmtNode* node) {
     if(node->assign != nullptr) visitAssignmentExpr(node->assign);
@@ -408,7 +411,7 @@ void ygen::ByteCodeGenerator::visitForStmt(AST::ForStmtNode* node) {
     // 释放局部变量
     FLAG(paraHelper::flagt::loopEnd);
     if(node->hasVorc)
-        DEL(addPara(node->vorc->name->content), 1.0)
+        DEL(addPara(node->vorc->defintions[0]->name->content), 1.0)
 }
 
 void ygen::ByteCodeGenerator::visitDeleteStmt(AST::DeleteStmtNode* node) {
