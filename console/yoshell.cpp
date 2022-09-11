@@ -119,6 +119,8 @@ void ysh::insRun(std::vector<std::string> paras) {
             ygen::ByteCodeGenerator bcg(stmts);
             bcg.visit(stmts);
 
+            yvm.load(bcg.getConstPool(), bcg.getCodes());
+            yvm.run(-1, "program");
         }
         else
             throw yoexception::YoError("FileError", "Not any file that can be run", -1, -1);
@@ -270,7 +272,7 @@ void ysh::insEnv(std::vector<std::string> paras) {
     else {
         if(paras.size() == 1) {
             if(paras[0] == "clear") {
-                // clear
+                yvm = vmcore::vm();
                 std::cout<<"[YVM SUCCESS] Operation execution completed";
             }
             else std::cout<<"[YVM ERROR] Unknown operation on virtual machine: '" + paras[0] + "'";
