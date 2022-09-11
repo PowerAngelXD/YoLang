@@ -3,6 +3,7 @@
 #include "../type/YDecimal.h"
 #include "../type/YBoolean.h"
 #include "../type/YString.h"
+#include "../type/YNull.h"
 #include <vector>
 
 namespace ytype {
