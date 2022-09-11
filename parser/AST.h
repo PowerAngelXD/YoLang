@@ -199,12 +199,22 @@ namespace AST{
 
     class VorcStmtNode{
     public:
+        struct defineBlock {
+            yolexer::yoToken* name = nullptr;
+            yolexer::yoToken* separate = nullptr;
+            yolexer::yoToken* type = nullptr;
+            yolexer::yoToken* equ = nullptr;
+            WholeExprNode* expr = nullptr;
+
+            std::string toString();
+        };
+
+        yolexer::yoToken* modifier = nullptr;
         yolexer::yoToken* mark = nullptr;
-        yolexer::yoToken* name = nullptr;
-        yolexer::yoToken* separate = nullptr;
-        yolexer::yoToken* type = nullptr;
-        yolexer::yoToken* equ = nullptr;
-        WholeExprNode* expr = nullptr;
+
+        std::vector<defineBlock*> defintions;
+        std::vector<yolexer::yoToken*> dots;
+
         yolexer::yoToken* end = nullptr;
 
         std::string toString();

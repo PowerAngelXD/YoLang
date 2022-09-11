@@ -174,11 +174,19 @@ std::string AST::OutStmtNode::toString() {
     return "OutStmtNode: {" + mark->toString() + ", " + expr->toString() + "}";
 }
 
+std::string AST::VorcStmtNode::defineBlock::toString() {
+    return "DefineBlock: {" + name->toString() + ", " + (type != nullptr?type->toString():"") + ", " + expr->toString() + "}";
+}
+
 std::string AST::VorcStmtNode::toString() {
-    return "VorcStmtNode: {" + mark->toString() + ", " + 
-            name->toString() + ", " + 
-            (type != nullptr?type->toString():"") + ", " + 
-            expr->toString() + "}";
+    std::string ret = "VorcStmtNode: {" +(modifier == nullptr?"":modifier->toString()) + mark->toString() + ", [";
+    ret += defintions[0]->toString();
+    for(int i = 0; i < dots.size(); i ++) {
+        ret + ", ";
+        ret += defintions[i + 1]->toString();
+    }
+    ret + "]}";
+    return ret;
 }
 
 std::string AST::BlockStmtNode::toString() {
