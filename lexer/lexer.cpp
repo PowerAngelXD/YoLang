@@ -44,7 +44,7 @@ void yolexer::Lexer::generate(){
         "while", "for", "for_each", "return", "func", 
         "string", "integer", "decimal", "char", "boolean", "delete",
         "string[]", "integer[]", "decimal[]", "char[]", "boolean[]", "function",
-        "as"
+        "as", "dynamic", "static"
     }; // 新增关键字都在这里
     for(int i = 0; i < input.size(); i++){
         if(input[i] == '\n'){
