@@ -179,45 +179,45 @@ void vmcore::vm::load(std::vector<std::string> cp, std::vector<ygen::byteCode> c
 }
 
 void vmcore::vm::run(int queue_id, std::string arg) {
-    auto queue = queue_id == -1? mainQueue: codeQueue[queue_id];
+    auto& queue = queue_id == -1? mainQueue: codeQueue[queue_id];
     for(int i = 0; i < queue.size(); i ++) {
         auto& code  = queue[i];
         switch (code.code) {
-            case ygen::tcast: tcast(code, queue); break;
-            case ygen::del_val: del_val(queue); break;
-            case ygen::add: add(code, queue); break;
-            case ygen::push: push(code, queue); break;
+            case ygen::tcast: tcast(code); break;
+            case ygen::del_val: del_val(); break;
+            case ygen::add: add(code); break;
+            case ygen::push: push(code); break;
             case ygen::jmp: i = jmp(code, queue, i); break;
-            case ygen::selfadd: selfadd(code, queue); break;
-            case ygen::selfsub: selfsub(code, queue); break;
-            case ygen::sub: sub(code, queue); break;
-            case ygen::div: div(code, queue); break;
-            case ygen::mul: mul(code, queue); break;
-            case ygen::tmo: mod(code, queue); break;
-            case ygen::idx: idx(code, queue); break;
-            case ygen::lst: lst(code, queue); break;
-            case ygen::logicand: logicAnd(code, queue); break;
-            case ygen::logicor: logicOr(code, queue); break;
-            case ygen::no: no(code, queue); break;
-            case ygen::lt: lt(code, queue); break;
-            case ygen::ltet: ltet(code, queue); break;
-            case ygen::gt: gt(code, queue); break;
-            case ygen::gtet: gtet(code, queue); break;
-            case ygen::equ: equ(code, queue); break;
-            case ygen::noequ: noequ(code, queue); break;
+            case ygen::selfadd: selfadd(code); break;
+            case ygen::selfsub: selfsub(code); break;
+            case ygen::sub: sub(code); break;
+            case ygen::div: div(code); break;
+            case ygen::mul: mul(code); break;
+            case ygen::tmo: mod(code); break;
+            case ygen::idx: idx(code); break;
+            case ygen::lst: lst(code); break;
+            case ygen::logicand: logicAnd(code); break;
+            case ygen::logicor: logicOr(code); break;
+            case ygen::no: no(code); break;
+            case ygen::lt: lt(code); break;
+            case ygen::ltet: ltet(code); break;
+            case ygen::gt: gt(code); break;
+            case ygen::gtet: gtet(code); break;
+            case ygen::equ: equ(code); break;
+            case ygen::noequ: noequ(code); break;
             case ygen::gmem:
                 break;
-            case ygen::stf: stf(code, queue); break;
-            case ygen::listend: lstend(code, queue); break;
-            case ygen::paraend: paraend(code, queue); break;
-            case ygen::scopestart: scopestart(code, queue); break;
-            case ygen::scopeend: scopeend(code, queue); break;
-            case ygen::idenend: idenend(code, queue); break;
-            case ygen::out: out(code, queue); break;
-            case ygen::create: create(code, queue); break;
-            case ygen::assign: assign(code, queue); break;
-            case ygen::del: del(code, queue); break;
-            case ygen::call: call(code, queue); break;
+            case ygen::stf: stf(code); break;
+            case ygen::listend: lstend(code); break;
+            case ygen::paraend: paraend(code); break;
+            case ygen::scopestart: scopestart(code); break;
+            case ygen::scopeend: scopeend(code); break;
+            case ygen::idenend: idenend(code); break;
+            case ygen::out: out(code); break;
+            case ygen::create: create(code); break;
+            case ygen::assign: assign(code); break;
+            case ygen::del: del(code); break;
+            case ygen::call: call(code); break;
         }
     }
 }
@@ -226,7 +226,7 @@ ysto::Value vmcore::vm::getResult() {
     return valueStack.pop();
 }
 
-void vmcore::vm::push(ygen::byteCode code, std::vector<ygen::byteCode> queue) {
+void vmcore::vm::push(ygen::byteCode code) {
     switch (ytype::getType(code.arg2)) {
         case ytype::vtype::integer: {
             valueStack.push(ysto::Value(ytype::YInteger(code.arg1), true, code.line, code.column));
@@ -285,7 +285,7 @@ void vmcore::vm::push(ygen::byteCode code, std::vector<ygen::byteCode> queue) {
     }
 }
 
-void vmcore::vm::tcast(ygen::byteCode code, std::vector<ygen::byteCode> queue) {
+void vmcore::vm::tcast(ygen::byteCode code) {
     auto right = valueStack.pop().getStringValue().get();
     auto left = valueStack.pop();
     switch (left.getType()) {
@@ -371,7 +371,7 @@ void vmcore::vm::tcast(ygen::byteCode code, std::vector<ygen::byteCode> queue) {
         }
     }
 }
-void vmcore::vm::add(ygen::byteCode code, std::vector<ygen::byteCode> queue) {
+void vmcore::vm::add(ygen::byteCode code) {
     auto right = valueStack.pop();
     auto left = valueStack.pop();
     switch (left.getType()) {
@@ -417,7 +417,7 @@ void vmcore::vm::add(ygen::byteCode code, std::vector<ygen::byteCode> queue) {
     }
 }
 
-void vmcore::vm::sub(ygen::byteCode code, std::vector<ygen::byteCode> queue) {
+void vmcore::vm::sub(ygen::byteCode code) {
     auto right = valueStack.pop();
     auto left = valueStack.pop();
     switch (left.getType()) {
@@ -453,7 +453,7 @@ void vmcore::vm::sub(ygen::byteCode code, std::vector<ygen::byteCode> queue) {
     }
 }
 
-void vmcore::vm::mul(ygen::byteCode code, std::vector<ygen::byteCode> queue) {
+void vmcore::vm::mul(ygen::byteCode code) {
     auto right = valueStack.pop();
     auto left = valueStack.pop();
     switch (left.getType()) {
@@ -511,7 +511,7 @@ void vmcore::vm::mul(ygen::byteCode code, std::vector<ygen::byteCode> queue) {
     }
 }
 
-void vmcore::vm::div(ygen::byteCode code, std::vector<ygen::byteCode> queue) {
+void vmcore::vm::div(ygen::byteCode code) {
     auto right = valueStack.pop();
     auto left = valueStack.pop();
     switch (left.getType()) {
@@ -556,7 +556,7 @@ void vmcore::vm::div(ygen::byteCode code, std::vector<ygen::byteCode> queue) {
     }
 }
 
-void vmcore::vm::mod(ygen::byteCode code, std::vector<ygen::byteCode> queue) {
+void vmcore::vm::mod(ygen::byteCode code) {
     auto right = valueStack.pop();
     auto left = valueStack.pop();
     if(left.getType() == ytype::vtype::integer) {
@@ -568,7 +568,7 @@ void vmcore::vm::mod(ygen::byteCode code, std::vector<ygen::byteCode> queue) {
     else throw yoexception::YoError("TypeError", "This operator does not support this type of operation",code.line, code.column);
 }
 
-void vmcore::vm::stf(ygen::byteCode code, std::vector<ygen::byteCode> queue) {
+void vmcore::vm::stf(ygen::byteCode code) {
     std::string name = constPool[code.arg1];
     if(name == "typeof") {
         auto value = valueStack.pop();
@@ -595,7 +595,7 @@ void vmcore::vm::stf(ygen::byteCode code, std::vector<ygen::byteCode> queue) {
     }
 }
 
-void vmcore::vm::lt(ygen::byteCode code, std::vector<ygen::byteCode> queue) {
+void vmcore::vm::lt(ygen::byteCode code) {
     auto right = valueStack.pop();
     auto left = valueStack.pop();
     switch (left.getType()) {
@@ -631,7 +631,7 @@ void vmcore::vm::lt(ygen::byteCode code, std::vector<ygen::byteCode> queue) {
     }
 }
 
-void vmcore::vm::gt(ygen::byteCode code, std::vector<ygen::byteCode> queue) {
+void vmcore::vm::gt(ygen::byteCode code) {
     auto right = valueStack.pop();
     auto left = valueStack.pop();
     switch (left.getType()) {
@@ -667,7 +667,7 @@ void vmcore::vm::gt(ygen::byteCode code, std::vector<ygen::byteCode> queue) {
     }
 }
 
-void vmcore::vm::ltet(ygen::byteCode code, std::vector<ygen::byteCode> queue) {
+void vmcore::vm::ltet(ygen::byteCode code) {
     auto right = valueStack.pop();
     auto left = valueStack.pop();
     switch (left.getType()) {
@@ -703,7 +703,7 @@ void vmcore::vm::ltet(ygen::byteCode code, std::vector<ygen::byteCode> queue) {
     }
 }
 
-void vmcore::vm::gtet(ygen::byteCode code, std::vector<ygen::byteCode> queue) {
+void vmcore::vm::gtet(ygen::byteCode code) {
     auto right = valueStack.pop();
     auto left = valueStack.pop();
     switch (left.getType()) {
@@ -739,14 +739,14 @@ void vmcore::vm::gtet(ygen::byteCode code, std::vector<ygen::byteCode> queue) {
     }
 }
 
-void vmcore::vm::no(ygen::byteCode code, std::vector<ygen::byteCode> queue) {
+void vmcore::vm::no(ygen::byteCode code) {
     auto value = valueStack.pop();
     if(value.getType() == ytype::vtype::boolean)
         valueStack.push(ysto::Value(ytype::YBoolean(!value.getBooleanValue().get()), true, code.line, code.column));
     else throw yoexception::YoError("TypeError", "This operator does not support this type of operation",code.line, code.column);
 }
 
-void vmcore::vm::logicAnd(ygen::byteCode code, std::vector<ygen::byteCode> queue) {
+void vmcore::vm::logicAnd(ygen::byteCode code) {
     auto left = valueStack.pop();
     auto right = valueStack.pop();
     if(left.getType() == ytype::vtype::boolean && right.getType() == ytype::vtype::boolean)
@@ -754,7 +754,7 @@ void vmcore::vm::logicAnd(ygen::byteCode code, std::vector<ygen::byteCode> queue
     else throw yoexception::YoError("TypeError", "This operator does not support this type of operation",code.line, code.column);
 }
 
-void vmcore::vm::logicOr(ygen::byteCode code, std::vector<ygen::byteCode> queue) {
+void vmcore::vm::logicOr(ygen::byteCode code) {
     auto left = valueStack.pop();
     auto right = valueStack.pop();
     if(left.getType() == ytype::vtype::boolean && right.getType() == ytype::vtype::boolean)
@@ -762,7 +762,7 @@ void vmcore::vm::logicOr(ygen::byteCode code, std::vector<ygen::byteCode> queue)
     else throw yoexception::YoError("TypeError", "This operator does not support this type of operation",code.line, code.column);
 }
 
-void vmcore::vm::equ(ygen::byteCode code, std::vector<ygen::byteCode> queue) {
+void vmcore::vm::equ(ygen::byteCode code) {
     auto right = valueStack.pop();
     auto left = valueStack.pop();
     switch (left.getType()) {
@@ -808,7 +808,7 @@ void vmcore::vm::equ(ygen::byteCode code, std::vector<ygen::byteCode> queue) {
     }
 }
 
-void vmcore::vm::noequ(ygen::byteCode code, std::vector<ygen::byteCode> queue) {
+void vmcore::vm::noequ(ygen::byteCode code) {
     auto right = valueStack.pop();
     auto left = valueStack.pop();
     switch (left.getType()) {
@@ -854,15 +854,15 @@ void vmcore::vm::noequ(ygen::byteCode code, std::vector<ygen::byteCode> queue) {
     }
 }
 
-void vmcore::vm::lstend(ygen::byteCode code, std::vector<ygen::byteCode> queue) {
+void vmcore::vm::lstend(ygen::byteCode code) {
      valueStack.push(ysto::Value("flag:list_end"));
 }
 
-void vmcore::vm::paraend(ygen::byteCode code, std::vector<ygen::byteCode> queue) {
+void vmcore::vm::paraend(ygen::byteCode code) {
     valueStack.push(ysto::Value("flag:para_end"));
 }
 
-void vmcore::vm::lst(ygen::byteCode code, std::vector<ygen::byteCode> queue) {
+void vmcore::vm::lst(ygen::byteCode code) {
     std::vector<ysto::Value> list;
     while(valueStack.peek().getType() != ytype::vtype::flag && valueStack.peek().getStringValue().get() != "flag:list_end") {
         list.push_back(valueStack.pop());
@@ -872,7 +872,7 @@ void vmcore::vm::lst(ygen::byteCode code, std::vector<ygen::byteCode> queue) {
     valueStack.push(ysto::Value(list, true, code.line, code.column));
 }
 
-void vmcore::vm::out(ygen::byteCode code, std::vector<ygen::byteCode> queue) {
+void vmcore::vm::out(ygen::byteCode code) {
     auto result = valueStack.pop();
     if(result.isList) {
         std::cout<<"[";
@@ -919,7 +919,7 @@ void vmcore::vm::out(ygen::byteCode code, std::vector<ygen::byteCode> queue) {
     }
 }
 
-void vmcore::vm::create(ygen::byteCode code, std::vector<ygen::byteCode> queue) {
+void vmcore::vm::create(ygen::byteCode code) {
     std::string name = constPool[code.arg1];
     std::string state = constPool[code.arg2]; // 初始化的类型，变量还是常量
     auto value = valueStack.pop();
@@ -970,7 +970,7 @@ void vmcore::vm::create(ygen::byteCode code, std::vector<ygen::byteCode> queue) 
     }
 }
 
-void vmcore::vm::idx(ygen::byteCode code, std::vector<ygen::byteCode> queue) {
+void vmcore::vm::idx(ygen::byteCode code) {
     auto idx = valueStack.pop();
     auto value = valueStack.pop();
     if(value.isListValue()) {
@@ -981,7 +981,7 @@ void vmcore::vm::idx(ygen::byteCode code, std::vector<ygen::byteCode> queue) {
     else throw yoexception::YoError("TypeError", "This operator does not support this type of operation",code.line, code.column);
 }
 
-void vmcore::vm::selfadd(ygen::byteCode code, std::vector<ygen::byteCode> queue) {
+void vmcore::vm::selfadd(ygen::byteCode code) {
     auto name = valueStack.pop().getStringValue().get();
 
     if(!space.findValue(name))
@@ -1001,7 +1001,7 @@ void vmcore::vm::selfadd(ygen::byteCode code, std::vector<ygen::byteCode> queue)
     }
 }
 
-void vmcore::vm::selfsub(ygen::byteCode code, std::vector<ygen::byteCode> queue) {
+void vmcore::vm::selfsub(ygen::byteCode code) {
     auto name = valueStack.pop().getStringValue().get();
 
     if(!space.findValue(name))
@@ -1021,7 +1021,7 @@ void vmcore::vm::selfsub(ygen::byteCode code, std::vector<ygen::byteCode> queue)
     }
 }
 
-void vmcore::vm::assign(ygen::byteCode code, std::vector<ygen::byteCode> queue) {
+void vmcore::vm::assign(ygen::byteCode code) {
     auto value = valueStack.pop();
     auto name = valueStack.pop().getStringValue().get();
     if(space.getValue(name).isConst())
@@ -1036,19 +1036,19 @@ void vmcore::vm::assign(ygen::byteCode code, std::vector<ygen::byteCode> queue) 
     }
 }
 
-void vmcore::vm::scopestart(ygen::byteCode code, std::vector<ygen::byteCode> queue) {
+void vmcore::vm::scopestart(ygen::byteCode code) {
     space.createScope("vm_created_scope", code.line, code.column);
 }
 
-void vmcore::vm::scopeend(ygen::byteCode code, std::vector<ygen::byteCode> queue) {
+void vmcore::vm::scopeend(ygen::byteCode code) {
     space.deleteScope();
 }
 
-void vmcore::vm::del_val(std::vector<ygen::byteCode> queue) {
+void vmcore::vm::del_val() {
     valueStack.pop();
 }
 
-int vmcore::vm::jmp(ygen::byteCode code, std::vector<ygen::byteCode> queue, int current) {
+int vmcore::vm::jmp(ygen::byteCode code, std::vector<ygen::byteCode>& queue, int current) {
     switch ((int)code.arg1) {
         case ygen::paraHelper::jmpt::reqTrue: {
             if(valueStack.pop().getBooleanValue().get() == true) {
@@ -1076,6 +1076,7 @@ int vmcore::vm::jmp(ygen::byteCode code, std::vector<ygen::byteCode> queue, int 
                             else if(queue[current].code == ygen::btc::scopeend) flag ++;
                             else ;
                         }
+                        current --;
                         break;
                     }
                     default: break;
@@ -1110,6 +1111,7 @@ int vmcore::vm::jmp(ygen::byteCode code, std::vector<ygen::byteCode> queue, int 
                             else if(queue[current].code == ygen::btc::scopeend) flag ++;
                             else ;
                         }
+                        current --;
                         break;
                     }
                     default: break;
@@ -1132,7 +1134,7 @@ int vmcore::vm::jmp(ygen::byteCode code, std::vector<ygen::byteCode> queue, int 
                 }
                 case ygen::paraHelper::jmpt::outLoop: {
                     int flag = 1;
-                    while(flag != 0) {
+                    while(queue[current].arg1 != ygen::paraHelper::flagt::loopEnd) {
                         current ++;
                         if(queue[current].code == ygen::btc::scopestart) flag ++;
                         else if(queue[current].code == ygen::btc::scopeend) flag --;
@@ -1159,7 +1161,7 @@ int vmcore::vm::jmp(ygen::byteCode code, std::vector<ygen::byteCode> queue, int 
     return current;
 }
 
-void vmcore::vm::del(ygen::byteCode code, std::vector<ygen::byteCode> queue) {
+void vmcore::vm::del(ygen::byteCode code) {
     if(code.arg2 == 1.0) {
         // 判断是否启用了不传入push名称的模式
         auto name = constPool[code.arg1];
@@ -1179,11 +1181,11 @@ void vmcore::vm::del(ygen::byteCode code, std::vector<ygen::byteCode> queue) {
     }
 }
 
-void vmcore::vm::idenend(ygen::byteCode code, std::vector<ygen::byteCode> queue) {
+void vmcore::vm::idenend(ygen::byteCode code) {
     valueStack.push(ysto::Value("flag:identifier_end"));
 }
 
-void vmcore::vm::call(ygen::byteCode code, std::vector<ygen::byteCode> queue) {
+void vmcore::vm::call(ygen::byteCode code) {
     std::string fnName = valueStack.pop().getStringValue().get();
     auto temp = valueStack.pop(); // temp值，用于检测是paraend还是正常的flag
     // 是不是无参函数: true-不是，false-是
