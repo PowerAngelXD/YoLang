@@ -181,7 +181,7 @@ bool parser::Parser::isOutStmt() {
     return peek()->content == "out";
 }
 bool parser::Parser::isVorcStmt() {
-    return peek()->content == "var" || peek()->content == "const"; // TODO： 支持ref后添加对ref的判断
+    return peek()->content == "var" || peek()->content == "const" || peek()->content == "dynamic" || peek()->content == "static";
 }
 bool parser::Parser::isBlockStmt() {
     return peek()->content == "{";
@@ -509,26 +509,64 @@ AST::OutStmtNode* parser::Parser::parseOutStmtNode(){
 
 AST::VorcStmtNode* parser::Parser::parseVorcStmtNode(bool asStmt){
     AST::VorcStmtNode* node = new AST::VorcStmtNode;
-    node->mark = token();
-    if(isIdentifier()) node->name = token();
+    if(peek()->content == "dynamic" || peek()->content == "static") {
+        node->modifier = token();
+        if(peek()->content == "const")
+            throw yoexception::YoError("SyntaxError", "Constants cannot use modifier: '" + node->modifier->content + "'", tg[offset].line, tg[offset].column);
+        node->mark = token();
+    }
+    else node->mark = token();
+
+    AST::VorcStmtNode::defineBlock* defintion = new AST::VorcStmtNode::defineBlock;
+    if(isIdentifier()) defintion->name = token();
     else throw yoexception::YoError("SyntaxError", "Expect an identifier", tg[offset].line, tg[offset].column);
     if(peek()->content == ":"){
-        node->separate = token();
-        if(peek()->type == yolexer::KeyWord) node->type = token();
+        defintion->separate = token();
+        if(peek()->type == yolexer::KeyWord) defintion->type = token();
         else throw yoexception::YoError("SyntaxError", "Expect type specifier ", tg[offset].line, tg[offset].column);
         if(peek()->content == "=") {
-            node->equ = token();
-            if(isExpr()) node->expr = parseExpr();
+            defintion->equ = token();
+            if(isExpr()) defintion->expr = parseExpr();
             else throw yoexception::YoError("SyntaxError", "Expect an expression", tg[offset].line, tg[offset].column);
         }
     }
     else{
         if(peek()->content == "=") {
-            node->equ = token();
-            if (isExpr()) node->expr = parseExpr();
+            defintion->equ = token();
+            if (isExpr()) defintion->expr = parseExpr();
             else throw yoexception::YoError("SyntaxError", "Expect an expression", tg[offset].line, tg[offset].column);
         }
     }
+
+    node->defintions.push_back(defintion);
+    while(true) {
+        if(peek()->content != ",") break;
+        node->dots.push_back(token());
+
+        AST::VorcStmtNode::defineBlock* def = new AST::VorcStmtNode::defineBlock;
+        if(isIdentifier()) def->name = token();
+        else throw yoexception::YoError("SyntaxError", "Expect an identifier", tg[offset].line, tg[offset].column);
+        if(peek()->content == ":"){
+            def->separate = token();
+            if(peek()->type == yolexer::KeyWord) def->type = token();
+            else throw yoexception::YoError("SyntaxError", "Expect type specifier ", tg[offset].line, tg[offset].column);
+            if(peek()->content == "=") {
+                def->equ = token();
+                if(isExpr()) def->expr = parseExpr();
+                else throw yoexception::YoError("SyntaxError", "Expect an expression", tg[offset].line, tg[offset].column);
+            }
+        }
+        else{
+            if(peek()->content == "=") {
+                def->equ = token();
+                if (isExpr()) def->expr = parseExpr();
+                else throw yoexception::YoError("SyntaxError", "Expect an expression", tg[offset].line, tg[offset].column);
+            }
+        }
+
+        node->defintions.push_back(def);
+    }
+
     if(peek()->content == ";" && asStmt) node->end = token();
     else {
         if(asStmt)
