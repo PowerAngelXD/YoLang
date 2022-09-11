@@ -5,16 +5,28 @@ ysto::Value::Value(ytype::YBoolean v, bool isc, int ln, int col): booleanValue(v
 ysto::Value::Value(ytype::YString v, bool isc, int ln, int col): stringValue(v), isConstant(isc), line(ln), column(col), type(ytype::vtype::string) {}
 ysto::Value::Value(ytype::YDecimal v, bool isc, int ln, int col): decimalValue(v), isConstant(isc), line(ln), column(col), type(ytype::vtype::decimal) {}
 ysto::Value::Value(ytype::YObject v, bool isc, int ln, int col): objectValue(v), isConstant(isc), line(ln), column(col), type(ytype::vtype::object) {}
-ysto::Value::Value(std::string content) {
-    stringValue = ytype::YString(content);
-    type = ytype::vtype::flag;
-}
 ysto::Value::Value(int ln, int col) {
     type = ytype::vtype::null;
     line = ln, column = col;
 }
 ysto::Value::Value(std::vector<Value> v, bool isc, int ln, int col): list(v), isConstant(isc), line(ln), column(col), type(v[0].getType()), isList(true) {}
 
+ysto::Value::Value(ytype::YInteger v, bool isc, bool isdyn, int ln, int col): integerValue(v), isDynamic(isdyn), isConstant(isc), line(ln), column(col), type(ytype::vtype::integer) {}
+ysto::Value::Value(ytype::YBoolean v, bool isc, bool isdyn, int ln, int col): booleanValue(v), isDynamic(isdyn), isConstant(isc), line(ln), column(col), type(ytype::vtype::boolean) {}
+ysto::Value::Value(ytype::YString v, bool isc, bool isdyn, int ln, int col): stringValue(v), isDynamic(isdyn), isConstant(isc), line(ln), column(col), type(ytype::vtype::string) {}
+ysto::Value::Value(ytype::YDecimal v, bool isc, bool isdyn, int ln, int col): decimalValue(v), isDynamic(isdyn), isConstant(isc), line(ln), column(col), type(ytype::vtype::decimal) {}
+ysto::Value::Value(ytype::YObject v, bool isc, bool isdyn, int ln, int col): objectValue(v), isDynamic(isdyn), isConstant(isc), line(ln), column(col), type(ytype::vtype::object) {}
+ysto::Value::Value(bool isdyn, int ln, int col) {
+    type = ytype::vtype::null;
+    isDynamic = isdyn;
+    line = ln, column = col;
+}
+ysto::Value::Value(std::vector<Value> v, bool isc, bool isdyn, int ln, int col): list(v), isDynamic(isdyn), isConstant(isc), line(ln), column(col), type(v[0].getType()), isList(true) {}
+
+ysto::Value::Value(std::string content) {
+    stringValue = ytype::YString(content);
+    type = ytype::vtype::flag;
+}
 ytype::vtype& ysto::Value::getType() {
     return type;
 }
@@ -25,6 +37,10 @@ bool ysto::Value::isConst() {
 
 bool ysto::Value::isListValue() {
     return isList;
+}
+
+bool ysto::Value::isDyn() {
+    return isDynamic;
 }
 
 ytype::YObject &ysto::Value::getObjectValue() {
