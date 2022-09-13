@@ -5,3 +5,7 @@ yolang
 .idea
 cmake-build-release
 cmake-build-debug
+CMakeFiles
+*.exe
+*.o
+
