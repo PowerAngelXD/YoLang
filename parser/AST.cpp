@@ -248,6 +248,10 @@ std::string AST::FuncDefStmtNode::toString() {
     }
 }
 
+std::string AST::ReturnStmtNode::toString() {
+    return "ReturnStmt: {" + expr->toString() + "}";
+}
+
 std::string AST::BreakStmtNode::toString() {
     return "BreakStmt";
 }
@@ -275,5 +279,6 @@ std::string AST::StmtNode::toString() {
     else if(fdefstmt != nullptr) return "StmtNode: {" + fdefstmt->toString() + "}";
     else if(breakstmt != nullptr) return "StmtNode: {" + breakstmt->toString() + "}";
     else if(deferstmt != nullptr) return "StmtNode: {" + deferstmt->toString() + "}";
+    else if(retstmt != nullptr) return "StmtNode: {" + retstmt->toString() + "}";
     return "null";
 }

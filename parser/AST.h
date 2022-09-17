@@ -346,7 +346,11 @@ namespace AST{
 
     class ReturnStmtNode {
     public:
+        yolexer::yoToken* mark = nullptr;
+        WholeExprNode* expr = nullptr;
+        yolexer::yoToken* end = nullptr;
 
+        std::string toString();
     };
 
     class BreakStmtNode {
@@ -381,6 +385,7 @@ namespace AST{
         ForStmtNode* forstmt = nullptr;
         FuncDefStmtNode* fdefstmt = nullptr;
         DeferStmtNode* deferstmt = nullptr;
+        ReturnStmtNode* retstmt = nullptr;
 
         std::string toString();
     };
