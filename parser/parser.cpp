@@ -219,9 +219,12 @@ bool parser::Parser::isFuncDefStmt() {
 bool parser::Parser::isDeferStmt() {
     return peek()->content == "defer";
 }
+bool parser::Parser::isReturnStmt() {
+    return peek()->content == "return";
+}
 bool parser::Parser::isStmt() {
     return isOutStmt() || isVorcStmt() || isSpExprStmt() || isBlockStmt() || isWhileStmt() || isIfStmt() || isElifStmt() || isElseStmt() ||
-            isRepeatStmt() || isDeleteStmt() || isForStmt() || isBreakStmt() || isFuncDefStmt() || isDeferStmt();
+            isRepeatStmt() || isDeleteStmt() || isForStmt() || isBreakStmt() || isFuncDefStmt() || isDeferStmt() || isReturnStmt();
 }
 
 // EXPR
@@ -482,6 +485,7 @@ AST::StmtNode* parser::Parser::parseStmtNode() {
     else if(isBreakStmt()) node->breakstmt = parseBreakStmtNode();
     else if(isFuncDefStmt()) node->fdefstmt = parseFuncDefStmtNode();
     else if(isDeferStmt()) node->deferstmt = parseDeferStmtNode();
+    else if(isReturnStmt()) node->retstmt = parseReturnStmtNode();
     else throw yoexception::YoError("SyntaxError", "Not any statement", tg[offset].line, tg[offset].column);
     return node;
 }
@@ -714,6 +718,18 @@ AST::DeferStmtNode* parser::Parser::parseDeferStmtNode() {
     node->mark = token();
     if(isStmt()) node->stmt = parseStmtNode();
     else throw yoexception::YoError("SyntaxError", "Not any statement", tg[offset].line, tg[offset].column);
+    return node;
+}
+
+AST::ReturnStmtNode* parser::Parser::parseReturnStmtNode() {
+    AST::ReturnStmtNode* node = new AST::ReturnStmtNode;
+    node->mark = token();
+    if(isExpr()) node->expr = parseExpr();
+    else throw yoexception::YoError("SyntaxError", "Expect an expression!", tg[offset].line, tg[offset].column);
+
+    if(peek()->content == ";") node->end = token();
+    else throw yoexception::YoError("SyntaxError", "Expect ';'", tg[offset].line, tg[offset].column);
+
     return node;
 }
 
