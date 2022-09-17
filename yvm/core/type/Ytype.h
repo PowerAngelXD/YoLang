@@ -34,7 +34,7 @@ namespace ytype {
      */
     struct byteCode{
         int code;
-        ytypeUnit typ;
+        ytypeUnit type;
         float arg1=0.0, arg2=0.0, arg3=0.0, arg4=0.0;
         int line, column;
     };

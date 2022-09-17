@@ -61,18 +61,18 @@ ytype::ytypeUnit ytype::string2Type(std::string s) {
         basic += s[i];
     }
     bool flag = false;
-    for(int i = 0; i < s.size(); i++) {
-        if(s[i]==':') flag = true;
-        if(flag) comp += s[i];
+    for(int j = 0; j < s.size(); j++) {
+        if(s[j]==':') flag = true;
+        if(flag) comp += s[j];
     }
-    return {string2BasicType(basic), string2CompType(comp)};
+    return {string2BasicType(basic), flag?string2CompType(comp):compType::norm};
 }
 
 bool ytype::ytypeUnit::operator==(ytypeUnit tu) {
     return this->bt == tu.bt && this->ct == tu.ct;
 }
 bool ytype::ytypeUnit::operator!=(ytypeUnit tu) {
-    return this->bt != tu.bt && this->ct != tu.ct;
+    return !(this->bt != tu.bt && this->ct != tu.ct);
 }
 
 //
