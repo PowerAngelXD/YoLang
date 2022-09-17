@@ -43,7 +43,7 @@ void yolexer::Lexer::generate(){
         "var", "ref", "typeof", "const", "out", "repeat",
         "while", "for", "for_each", "return", "func", 
         "string", "integer", "decimal", "boolean", "delete",
-        "string[]", "integer[]", "decimal[]", "boolean[]", "function",
+        "string[]", "integer[]", "decimal[]", "boolean[]",
         "as", "dynamic", "static", "null"
     }; // 新增关键字都在这里
     for(int i = 0; i < input.size(); i++){

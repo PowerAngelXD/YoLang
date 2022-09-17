@@ -214,7 +214,7 @@ bool parser::Parser::isBreakStmt() {
     return peek()->content == "break";
 }
 bool parser::Parser::isFuncDefStmt() {
-    return peek()->content == "function";
+    return peek()->content == "func";
 }
 bool parser::Parser::isDeferStmt() {
     return peek()->content == "defer";
@@ -262,12 +262,12 @@ AST::IndexOpNode* parser::Parser::parseIndexOpNode(){
     node->left = token();
     if(isAddExpr()) node->index = parseAddExprNode();
     else throw yoexception::YoError("SyntaxError", "A correct expression is required",
-                tg[offset].line,
-                tg[offset].column);
+                                    tg[offset].line,
+                                    tg[offset].column);
     if(peek()->content == "]") node->right = token();
-    else throw yoexception::YoError("SyntaxError", "Expect ']'", 
-                tg[offset].line,
-                tg[offset].column);
+    else throw yoexception::YoError("SyntaxError", "Expect ']'",
+                                    tg[offset].line,
+                                    tg[offset].column);
     return node;
 }
 AST::AsOpNode* parser::Parser::parseAsOp() {
@@ -276,9 +276,9 @@ AST::AsOpNode* parser::Parser::parseAsOp() {
     return node;
 }
 AST::AddOpNode* parser::Parser::parseAddOpNode(){
-    if(!isAddOp()) throw yoexception::YoError("SyntaxError", "Expect '+' or '-'", 
-                        tg[offset].line,
-                        tg[offset].column);
+    if(!isAddOp()) throw yoexception::YoError("SyntaxError", "Expect '+' or '-'",
+                                              tg[offset].line,
+                                              tg[offset].column);
     AST::AddOpNode* node = new AST::AddOpNode;
     node->op = token();
     return node;
@@ -294,25 +294,25 @@ AST::StfOpNode* parser::Parser::parseStfOpNode(){
     return node;
 }
 AST::MulOpNode* parser::Parser::parseMulOpNode(){
-    if(!isMulOp()) throw yoexception::YoError("SyntaxError", "Expect '*', '%' or '/'", 
-                        tg[offset].line,
-                        tg[offset].column);
+    if(!isMulOp()) throw yoexception::YoError("SyntaxError", "Expect '*', '%' or '/'",
+                                              tg[offset].line,
+                                              tg[offset].column);
     AST::MulOpNode* node = new AST::MulOpNode;
     node->op = token();
     return node;
 }
 AST::CmpOpNode* parser::Parser::parseCmpOpNode(){
-    if(!isCmpOp()) throw yoexception::YoError("SyntaxError", "Expect '==', '!=', '>', '>=', '<' or '<='", 
-                        tg[offset].line,
-                        tg[offset].column);
+    if(!isCmpOp()) throw yoexception::YoError("SyntaxError", "Expect '==', '!=', '>', '>=', '<' or '<='",
+                                              tg[offset].line,
+                                              tg[offset].column);
     AST::CmpOpNode* node = new AST::CmpOpNode;
     node->op = token();
     return node;
 }
 AST::BoolOpNode* parser::Parser::parseBoolOpNode(){
-    if(!isBoolOp()) throw yoexception::YoError("SyntaxError", "Expect '||' or '&&'", 
-                        tg[offset].line,
-                        tg[offset].column);
+    if(!isBoolOp()) throw yoexception::YoError("SyntaxError", "Expect '||' or '&&'",
+                                               tg[offset].line,
+                                               tg[offset].column);
     AST::BoolOpNode* node = new AST::BoolOpNode;
     node->op = token();
     return node;
@@ -337,8 +337,8 @@ AST::PrimExprNode* parser::Parser::parsePrimExprNode(){
         node->expr = parseExpr();
         if(peek()->content == ")") node->right = token();
         else throw yoexception::YoError("SyntaxError", "Expect ')'",
-                tg[offset].line,
-                tg[offset].column);
+                                        tg[offset].line,
+                                        tg[offset].column);
     }
     else throw yoexception::YoError("SyntaxError", "Unsupported expression or operator", tg[offset].line, tg[offset].column);
     return node;
@@ -375,8 +375,8 @@ AST::ListExprNode* parser::Parser::parseListExprNode(){
     }
     if(peek()->content == "]") node->right = token();
     else throw yoexception::YoError("SyntaxError", "Expect ']'",
-                tg[offset].line,
-                tg[offset].column);
+                                    tg[offset].line,
+                                    tg[offset].column);
     return node;
 }
 AST::MulExprNode* parser::Parser::parseMulExprNode(){
@@ -406,23 +406,23 @@ AST::CmpExprNode* parser::Parser::parseCmpExprNode(){
     if(peek()->content == "!") {
         node->reverse = parseCmpOpNode();
         if(isAddExpr()) node->expr = parseAddExprNode();
-        else throw yoexception::YoError("SyntaxError", "An appropriate expression is required!", 
-                tg[offset].line,
-                tg[offset].column);
+        else throw yoexception::YoError("SyntaxError", "An appropriate expression is required!",
+                                        tg[offset].line,
+                                        tg[offset].column);
     }
     else node->expr = parseAddExprNode();
     if(isCmpOp()) {
         node->op = parseCmpOpNode();
         if(isAddExpr()) node->cmpExpr = parseAddExprNode();
-        else throw yoexception::YoError("SyntaxError", "An appropriate expression is required!", 
-                tg[offset].line,
-                tg[offset].column);
+        else throw yoexception::YoError("SyntaxError", "An appropriate expression is required!",
+                                        tg[offset].line,
+                                        tg[offset].column);
         return node;
     }
-    if(isAddExpr()) 
-        throw yoexception::YoError("SyntaxError", "Expect '>', '<', '<=', '>=', '==' or '!='!", 
-                tg[offset].line,
-                tg[offset].column);
+    if(isAddExpr())
+        throw yoexception::YoError("SyntaxError", "Expect '>', '<', '<=', '>=', '==' or '!='!",
+                                   tg[offset].line,
+                                   tg[offset].column);
     return node;
 }
 AST::BoolExprNode* parser::Parser::parseBoolExprNode(){
