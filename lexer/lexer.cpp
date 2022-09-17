@@ -42,9 +42,9 @@ void yolexer::Lexer::generate(){
     std::vector<std::string> yoKeyWords = {
         "var", "ref", "typeof", "const", "out", "repeat",
         "while", "for", "for_each", "return", "func", 
-        "string", "integer", "decimal", "char", "boolean", "delete",
-        "string[]", "integer[]", "decimal[]", "char[]", "boolean[]", "function",
-        "as", "dynamic", "static"
+        "string", "integer", "decimal", "boolean", "delete",
+        "string[]", "integer[]", "decimal[]", "boolean[]", "function",
+        "as", "dynamic", "static", "null"
     }; // 新增关键字都在这里
     for(int i = 0; i < input.size(); i++){
         if(input[i] == '\n'){
