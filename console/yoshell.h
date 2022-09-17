@@ -44,7 +44,8 @@ namespace ysh{
             "2, Optimized escape character detection and ported it to lexer\n" +
             "3, Updated bif: fwrite\n" +
             "4, further optimize NULL\n" +
-            "5, Optimized for vorcstmt";
+            "5, Optimized for vorcstmt\n"+
+            "6, implemented the function";
     // 指令方法类型
     typedef void (*insMethod)(std::vector<std::string>);
     // 指令定义
