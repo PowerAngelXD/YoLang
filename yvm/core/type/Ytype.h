@@ -7,34 +7,24 @@
 #include <vector>
 
 namespace ytype {
-    enum vtype {integer = 1, boolean, decimal, string, null, object, iden, flag}; // iden类型只是为了标记为标识符所代表的值
-    typedef float modifier;
-    typedef float vtypeUnit;
+    // 对原先的类型系统作出修改
+    enum basicType {integer = 0, boolean, decimal, string, null, object, iden, flag}; // iden类型只是为了标记为标识符所代表的值
+    enum compType {norm = 10, list, dict};
+    struct ytypeUnit{
+        basicType bt;
+        compType ct;
+        bool operator==(ytypeUnit tu);
+        bool operator!=(ytypeUnit tu);
+    };
+    ytypeUnit type(basicType bt_, compType ct_);
 
-    // 新类型系统的类型构造器
-    float type(vtype t, modifier m);
-    int getType(vtypeUnit unit);
-    float getModifier(vtypeUnit unit);
+    std::string basicType2String(basicType bt);
+    std::string compType2String(compType ct);
+    std::string type2String(ytypeUnit tu);
 
-    std::string vtype2String(vtype t);
-    std::string modifier2String(modifier m);
-
-    vtype string2Vtype(std::string s);
-    modifier string2Modifier(std::string s);
-
-    //
-    extern modifier norm;
-    extern modifier list;
-    extern modifier dict;
-
-    //类型常量
-    extern const vtypeUnit Integer;
-    extern const vtypeUnit Decimal;
-    extern const vtypeUnit String;
-    extern const vtypeUnit Boolean;
-    extern const vtypeUnit Object;
-
-
+    basicType string2BasicType(std::string s);
+    compType string2CompType(std::string s);
+    ytypeUnit string2Type(std::string s);
     // Object
 
     enum objectKind {typable, function};
@@ -44,6 +34,7 @@ namespace ytype {
      */
     struct byteCode{
         int code;
+        ytypeUnit typ;
         float arg1=0.0, arg2=0.0, arg3=0.0, arg4=0.0;
         int line, column;
     };
@@ -52,14 +43,15 @@ namespace ytype {
         objectKind kind; // Object的类型
 
         std::vector<std::string> members; // only "typable"
-        std::vector<std::pair<ytype::vtypeUnit, std::string>> args; // 参数类型:参数名 only "function"
+    public:
+        std::vector<std::pair<ytype::ytypeUnit, std::string>> args; // 参数类型:参数名 only "function"
+        ytype::ytypeUnit retType; // 返回类型
         std::vector<byteCode> codes; // 储存的代码片段（包含scopestart scopeend） only "function"
 
-    public:
         YObject(objectKind k);
         YObject()=default;
         // 构造一个函数Object的方法
-        YObject(std::vector<byteCode> cs, std::vector<std::pair<ytype::vtypeUnit, std::string>> as);
+        YObject(std::vector<byteCode> cs, std::vector<std::pair<ytype::ytypeUnit, std::string>> as, ytype::ytypeUnit rety);
 
         bool isTypable();
         bool isFunction();

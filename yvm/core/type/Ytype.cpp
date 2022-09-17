@@ -1,87 +1,89 @@
 #include "Ytype.h"
 
-ytype::modifier ytype::norm = 0.1;
-ytype::modifier ytype::list = 0.2;
-ytype::modifier ytype::dict = 0.3;
-
-const ytype::vtypeUnit ytype::Integer = ytype::type(ytype::vtype::integer,ytype::norm);
-const ytype::vtypeUnit ytype::Decimal = ytype::type(ytype::vtype::decimal,ytype::norm);
-const ytype::vtypeUnit ytype::String = ytype::type(ytype::vtype::string, ytype::norm);
-const ytype::vtypeUnit ytype::Boolean = ytype::type(ytype::vtype::boolean,ytype::norm);
-const ytype::vtypeUnit ytype::Object = ytype::type(ytype::vtype::object, ytype::norm);
-
-float ytype::type(vtype t, modifier m) {
-    return t + m;
-}
-int ytype::getType(vtypeUnit unit) {
-    ytype::vtype t = static_cast<ytype::vtype>(unit);
-    return t;
-}
-float ytype::getModifier(vtypeUnit unit) {
-    ytype::vtype t = static_cast<ytype::vtype>(unit);
-    ytype::modifier m = unit - t;
-    return m;
+ytype::ytypeUnit ytype::type(ytype::basicType bt_, ytype::compType ct_) {
+    return ytype::ytypeUnit{bt_, ct_};
 }
 
-ytype::vtype ytype::string2Vtype(std::string s) {
-    ytype::vtype t;
-    if(s == "integer") t = ytype::vtype::integer;
-    else if(s == "decimal") t = ytype::vtype::decimal;
-    else if(s == "string") t = ytype::vtype::string;
-    else if(s == "object") t = ytype::vtype::object;
-    else if(s == "boolean") t = ytype::vtype::boolean;
-    else if(s == "null") t = ytype::vtype::null;
-    return t;
-}
-ytype::modifier ytype::string2Modifier(std::string s) {
-    modifier m;
-    if(s == "norm") m = norm;
-    else if(s == "list") m = list;
-    else if(s == "dict") m = dict;
-    return m;
-}
-
-std::string ytype::modifier2String(modifier m) {
-    std::string ret;
-    if(m == norm) ret = "norm";
-    else if(m == list) ret = "list";
-    else if(m == dict) ret = "dict";
-    return ret;
-}
-std::string ytype::vtype2String(ytype::vtype t) {
-    std::string ret = "null";
-    switch (t) {
+std::string ytype::basicType2String(basicType bt) {
+    switch (bt) {
         case integer:
-            ret = "integer";
-            break;
+            return "integer";
         case boolean:
-            ret = "boolean";
-            break;
+            return "boolean";
         case decimal:
-            ret = "decimal";
-            break;
+            return "decimal";
         case string:
-            ret = "string";
-            break;
+            return "string";
         case null:
-            ret = "null";
-            break;
+            return "null";
         case object:
-            ret = "obj";
-            break;
-        default:
-            break;
+            return "object";
+        case iden:
+            return "iden";
+        case flag:
+            return "flag";
+        default: return "__null__";
     }
-    return ret;
+}
+std::string ytype::compType2String(compType ct) {
+    switch (ct) {
+        case norm:
+            return "norm";
+        case list:
+            return "list";
+        case dict:
+            return "dict";
+        default:
+            return "__null__";
+    }
+}
+std::string ytype::type2String(ytypeUnit tu) {
+    return basicType2String(tu.bt) + ":" + compType2String(tu.ct);
 }
 
+ytype::basicType ytype::string2BasicType(std::string s) {
+    if(s=="integer") return basicType::integer;
+    else if(s=="decimal") return basicType::decimal;
+    else if(s=="boolean") return basicType::boolean;
+    else if(s=="string") return basicType::string;
+    else if(s=="null") return basicType::null;
+}
+ytype::compType ytype::string2CompType(std::string s) {
+    if(s=="norm") return compType::norm;
+    else if(s=="list") return compType::list;
+    else if(s=="dict") return compType::dict;
+}
+ytype::ytypeUnit ytype::string2Type(std::string s) {
+    std::string basic;
+    std::string comp;
+    for(int i = 0; i < s.size(); i++) {
+        if(s[i]==':') break;
+        basic += s[i];
+    }
+    bool flag = false;
+    for(int i = 0; i < s.size(); i++) {
+        if(s[i]==':') flag = true;
+        if(flag) comp += s[i];
+    }
+    return {string2BasicType(basic), string2CompType(comp)};
+}
+
+bool ytype::ytypeUnit::operator==(ytypeUnit tu) {
+    return this->bt == tu.bt && this->ct == tu.ct;
+}
+bool ytype::ytypeUnit::operator!=(ytypeUnit tu) {
+    return this->bt != tu.bt && this->ct != tu.ct;
+}
+
+//
 
 ytype::YObject::YObject(ytype::objectKind k) {
     kind = k;
 }
 
-ytype::YObject::YObject(std::vector<byteCode> cs, std::vector<std::pair<ytype::vtypeUnit, std::string>> as) {
+ytype::YObject::YObject(std::vector<byteCode> cs, std::vector<std::pair<ytype::ytypeUnit, std::string>> as, ytype::ytypeUnit rety) {
     codes = cs;
+    retType = rety;
     args = as;
     kind = objectKind::function;
 }
