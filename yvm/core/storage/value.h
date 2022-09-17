@@ -12,7 +12,7 @@ namespace ysto {
         std::vector<Value> list;
         // 属性
 
-        ytype::vtype type; // 值类型（无修饰符）
+        ytype::ytypeUnit type; // 值类型（无修饰符）
     public:
         bool isConstant = false; // 是否为常量
         bool isList = false; // 是否为列表
@@ -36,7 +36,10 @@ namespace ysto {
 
         Value(std::string content); // 用于初始化flag类型的构造函数（flag只用于内部
 
-        ytype::vtype& getType(); // 获取Value对应的完整Type
+        ytype::basicType& getBasicType(); // 获取Value对应的BasicType
+        ytype::compType& getCompType(); // 获取Value对应的BasicType
+        ytype::ytypeUnit& getType(); // 获取Value对应的BasicType
+
         bool isConst();
         bool isListValue();
         bool isDyn();
