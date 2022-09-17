@@ -81,8 +81,6 @@ namespace ygen{
          */
         void completeCtor(btc code, float arg1, float arg2, float arg3, float arg4, int ln, int col);
         void pushCtor(float arg1, ytype::ytypeUnit t, float arg2, int ln, int col);
-        // 用来生成 .ybtc 文件（yolang字节码文件）
-        void genFile(std::string name);
 
         void visitNumber(yolexer::yoToken* token);
         void buildIntegerNumber(std::string number, int line, int column);

@@ -64,26 +64,6 @@ void ygen::ByteCodeGenerator::completeCtor(ygen::btc code, float arg1, float arg
 void ygen::ByteCodeGenerator::pushCtor(float arg1, ytype::ytypeUnit t, float arg2, int ln, int col) {
     codes.push_back({ygen::btc::push, t, arg1, arg2, 0.0, 0.0, ln, col});
 }
-void ygen::ByteCodeGenerator::genFile(std::string name) {
-    std::ofstream file(name, std::ios::binary|std::ios::out);
-    
-    std::string paraArea;
-    for(int i = 0; i < codes.size(); i++) {
-        file<<removeZero(codes[i].code)<<",";
-        file<<removeZero(codes[i].arg1)<<",";
-        file<<removeZero(codes[i].arg2)<<",";
-        file<<removeZero(codes[i].arg3)<<",";
-        file<<removeZero(codes[i].arg4)<<",";
-        file<<removeZero(codes[i].line)<<",";
-        file<<removeZero(codes[i].column)<<":\n";
-    }
-    file<<"#\n";
-    for(auto para: constpool) {
-        file<<para<<"\"";
-        // file.write(strcat(para.data(), ","), sizeof(std::string));
-    }
-    file.close();
-}
 
 void ygen::ByteCodeGenerator::visitBoolean(yolexer::yoToken* token){
     if(token->content == "false")
