@@ -927,7 +927,7 @@ void vmcore::vm::create(ygen::byteCode code,  int &current) {
     if(space.findValue(name))
         throw yoexception::YoError("NameError", "Identifier:'" + name + "' already exists", code.line, code.column);
 
-    if(state == "function") {
+    if(state == "func") {
         // 参数, 返回值处理
         std::vector<std::pair<ytype::ytypeUnit, std::string>> formalParas;
         while(valueStack.peek().getBasicType() != ytype::basicType::flag && valueStack.peek().getStringValue().get() != "flag:para_end") {
@@ -935,6 +935,7 @@ void vmcore::vm::create(ygen::byteCode code,  int &current) {
             std::string argType = valueStack.pop().getStringValue().get();
             formalParas.push_back(std::pair<ytype::ytypeUnit, std::string>(ytype::string2Type(argType),argName));
         }
+        std::reverse(formalParas.begin(), formalParas.end());
         valueStack.pop();
         ytype::ytypeUnit retType = ytype::string2Type(valueStack.pop().getStringValue().get());
         // 代码块打包
@@ -946,7 +947,7 @@ void vmcore::vm::create(ygen::byteCode code,  int &current) {
             current ++;
             if(mainQueue[current].code == ygen::btc::scopestart) flag ++;
             else if(mainQueue[current].code == ygen::btc::scopeend) flag --;
-            codes.push_back({mainQueue[current].code,{} , mainQueue[current].arg1, mainQueue[current].arg2, mainQueue[current].arg3,
+            codes.push_back({mainQueue[current].code, mainQueue[current].type, mainQueue[current].arg1, mainQueue[current].arg2, mainQueue[current].arg3,
                                             mainQueue[current].arg4, mainQueue[current].line, mainQueue[current].column});
         }
         //
@@ -1272,13 +1273,20 @@ void vmcore::vm::call(ygen::byteCode code) {
         auto codes = fnTemp.getObjectValue().codes;
         std::vector<ygen::byteCode> cs;
         for(int i = 0; i < codes.size(); i ++){
-            ygen::byteCode temp = {(ygen::btc)codes[i].code, {}, codes[i].arg1, codes[i].arg2, codes[i].arg3, codes[i].arg4, codes[i].line, codes[i].column};
+            ygen::byteCode temp = {(ygen::btc)codes[i].code, codes[i].type, codes[i].arg1, codes[i].arg2, codes[i].arg3, codes[i].arg4, codes[i].line, codes[i].column};
             cs.push_back(temp);
         }
         codeQueue.push_back(cs);
         // 运行
+        run(codeQueue.size() - 1, "in_function");
         if(fnTemp.getObjectValue().retType.bt == ytype::basicType::null)
             valueStack.push(ysto::Value(code.line, code.column));
-        run(codeQueue.size() - 1, "normal");
+        space.deleteScope(); // 删除给函数的作用域
+
+        // 返回值拦截
+        auto ret = valueStack.pop();
+        if(ret.getType() != fnTemp.getObjectValue().retType)
+            throw yoexception::YoError("FunctionCallingError", "The return value is inconsistent with the design return value", code.line, code.column);
+        else valueStack.push(ret);
     }
 }
