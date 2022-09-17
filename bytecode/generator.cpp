@@ -53,13 +53,13 @@ int ygen::ByteCodeGenerator::addPara(std::string para){
     return constpool.size()-1;
 }
 void ygen::ByteCodeGenerator::minCtor(ygen::btc code, int ln, int col){
-    codes.push_back({code, {}, 0.0, 0.0, 0.0, 0.0, ln, col});
+    codes.push_back({code, {ytype::basicType::null, ytype::compType::norm}, 0.0, 0.0, 0.0, 0.0, ln, col});
 }
 void ygen::ByteCodeGenerator::normalCtor(ygen::btc code, float arg1, float arg2, int ln, int col){
-    codes.push_back({code, {}, arg1, arg2, 0.0, 0.0, ln, col});
+    codes.push_back({code, {ytype::basicType::null, ytype::compType::norm}, arg1, arg2, 0.0, 0.0, ln, col});
 }
 void ygen::ByteCodeGenerator::completeCtor(ygen::btc code, float arg1, float arg2, float arg3, float arg4, int ln, int col){
-    codes.push_back({code, {}, arg1, arg2, arg3, arg4, ln, col});
+    codes.push_back({code, {ytype::basicType::null, ytype::compType::norm}, arg1, arg2, arg3, arg4, ln, col});
 }
 void ygen::ByteCodeGenerator::pushCtor(float arg1, ytype::ytypeUnit t, float arg2, int ln, int col) {
     codes.push_back({ygen::btc::push, t, arg1, arg2, 0.0, 0.0, ln, col});
@@ -468,5 +468,6 @@ void ygen::ByteCodeGenerator::visit(std::vector<AST::StmtNode*> stmts) {
         else if(stmt->forstmt != nullptr) visitForStmt(stmt->forstmt);
         else if(stmt->breakstmt != nullptr) visitBreakStmt(stmt->breakstmt);
         else if(stmt->fdefstmt != nullptr) visitFuncDefStmt(stmt->fdefstmt);
+        else if(stmt->retstmt != nullptr) visitReturnStmt(stmt->retstmt);
     }
 }
