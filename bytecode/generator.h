@@ -33,6 +33,7 @@ namespace ygen{
      */
     struct byteCode{
         btc code;
+        ytype::ytypeUnit type;
         float arg1=0.0, arg2=0.0, arg3=0.0, arg4=0.0;
         int line, column;
     };
@@ -79,6 +80,7 @@ namespace ygen{
          * @return byteCode
          */
         void completeCtor(btc code, float arg1, float arg2, float arg3, float arg4, int ln, int col);
+        void pushCtor(float arg1, ytype::ytypeUnit t, float arg2, int ln, int col);
         // 用来生成 .ybtc 文件（yolang字节码文件）
         void genFile(std::string name);
 
@@ -122,6 +124,7 @@ namespace ygen{
         void visitForStmt(AST::ForStmtNode* node);
         void visitBreakStmt(AST::BreakStmtNode* node);
         void visitFuncDefStmt(AST::FuncDefStmtNode* node);
+        void visitReturnStmt(AST::ReturnStmtNode* node);
         AST::StmtNode* visitDeferStmt(AST::DeferStmtNode* node);
         void visit(std::vector<AST::StmtNode*> stmts); // 特殊的visitor，visit的是整个stmts
     };
