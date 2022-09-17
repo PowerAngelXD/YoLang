@@ -69,7 +69,7 @@ namespace vmcore {
         void lstend(ygen::byteCode code);
         void paraend(ygen::byteCode code);
         void push(ygen::byteCode code);
-        void create(ygen::byteCode code);
+        void create(ygen::byteCode code, int &current);
         void assign(ygen::byteCode code);
         void scopestart(ygen::byteCode code);
         void scopeend(ygen::byteCode code);

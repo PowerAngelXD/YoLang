@@ -8,7 +8,7 @@ ysto::Value vmcore::native::BuiltInFunctionSet::println(std::vector<ysto::Value>
     else if(args.size() != 1)
         throw yoexception::YoError("FunctionCallingError", "Overloaded function with no specified arguments", args[0].line, args[0].column);
     auto content = args[0];
-    switch (content.getType()){
+    switch (content.getBasicType()){
         case ytype::integer:
             std::cout << std::to_string(content.getIntegerValue().get()) << std::endl;
             break;
@@ -41,7 +41,7 @@ ysto::Value vmcore::native::BuiltInFunctionSet::input(std::vector<ysto::Value> a
     if(args.empty()) promptText = "";
     else {
         auto prompt = args[0];
-        if (prompt.getType() == ytype::vtype::string){
+        if (prompt.getBasicType() == ytype::basicType::string){
             promptText = prompt.getStringValue().get();
         }
     }
@@ -55,7 +55,7 @@ ysto::Value vmcore::native::BuiltInFunctionSet::fread(std::vector<ysto::Value> a
         throw yoexception::YoError("FunctionCallingError", "Overloaded function with no specified arguments", args[0].line, args[0].column);
     }
     auto filename = args[0];
-    if (filename.getType() != ytype::vtype::string){
+    if (filename.getBasicType() != ytype::basicType::string){
         throw yoexception::YoError("TypeError", "Invalid FileName Type", filename.line, filename.column);
     }
 
@@ -71,9 +71,9 @@ ysto::Value vmcore::native::BuiltInFunctionSet::fread(std::vector<ysto::Value> a
 ysto::Value vmcore::native::BuiltInFunctionSet::fwrite(std::vector<ysto::Value> args, ygen::byteCode code) {
     if (args.size() != 3)
         throw yoexception::YoError("FunctionCallingError", "Overloaded function with no specified arguments", args[0].line, args[0].column);
-    if(args[0].getType() != ytype::vtype::string &&
-        args[1].getType() != ytype::vtype::string &&
-        args[2].getType() != ytype::vtype::string)
+    if(args[0].getBasicType() != ytype::basicType::string &&
+        args[1].getBasicType() != ytype::basicType::string &&
+        args[2].getBasicType() != ytype::basicType::string)
         throw yoexception::YoError("TypeError", "The parameter type filled in the corresponding function does not match the definition", args[0].line, args[0].column);
     std::string path = args[0].getStringValue().get();
     std::string content = args[1].getStringValue().get();
@@ -120,13 +120,13 @@ ysto::Value vmcore::native::BuiltInFunctionSet::substr(std::vector<ysto::Value> 
     auto string = args[0];
     auto start = args[1];
     auto end = args[2];
-    if (string.getType() != ytype::vtype::string){
+    if (string.getBasicType() != ytype::basicType::string){
         throw yoexception::YoError("TypeError", "Invalid String Argument Type", string.line, string.column);
     }
-    if (start.getType() != ytype::vtype::integer){
+    if (start.getBasicType() != ytype::basicType::integer){
         throw yoexception::YoError("TypeError", "Invalid Start Argument Type", start.line, start.column);
     }
-    if (end.getType() != ytype::vtype::integer){
+    if (end.getBasicType() != ytype::basicType::integer){
         throw yoexception::YoError("TypeError", "Invalid End Argument Type", end.line, end.column);
     }
     std::string result = string.getStringValue().get().substr(start.getIntegerValue().get(),end.getIntegerValue().get());
@@ -138,7 +138,7 @@ ysto::Value vmcore::native::BuiltInFunctionSet::substr(std::vector<ysto::Value> 
 //        throw yoexception::YoError("FunctionCallingError", "Overloaded function with no specified arguments", args[0].line, args[0].column);
 //    else if (args.size() != 1)
 //        throw yoexception::YoError("FunctionCallingError", "Overloaded function with no specified arguments", args[0].line, args[0].column);
-//    else if (args[0].getType() != ytype::vtype::string)
+//    else if (args[0].getBasicType() != ytype::basicType::string)
 //        throw yoexception::YoError("TypeError", "Invalid Command Argument Type", args[0].line, args[0].column);
 //    ::system(args[0].getStringValue().get().c_str());
 //    return native::null_value;
@@ -214,7 +214,7 @@ void vmcore::vm::run(int queue_id, std::string arg) {
             case ygen::scopeend: scopeend(code); break;
             case ygen::idenend: idenend(code); break;
             case ygen::out: out(code); break;
-            case ygen::create: create(code); break;
+            case ygen::create: create(code, i); break;
             case ygen::assign: assign(code); break;
             case ygen::del: del(code); break;
             case ygen::call: call(code); break;
@@ -227,28 +227,28 @@ ysto::Value vmcore::vm::getResult() {
 }
 
 void vmcore::vm::push(ygen::byteCode code) {
-    switch (ytype::getType(code.arg2)) {
-        case ytype::vtype::integer: {
+    switch (code.type.bt) {
+        case ytype::basicType::integer: {
             valueStack.push(ysto::Value(ytype::YInteger(code.arg1), false, code.line, code.column));
             break;
         }
-        case ytype::vtype::decimal: {
+        case ytype::basicType::decimal: {
             valueStack.push(ysto::Value(ytype::YDecimal(code.arg1), false, code.line, code.column));
             break;
         }
-        case ytype::vtype::string: {
+        case ytype::basicType::string: {
             valueStack.push(ysto::Value(ytype::YString(constPool[code.arg1]), false, code.line, code.column));
             break;
         }
-        case ytype::vtype::boolean: {
+        case ytype::basicType::boolean: {
             valueStack.push(ysto::Value(ytype::YBoolean(code.arg1), false, code.line, code.column));
             break;
         }
-        case ytype::vtype::null: {
+        case ytype::basicType::null: {
             valueStack.push(ysto::Value(code.line, code.column));
             break;
         }
-        case ytype::vtype::iden: {
+        case ytype::basicType::iden: {
             std::string name = constPool[code.arg1];
 
             if(!space.findValue(name))
@@ -258,24 +258,24 @@ void vmcore::vm::push(ygen::byteCode code) {
                 valueStack.push(ysto::Value(space.getValue(name).getList(), false, code.line, code.column));
             }
             else {
-                switch (space.getValue(name).getType()) {
-                    case ytype::vtype::integer: {
+                switch (space.getValue(name).getBasicType()) {
+                    case ytype::basicType::integer: {
                         valueStack.push(ysto::Value(ytype::YInteger(space.getValue(name).getIntegerValue()), false, code.line, code.column));
                         break;
                     }
-                    case ytype::vtype::decimal: {
+                    case ytype::basicType::decimal: {
                         valueStack.push(ysto::Value(ytype::YDecimal(space.getValue(name).getDecimalValue()), false, code.line, code.column));
                         break;
                     }
-                    case ytype::vtype::string: {
+                    case ytype::basicType::string: {
                         valueStack.push(ysto::Value(ytype::YString(space.getValue(name).getStringValue()), false, code.line, code.column));
                         break;
                     }
-                    case ytype::vtype::boolean: {
+                    case ytype::basicType::boolean: {
                         valueStack.push(ysto::Value(ytype::YBoolean(space.getValue(name).getBooleanValue().get()), false, code.line, code.column));
                         break;
                     }
-                    case ytype::vtype::null: {
+                    case ytype::basicType::null: {
                         valueStack.push(ysto::Value(code.line, code.column));
                         break;
                     }
@@ -288,7 +288,7 @@ void vmcore::vm::push(ygen::byteCode code) {
 void vmcore::vm::tcast(ygen::byteCode code) {
     auto right = valueStack.pop().getStringValue().get();
     auto left = valueStack.pop();
-    switch (left.getType()) {
+    switch (left.getBasicType()) {
         case ytype::integer: {
             if(right == "integer")
                 valueStack.push(left);
@@ -374,14 +374,14 @@ void vmcore::vm::tcast(ygen::byteCode code) {
 void vmcore::vm::add(ygen::byteCode code) {
     auto right = valueStack.pop();
     auto left = valueStack.pop();
-    switch (left.getType()) {
-        case ytype::vtype::integer: {
-            switch (right.getType()) {
-                case ytype::vtype::integer: {
+    switch (left.getBasicType()) {
+        case ytype::basicType::integer: {
+            switch (right.getBasicType()) {
+                case ytype::basicType::integer: {
                     valueStack.push(ysto::Value(ytype::YInteger(left.getIntegerValue().get() + right.getIntegerValue().get()),false, code.line, code.column));
                     break;
                 }
-                case ytype::vtype::decimal: {
+                case ytype::basicType::decimal: {
                     valueStack.push(ysto::Value(ytype::YDecimal(left.getIntegerValue().get() + right.getDecimalValue().get()), false, code.line, code.column));
                     break;
                 }
@@ -389,13 +389,13 @@ void vmcore::vm::add(ygen::byteCode code) {
             }
             break;
         }
-        case ytype::vtype::decimal: {
-            switch (right.getType()) {
-                case ytype::vtype::integer: {
+        case ytype::basicType::decimal: {
+            switch (right.getBasicType()) {
+                case ytype::basicType::integer: {
                     valueStack.push(ysto::Value(ytype::YDecimal(left.getDecimalValue().get() + right.getIntegerValue().get()),true, code.line, code.column));
                     break;
                 }
-                case ytype::vtype::decimal: {
+                case ytype::basicType::decimal: {
                     valueStack.push(ysto::Value(ytype::YDecimal(left.getDecimalValue().get() + right.getDecimalValue().get()), false, code.line, code.column));
                     break;
                 }
@@ -403,9 +403,9 @@ void vmcore::vm::add(ygen::byteCode code) {
             }
             break;
         }
-        case ytype::vtype::string: {
-            switch (right.getType()) {
-                case ytype::vtype::string: {
+        case ytype::basicType::string: {
+            switch (right.getBasicType()) {
+                case ytype::basicType::string: {
                     valueStack.push(ysto::Value(ytype::YString(left.getStringValue().get() + right.getStringValue().get()),false, code.line, code.column));
                     break;
                 }
@@ -420,14 +420,14 @@ void vmcore::vm::add(ygen::byteCode code) {
 void vmcore::vm::sub(ygen::byteCode code) {
     auto right = valueStack.pop();
     auto left = valueStack.pop();
-    switch (left.getType()) {
-        case ytype::vtype::integer: {
-            switch (right.getType()) {
-                case ytype::vtype::integer: {
+    switch (left.getBasicType()) {
+        case ytype::basicType::integer: {
+            switch (right.getBasicType()) {
+                case ytype::basicType::integer: {
                     valueStack.push(ysto::Value(ytype::YInteger(left.getIntegerValue().get() - right.getIntegerValue().get()), false, code.line, code.column));
                     break;
                 }
-                case ytype::vtype::decimal: {
+                case ytype::basicType::decimal: {
                     valueStack.push(ysto::Value(ytype::YDecimal(left.getIntegerValue().get() - right.getDecimalValue().get()), false, code.line, code.column));
                     break;
                 }
@@ -435,13 +435,13 @@ void vmcore::vm::sub(ygen::byteCode code) {
             }
             break;
         }
-        case ytype::vtype::decimal: {
-            switch (right.getType()) {
-                case ytype::vtype::integer: {
+        case ytype::basicType::decimal: {
+            switch (right.getBasicType()) {
+                case ytype::basicType::integer: {
                     valueStack.push(ysto::Value(ytype::YDecimal(left.getDecimalValue().get() - right.getIntegerValue().get()), false, code.line, code.column));
                     break;
                 }
-                case ytype::vtype::decimal: {
+                case ytype::basicType::decimal: {
                     valueStack.push(ysto::Value(ytype::YDecimal(left.getDecimalValue().get() - right.getDecimalValue().get()), false, code.line, code.column));
                     break;
                 }
@@ -456,18 +456,18 @@ void vmcore::vm::sub(ygen::byteCode code) {
 void vmcore::vm::mul(ygen::byteCode code) {
     auto right = valueStack.pop();
     auto left = valueStack.pop();
-    switch (left.getType()) {
-        case ytype::vtype::integer: {
-            switch (right.getType()) {
-                case ytype::vtype::integer: {
+    switch (left.getBasicType()) {
+        case ytype::basicType::integer: {
+            switch (right.getBasicType()) {
+                case ytype::basicType::integer: {
                     valueStack.push(ysto::Value(ytype::YInteger(left.getIntegerValue().get() * right.getIntegerValue().get()), false, code.line, code.column));
                     break;
                 }
-                case ytype::vtype::decimal: {
+                case ytype::basicType::decimal: {
                     valueStack.push(ysto::Value(ytype::YDecimal(left.getIntegerValue().get() * right.getDecimalValue().get()), false, code.line, code.column));
                     break;
                 }
-                case ytype::vtype::string: {
+                case ytype::basicType::string: {
                     std::string ret;
                     for(int i = 0; i < left.getIntegerValue().get(); i ++) {
                         ret += right.getStringValue().get();
@@ -479,13 +479,13 @@ void vmcore::vm::mul(ygen::byteCode code) {
             }
             break;
         }
-        case ytype::vtype::decimal: {
-            switch (right.getType()) {
-                case ytype::vtype::integer: {
+        case ytype::basicType::decimal: {
+            switch (right.getBasicType()) {
+                case ytype::basicType::integer: {
                     valueStack.push(ysto::Value(ytype::YDecimal(left.getDecimalValue().get() * right.getIntegerValue().get()), false, code.line, code.column));
                     break;
                 }
-                case ytype::vtype::decimal: {
+                case ytype::basicType::decimal: {
                     valueStack.push(ysto::Value(ytype::YDecimal(left.getDecimalValue().get() * right.getDecimalValue().get()), false, code.line, code.column));
                     break;
                 }
@@ -493,9 +493,9 @@ void vmcore::vm::mul(ygen::byteCode code) {
             }
             break;
         }
-        case ytype::vtype::string: {
-            switch (right.getType()) {
-                case ytype::vtype::integer: {
+        case ytype::basicType::string: {
+            switch (right.getBasicType()) {
+                case ytype::basicType::integer: {
                     std::string ret;
                     for(int i = 0; i < right.getIntegerValue().get(); i ++) {
                         ret += left.getStringValue().get();
@@ -514,10 +514,10 @@ void vmcore::vm::mul(ygen::byteCode code) {
 void vmcore::vm::div(ygen::byteCode code) {
     auto right = valueStack.pop();
     auto left = valueStack.pop();
-    switch (left.getType()) {
-        case ytype::vtype::integer: {
-            switch (right.getType()) {
-                case ytype::vtype::integer: {
+    switch (left.getBasicType()) {
+        case ytype::basicType::integer: {
+            switch (right.getBasicType()) {
+                case ytype::basicType::integer: {
                     std::ostringstream oss;
                     oss<<(float)left.getIntegerValue().get() / right.getIntegerValue().get();
                     if(oss.str().find('.') == oss.str().npos) {
@@ -530,7 +530,7 @@ void vmcore::vm::div(ygen::byteCode code) {
                     }
                     break;
                 }
-                case ytype::vtype::decimal: {
+                case ytype::basicType::decimal: {
                     valueStack.push(ysto::Value(ytype::YDecimal(left.getIntegerValue().get() / right.getDecimalValue().get()), false, code.line, code.column));
                     break;
                 }
@@ -538,13 +538,13 @@ void vmcore::vm::div(ygen::byteCode code) {
             }
             break;
         }
-        case ytype::vtype::decimal: {
-            switch (right.getType()) {
-                case ytype::vtype::integer: {
+        case ytype::basicType::decimal: {
+            switch (right.getBasicType()) {
+                case ytype::basicType::integer: {
                     valueStack.push(ysto::Value(ytype::YDecimal(left.getDecimalValue().get() / right.getIntegerValue().get()), false, code.line, code.column));
                     break;
                 }
-                case ytype::vtype::decimal: {
+                case ytype::basicType::decimal: {
                     valueStack.push(ysto::Value(ytype::YDecimal(left.getDecimalValue().get() / right.getDecimalValue().get()), false, code.line, code.column));
                     break;
                 }
@@ -559,8 +559,8 @@ void vmcore::vm::div(ygen::byteCode code) {
 void vmcore::vm::mod(ygen::byteCode code) {
     auto right = valueStack.pop();
     auto left = valueStack.pop();
-    if(left.getType() == ytype::vtype::integer) {
-        if(right.getType() == ytype::vtype::integer) {
+    if(left.getBasicType() == ytype::basicType::integer) {
+        if(right.getBasicType() == ytype::basicType::integer) {
             valueStack.push(ysto::Value(ytype::YInteger(left.getIntegerValue().get() % right.getIntegerValue().get()), false, code.line, code.column));
         }
         else throw yoexception::YoError("TypeError", "This operator does not support this type of operation",code.line, code.column);
@@ -572,7 +572,7 @@ void vmcore::vm::stf(ygen::byteCode code) {
     std::string name = constPool[code.arg1];
     if(name == "typeof") {
         auto value = valueStack.pop();
-        switch (value.getType()) {
+        switch (value.getBasicType()) {
             case ytype::integer:
                 valueStack.push(ysto::Value(ytype::YString("Integer"), false, code.line, code.column));
                 break;
@@ -598,14 +598,14 @@ void vmcore::vm::stf(ygen::byteCode code) {
 void vmcore::vm::lt(ygen::byteCode code) {
     auto right = valueStack.pop();
     auto left = valueStack.pop();
-    switch (left.getType()) {
-        case ytype::vtype::integer: {
-            switch (right.getType()) {
-                case ytype::vtype::integer: {
+    switch (left.getBasicType()) {
+        case ytype::basicType::integer: {
+            switch (right.getBasicType()) {
+                case ytype::basicType::integer: {
                     valueStack.push(ysto::Value(ytype::YBoolean(left.getIntegerValue().get() < right.getIntegerValue().get()), false, code.line, code.column));
                     break;
                 }
-                case ytype::vtype::decimal: {
+                case ytype::basicType::decimal: {
                     valueStack.push(ysto::Value(ytype::YBoolean(left.getIntegerValue().get() < right.getDecimalValue().get()), false, code.line, code.column));
                     break;
                 }
@@ -613,13 +613,13 @@ void vmcore::vm::lt(ygen::byteCode code) {
             }
             break;
         }
-        case ytype::vtype::decimal: {
-            switch (right.getType()) {
-                case ytype::vtype::integer: {
+        case ytype::basicType::decimal: {
+            switch (right.getBasicType()) {
+                case ytype::basicType::integer: {
                     valueStack.push(ysto::Value(ytype::YBoolean(left.getDecimalValue().get() < right.getIntegerValue().get()), false, code.line, code.column));
                     break;
                 }
-                case ytype::vtype::decimal: {
+                case ytype::basicType::decimal: {
                     valueStack.push(ysto::Value(ytype::YBoolean(left.getDecimalValue().get() < right.getDecimalValue().get()), false, code.line, code.column));
                     break;
                 }
@@ -634,14 +634,14 @@ void vmcore::vm::lt(ygen::byteCode code) {
 void vmcore::vm::gt(ygen::byteCode code) {
     auto right = valueStack.pop();
     auto left = valueStack.pop();
-    switch (left.getType()) {
-        case ytype::vtype::integer: {
-            switch (right.getType()) {
-                case ytype::vtype::integer: {
+    switch (left.getBasicType()) {
+        case ytype::basicType::integer: {
+            switch (right.getBasicType()) {
+                case ytype::basicType::integer: {
                     valueStack.push(ysto::Value(ytype::YBoolean(left.getIntegerValue().get() > right.getIntegerValue().get()), false, code.line, code.column));
                     break;
                 }
-                case ytype::vtype::decimal: {
+                case ytype::basicType::decimal: {
                     valueStack.push(ysto::Value(ytype::YBoolean(left.getIntegerValue().get() > right.getDecimalValue().get()), false, code.line, code.column));
                     break;
                 }
@@ -649,13 +649,13 @@ void vmcore::vm::gt(ygen::byteCode code) {
             }
             break;
         }
-        case ytype::vtype::decimal: {
-            switch (right.getType()) {
-                case ytype::vtype::integer: {
+        case ytype::basicType::decimal: {
+            switch (right.getBasicType()) {
+                case ytype::basicType::integer: {
                     valueStack.push(ysto::Value(ytype::YBoolean(left.getDecimalValue().get() > right.getIntegerValue().get()), false, code.line, code.column));
                     break;
                 }
-                case ytype::vtype::decimal: {
+                case ytype::basicType::decimal: {
                     valueStack.push(ysto::Value(ytype::YBoolean(left.getDecimalValue().get() > right.getDecimalValue().get()), false, code.line, code.column));
                     break;
                 }
@@ -670,14 +670,14 @@ void vmcore::vm::gt(ygen::byteCode code) {
 void vmcore::vm::ltet(ygen::byteCode code) {
     auto right = valueStack.pop();
     auto left = valueStack.pop();
-    switch (left.getType()) {
-        case ytype::vtype::integer: {
-            switch (right.getType()) {
-                case ytype::vtype::integer: {
+    switch (left.getBasicType()) {
+        case ytype::basicType::integer: {
+            switch (right.getBasicType()) {
+                case ytype::basicType::integer: {
                     valueStack.push(ysto::Value(ytype::YBoolean(left.getIntegerValue().get() <= right.getIntegerValue().get()), false, code.line, code.column));
                     break;
                 }
-                case ytype::vtype::decimal: {
+                case ytype::basicType::decimal: {
                     valueStack.push(ysto::Value(ytype::YBoolean(left.getIntegerValue().get() <= right.getDecimalValue().get()), false, code.line, code.column));
                     break;
                 }
@@ -685,13 +685,13 @@ void vmcore::vm::ltet(ygen::byteCode code) {
             }
             break;
         }
-        case ytype::vtype::decimal: {
-            switch (right.getType()) {
-                case ytype::vtype::integer: {
+        case ytype::basicType::decimal: {
+            switch (right.getBasicType()) {
+                case ytype::basicType::integer: {
                     valueStack.push(ysto::Value(ytype::YBoolean(left.getDecimalValue().get() <= right.getIntegerValue().get()), false, code.line, code.column));
                     break;
                 }
-                case ytype::vtype::decimal: {
+                case ytype::basicType::decimal: {
                     valueStack.push(ysto::Value(ytype::YBoolean(left.getDecimalValue().get() <= right.getDecimalValue().get()), false, code.line, code.column));
                     break;
                 }
@@ -706,14 +706,14 @@ void vmcore::vm::ltet(ygen::byteCode code) {
 void vmcore::vm::gtet(ygen::byteCode code) {
     auto right = valueStack.pop();
     auto left = valueStack.pop();
-    switch (left.getType()) {
-        case ytype::vtype::integer: {
-            switch (right.getType()) {
-                case ytype::vtype::integer: {
+    switch (left.getBasicType()) {
+        case ytype::basicType::integer: {
+            switch (right.getBasicType()) {
+                case ytype::basicType::integer: {
                     valueStack.push(ysto::Value(ytype::YBoolean(left.getIntegerValue().get() >= right.getIntegerValue().get()), false, code.line, code.column));
                     break;
                 }
-                case ytype::vtype::decimal: {
+                case ytype::basicType::decimal: {
                     valueStack.push(ysto::Value(ytype::YBoolean(left.getIntegerValue().get() >= right.getDecimalValue().get()), false, code.line, code.column));
                     break;
                 }
@@ -721,13 +721,13 @@ void vmcore::vm::gtet(ygen::byteCode code) {
             }
             break;
         }
-        case ytype::vtype::decimal: {
-            switch (right.getType()) {
-                case ytype::vtype::integer: {
+        case ytype::basicType::decimal: {
+            switch (right.getBasicType()) {
+                case ytype::basicType::integer: {
                     valueStack.push(ysto::Value(ytype::YBoolean(left.getDecimalValue().get() >= right.getIntegerValue().get()), false, code.line, code.column));
                     break;
                 }
-                case ytype::vtype::decimal: {
+                case ytype::basicType::decimal: {
                     valueStack.push(ysto::Value(ytype::YBoolean(left.getDecimalValue().get() >= right.getDecimalValue().get()), false, code.line, code.column));
                     break;
                 }
@@ -741,7 +741,7 @@ void vmcore::vm::gtet(ygen::byteCode code) {
 
 void vmcore::vm::no(ygen::byteCode code) {
     auto value = valueStack.pop();
-    if(value.getType() == ytype::vtype::boolean)
+    if(value.getBasicType() == ytype::basicType::boolean)
         valueStack.push(ysto::Value(ytype::YBoolean(!value.getBooleanValue().get()), false, code.line, code.column));
     else throw yoexception::YoError("TypeError", "This operator does not support this type of operation",code.line, code.column);
 }
@@ -749,7 +749,7 @@ void vmcore::vm::no(ygen::byteCode code) {
 void vmcore::vm::logicAnd(ygen::byteCode code) {
     auto left = valueStack.pop();
     auto right = valueStack.pop();
-    if(left.getType() == ytype::vtype::boolean && right.getType() == ytype::vtype::boolean)
+    if(left.getBasicType() == ytype::basicType::boolean && right.getBasicType() == ytype::basicType::boolean)
         valueStack.push(ysto::Value(ytype::YBoolean(left.getBooleanValue().get() && right.getBooleanValue().get()), false, code.line, code.column));
     else throw yoexception::YoError("TypeError", "This operator does not support this type of operation",code.line, code.column);
 }
@@ -757,7 +757,7 @@ void vmcore::vm::logicAnd(ygen::byteCode code) {
 void vmcore::vm::logicOr(ygen::byteCode code) {
     auto left = valueStack.pop();
     auto right = valueStack.pop();
-    if(left.getType() == ytype::vtype::boolean && right.getType() == ytype::vtype::boolean)
+    if(left.getBasicType() == ytype::basicType::boolean && right.getBasicType() == ytype::basicType::boolean)
         valueStack.push(ysto::Value(ytype::YBoolean(left.getBooleanValue().get() || right.getBooleanValue().get()), false, code.line, code.column));
     else throw yoexception::YoError("TypeError", "This operator does not support this type of operation",code.line, code.column);
 }
@@ -765,14 +765,14 @@ void vmcore::vm::logicOr(ygen::byteCode code) {
 void vmcore::vm::equ(ygen::byteCode code) {
     auto right = valueStack.pop();
     auto left = valueStack.pop();
-    switch (left.getType()) {
-        case ytype::vtype::integer: {
-            switch (right.getType()) {
-                case ytype::vtype::integer: {
+    switch (left.getBasicType()) {
+        case ytype::basicType::integer: {
+            switch (right.getBasicType()) {
+                case ytype::basicType::integer: {
                     valueStack.push(ysto::Value(ytype::YBoolean(left.getIntegerValue().get() == right.getIntegerValue().get()),false, code.line, code.column));
                     break;
                 }
-                case ytype::vtype::decimal: {
+                case ytype::basicType::decimal: {
                     valueStack.push(ysto::Value(ytype::YBoolean(left.getIntegerValue().get() == right.getDecimalValue().get()), false, code.line, code.column));
                     break;
                 }
@@ -780,13 +780,13 @@ void vmcore::vm::equ(ygen::byteCode code) {
             }
             break;
         }
-        case ytype::vtype::decimal: {
-            switch (right.getType()) {
-                case ytype::vtype::integer: {
+        case ytype::basicType::decimal: {
+            switch (right.getBasicType()) {
+                case ytype::basicType::integer: {
                     valueStack.push(ysto::Value(ytype::YBoolean(left.getDecimalValue().get() == right.getIntegerValue().get()),false, code.line, code.column));
                     break;
                 }
-                case ytype::vtype::decimal: {
+                case ytype::basicType::decimal: {
                     valueStack.push(ysto::Value(ytype::YBoolean(left.getDecimalValue().get() == right.getDecimalValue().get()), false, code.line, code.column));
                     break;
                 }
@@ -794,9 +794,9 @@ void vmcore::vm::equ(ygen::byteCode code) {
             }
             break;
         }
-        case ytype::vtype::string: {
-            switch (right.getType()) {
-                case ytype::vtype::string: {
+        case ytype::basicType::string: {
+            switch (right.getBasicType()) {
+                case ytype::basicType::string: {
                     valueStack.push(ysto::Value(ytype::YBoolean(left.getStringValue().get() == right.getStringValue().get()),false, code.line, code.column));
                     break;
                 }
@@ -811,14 +811,14 @@ void vmcore::vm::equ(ygen::byteCode code) {
 void vmcore::vm::noequ(ygen::byteCode code) {
     auto right = valueStack.pop();
     auto left = valueStack.pop();
-    switch (left.getType()) {
-        case ytype::vtype::integer: {
-            switch (right.getType()) {
-                case ytype::vtype::integer: {
+    switch (left.getBasicType()) {
+        case ytype::basicType::integer: {
+            switch (right.getBasicType()) {
+                case ytype::basicType::integer: {
                     valueStack.push(ysto::Value(ytype::YBoolean(left.getIntegerValue().get() != right.getIntegerValue().get()),false, code.line, code.column));
                     break;
                 }
-                case ytype::vtype::decimal: {
+                case ytype::basicType::decimal: {
                     valueStack.push(ysto::Value(ytype::YBoolean(left.getIntegerValue().get() != right.getDecimalValue().get()), false, code.line, code.column));
                     break;
                 }
@@ -826,13 +826,13 @@ void vmcore::vm::noequ(ygen::byteCode code) {
             }
             break;
         }
-        case ytype::vtype::decimal: {
-            switch (right.getType()) {
-                case ytype::vtype::integer: {
+        case ytype::basicType::decimal: {
+            switch (right.getBasicType()) {
+                case ytype::basicType::integer: {
                     valueStack.push(ysto::Value(ytype::YBoolean(left.getDecimalValue().get() != right.getIntegerValue().get()),false, code.line, code.column));
                     break;
                 }
-                case ytype::vtype::decimal: {
+                case ytype::basicType::decimal: {
                     valueStack.push(ysto::Value(ytype::YBoolean(left.getDecimalValue().get() != right.getDecimalValue().get()), false, code.line, code.column));
                     break;
                 }
@@ -840,9 +840,9 @@ void vmcore::vm::noequ(ygen::byteCode code) {
             }
             break;
         }
-        case ytype::vtype::string: {
-            switch (right.getType()) {
-                case ytype::vtype::string: {
+        case ytype::basicType::string: {
+            switch (right.getBasicType()) {
+                case ytype::basicType::string: {
                     valueStack.push(ysto::Value(ytype::YBoolean(left.getStringValue().get() != right.getStringValue().get()),false, code.line, code.column));
                     break;
                 }
@@ -864,7 +864,7 @@ void vmcore::vm::paraend(ygen::byteCode code) {
 
 void vmcore::vm::lst(ygen::byteCode code) {
     std::vector<ysto::Value> list;
-    while(valueStack.peek().getType() != ytype::vtype::flag && valueStack.peek().getStringValue().get() != "flag:list_end") {
+    while(valueStack.peek().getBasicType() != ytype::basicType::flag && valueStack.peek().getStringValue().get() != "flag:list_end") {
         list.push_back(valueStack.pop());
     }
     valueStack.pop(); // flag抛出去
@@ -878,19 +878,19 @@ void vmcore::vm::out(ygen::byteCode code) {
         std::cout<<"[";
         for(int i = 0; i < result.getList().size(); i ++) {
             auto elt = result.getList()[i];
-            if(elt.getType() == ytype::vtype::integer)
+            if(elt.getBasicType() == ytype::basicType::integer)
                 std::cout<<elt.getIntegerValue().get();
-            else if(elt.getType() == ytype::vtype::decimal)
+            else if(elt.getBasicType() == ytype::basicType::decimal)
                 std::cout<<elt.getDecimalValue().get();
-            else if(elt.getType() == ytype::vtype::string)
+            else if(elt.getBasicType() == ytype::basicType::string)
                 std::cout<<elt.getStringValue().get();
-            else if(elt.getType() == ytype::vtype::boolean) {
+            else if(elt.getBasicType() == ytype::basicType::boolean) {
                 if(elt.getBooleanValue().get())
                     std::cout<<"true";
                 else
                     std::cout<<"false";
             }
-            else if(elt.getType() == ytype::vtype::null) {
+            else if(elt.getBasicType() == ytype::basicType::null) {
                 std::cout<<"<null>";
             }
 
@@ -901,75 +901,105 @@ void vmcore::vm::out(ygen::byteCode code) {
         std::cout<<"]";
     }
     else{
-        if(result.getType() == ytype::vtype::integer)
+        if(result.getBasicType() == ytype::basicType::integer)
             std::cout<<result.getIntegerValue().get()<<std::endl;
-        else if(result.getType() == ytype::vtype::decimal)
+        else if(result.getBasicType() == ytype::basicType::decimal)
             std::cout<<result.getDecimalValue().get()<<std::endl;
-        else if(result.getType() == ytype::vtype::string)
+        else if(result.getBasicType() == ytype::basicType::string)
             std::cout<<result.getStringValue().get()<<std::endl;
-        else if(result.getType() == ytype::vtype::boolean) {
+        else if(result.getBasicType() == ytype::basicType::boolean) {
             if(result.getBooleanValue().get())
                 std::cout<<"true"<<std::endl;
             else
                 std::cout<<"false"<<std::endl;
         }
-        else if(result.getType() == ytype::vtype::null) {
+        else if(result.getBasicType() == ytype::basicType::null) {
             std::cout<<"<null>"<<std::endl;
         }
     }
 }
 
-void vmcore::vm::create(ygen::byteCode code) {
+void vmcore::vm::create(ygen::byteCode code,  int &current) {
     std::string name = constPool[code.arg1];
     std::string state = constPool[code.arg2]; // 初始化的类型，变量还是常量；或者是Dynamic还是Static
-    auto value = valueStack.pop();
 
-    if(code.arg4 == 1) {
-        // 强制类型声明
-        std::string type = constPool[code.arg3];
-        if(ytype::string2Vtype(type) == value.getType()) ;
-        else throw yoexception::YoError("TypeError", "The expected type does not match the type given by the actual expression", code.line, code.column);
+    // 如果重命名则报错
+    if(space.findValue(name))
+        throw yoexception::YoError("NameError", "Identifier:'" + name + "' already exists", code.line, code.column);
+
+    if(state == "function") {
+        // 参数, 返回值处理
+        std::vector<std::pair<ytype::ytypeUnit, std::string>> formalParas;
+        while(valueStack.peek().getBasicType() != ytype::basicType::flag && valueStack.peek().getStringValue().get() != "flag:para_end") {
+            std::string argName = valueStack.pop().getStringValue().get();
+            std::string argType = valueStack.pop().getStringValue().get();
+            formalParas.push_back(std::pair<ytype::ytypeUnit, std::string>(ytype::string2Type(argType),argName));
+        }
+        valueStack.pop();
+        ytype::ytypeUnit retType = ytype::string2Type(valueStack.pop().getStringValue().get());
+        // 代码块打包
+        std::vector<ytype::byteCode> codes;
+        int flag = 0;
+        bool first = false;
+        while((flag != 0 || !first) && mainQueue[current].arg1 != ygen::paraHelper::flagt::fnEnd) {
+            first = true;
+            current ++;
+            if(mainQueue[current].code == ygen::btc::scopestart) flag ++;
+            else if(mainQueue[current].code == ygen::btc::scopeend) flag --;
+            codes.push_back({mainQueue[current].code,{} , mainQueue[current].arg1, mainQueue[current].arg2, mainQueue[current].arg3,
+                                            mainQueue[current].arg4, mainQueue[current].line, mainQueue[current].column});
+        }
+        //
+        space.createValue(name, ysto::Value(ytype::YObject(codes, formalParas, retType), false, code.line, code.column));
     }
-    else ;
+    else{
+        auto value = valueStack.pop();
+        if(code.arg4 == 1) {
+            // 强制类型声明
+            std::string type = constPool[code.arg3];
+            if(ytype::string2BasicType(type) == value.getBasicType()) ;
+            else throw yoexception::YoError("TypeError", "The expected type does not match the type given by the actual expression", code.line, code.column);
+        }
+        else ;
 
-    if(value.isListValue()) {
-        space.createValue(name, ysto::Value(value.getList(), state == "var" || state == "dynamic"|| state == "static"?false:true, state == "dynamic"?true:false, code.line, code.column));
-    }
-    else {
-        switch (value.getType()) {
+        if(value.isListValue()) {
+            space.createValue(name, ysto::Value(value.getList(), state == "var" || state == "dynamic"|| state == "static"?false:true, state == "dynamic"?true:false, code.line, code.column));
+        }
+        else {
+            switch (value.getBasicType()) {
+                case ytype::integer:
+                    space.createValue(name, ysto::Value(ytype::YInteger(value.getIntegerValue().get()),
+                                                        state == "var" || state == "dynamic"|| state == "static"?false:true,
+                                                        state == "dynamic"?true:false,
+                                                        code.line,
+                                                        code.column));
+                    break;
+                case ytype::boolean:
+                    space.createValue(name, ysto::Value(ytype::YBoolean(value.getBooleanValue().get()),
+                                                        state == "var" || state == "dynamic"|| state == "static"?false:true,
+                                                        state == "dynamic"?true:false,
+                                                        code.line,
+                                                        code.column));
+                    break;
+                case ytype::decimal:
+                    space.createValue(name, ysto::Value(ytype::YDecimal(value.getDecimalValue().get()),
+                                                        state == "var" || state == "dynamic"|| state == "static"?false:true,
+                                                        state == "dynamic"?true:false,
+                                                        code.line,
+                                                        code.column));
+                    break;
+                case ytype::string:
+                    space.createValue(name, ysto::Value(ytype::YString(value.getStringValue().get()),
+                                                        state == "var" || state == "dynamic"|| state == "static"?false:true,
+                                                        state == "dynamic"?true:false,
+                                                        code.line,
+                                                        code.column));
+                    break;
+                case ytype::null:
+                    space.createValue(name, ysto::Value(state == "dynamic"?true:false,code.line, code.column));
+                    break;
 
-            case ytype::integer:
-                space.createValue(name, ysto::Value(ytype::YInteger(value.getIntegerValue().get()),
-                                                    state == "var" || state == "dynamic"|| state == "static"?false:true,
-                                                    state == "dynamic"?true:false,
-                                                    code.line,
-                                                    code.column));
-                break;
-            case ytype::boolean:
-                space.createValue(name, ysto::Value(ytype::YBoolean(value.getBooleanValue().get()),
-                                                    state == "var" || state == "dynamic"|| state == "static"?false:true,
-                                                    state == "dynamic"?true:false,
-                                                    code.line,
-                                                    code.column));
-                break;
-            case ytype::decimal:
-                space.createValue(name, ysto::Value(ytype::YDecimal(value.getDecimalValue().get()),
-                                                    state == "var" || state == "dynamic"|| state == "static"?false:true,
-                                                    state == "dynamic"?true:false,
-                                                    code.line,
-                                                    code.column));
-                break;
-            case ytype::string:
-                space.createValue(name, ysto::Value(ytype::YString(value.getStringValue().get()),
-                                                    state == "var" || state == "dynamic"|| state == "static"?false:true,
-                                                    state == "dynamic"?true:false,
-                                                    code.line,
-                                                    code.column));
-                break;
-            case ytype::null:
-                space.createValue(name, ysto::Value(state == "dynamic"?true:false,code.line, code.column));
-                break;
-
+            }
         }
     }
 }
@@ -990,7 +1020,7 @@ void vmcore::vm::selfadd(ygen::byteCode code) {
 
     if(!space.findValue(name))
         throw yoexception::YoError("NameError", "Unknown identifier: '" + name + "'", code.line, code.column);
-    if(!(space.getValue(name).getType() == ytype::vtype::integer))
+    if(!(space.getValue(name).getBasicType() == ytype::basicType::integer))
         throw yoexception::YoError("TypeError", "This operator does not support this type of operation",code.line, code.column);
 
     if(code.arg1) {
@@ -1010,7 +1040,7 @@ void vmcore::vm::selfsub(ygen::byteCode code) {
 
     if(!space.findValue(name))
         throw yoexception::YoError("NameError", "Unknown identifier: '" + name + "'", code.line, code.column);
-    if(!(space.getValue(name).getType() == ytype::vtype::integer))
+    if(!(space.getValue(name).getBasicType() == ytype::basicType::integer))
         throw yoexception::YoError("TypeError", "This operator does not support this type of operation",code.line, code.column);
 
     if(code.arg1) {
@@ -1030,13 +1060,13 @@ void vmcore::vm::assign(ygen::byteCode code) {
     auto name = valueStack.pop().getStringValue().get();
     if(space.getValue(name).isConst())
         throw yoexception::YoError("AssignError", "You cannot assign value to a constant", code.line, code.column);
-    if(space.getValue(name).getType()!=value.getType() && !space.getValue(name).isDyn())
+    if(space.getValue(name).getBasicType()!=value.getBasicType() && !space.getValue(name).isDyn())
         throw yoexception::YoError("TypeError", "The type of assignment to static variable: '" + name + "' must be its original type", code.line, code.column);
     if(code.arg1) {
         // index assignment
         // 检查是否有类型不一致的存在
         for(auto v: space.getValue(name).getList()){
-            if(value.getType() != v.getType())
+            if(value.getBasicType() != v.getBasicType())
                 throw yoexception::YoError("TypeError", "This operator does not support this type of operation",code.line, code.column);
         }
         //
@@ -1203,11 +1233,11 @@ void vmcore::vm::call(ygen::byteCode code) {
     std::string fnName = valueStack.pop().getStringValue().get();
     auto temp = valueStack.pop(); // temp值，用于检测是paraend还是正常的flag
     // 是不是无参函数: true-不是，false-是
-    bool isNopara = temp.getType() == ytype::vtype::flag && temp.getStringValue().get() == "flag:para_end";
+    bool isNopara = temp.getBasicType() == ytype::basicType::flag && temp.getStringValue().get() == "flag:para_end";
     std::vector<ysto::Value> args;
     if(!isNopara) {
         args.push_back(temp);
-        while(valueStack.peek().getType() != ytype::vtype::flag && temp.getStringValue().get() != "flag:para_end") {
+        while(valueStack.peek().getBasicType() != ytype::basicType::flag && temp.getStringValue().get() != "flag:para_end") {
             args.push_back(valueStack.pop());
         }
     }
@@ -1220,5 +1250,35 @@ void vmcore::vm::call(ygen::byteCode code) {
         else if(fnName == "fwrite") valueStack.push(native.bifSet.fwrite(args, code));
         else if(fnName == "substr") valueStack.push(native.bifSet.substr(args, code));
         // else if(fnName == "system") valueStack.push(native.bifSet.system(args, code));
+    }
+    else {
+        // 用户定义的函数
+        if(!space.findValue(fnName))
+            throw yoexception::YoError("NameError", "There is no identifier named: '" + fnName + "'", code.line, code.column);
+        auto fnTemp = space.getValue(fnName);
+        if(fnTemp.getBasicType() != ytype::basicType::object)
+            throw yoexception::YoError("TypeError", "A value or object of type '" + ytype::basicType2String(fnTemp.getBasicType()) + "' cannot be called as a function", code.line, code.column);
+
+        // 参数工作
+        auto formalParas = fnTemp.getObjectValue().args;
+        auto actParas = args;
+        space.createScope("function_calling_scope", code.line, code.column); // 创建属于这个函数的作用域
+        for(int i = 0; i < formalParas.size(); i++) {
+            if(formalParas[i].first != actParas[i].getType())
+                throw yoexception::YoError("FunctionCallingError", "Overloaded function with no specified arguments", actParas[i].line, actParas[i].column);
+            space.createValue(formalParas[i].second, actParas[i]);
+        }
+        // 将函数代码队列push到codeQueue中
+        auto codes = fnTemp.getObjectValue().codes;
+        std::vector<ygen::byteCode> cs;
+        for(int i = 0; i < codes.size(); i ++){
+            ygen::byteCode temp = {(ygen::btc)codes[i].code, {}, codes[i].arg1, codes[i].arg2, codes[i].arg3, codes[i].arg4, codes[i].line, codes[i].column};
+            cs.push_back(temp);
+        }
+        codeQueue.push_back(cs);
+        // 运行
+        if(fnTemp.getObjectValue().retType.bt == ytype::basicType::null)
+            valueStack.push(ysto::Value(code.line, code.column));
+        run(codeQueue.size() - 1, "normal");
     }
 }
