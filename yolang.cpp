@@ -26,14 +26,6 @@ int main(int argc, char *argv[]){
                     ysh::insRun({arg2});
                 }
             }
-            else if(argc > 3 && argc <= 4) {
-                std::string arg1 = std::string(argv[1]);
-                std::string arg2 = std::string(argv[2]);
-                std::string arg3 = std::string(argv[3]);
-                if(arg1 == "--gen") {
-                    ysh::insGen({arg2, arg3});
-                }
-            }
         }
     }
     catch(yoexception::YoError e){

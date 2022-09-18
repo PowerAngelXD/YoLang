@@ -126,32 +126,6 @@ void ysh::insRun(std::vector<std::string> paras) {
             throw yoexception::YoError("FileError", "Not any file that can be run", -1, -1);
     }
 }
-void ysh::insGen(std::vector<std::string> paras) {
-    if(paras.size() > 2)
-        throw yoexception::YoError("ConsoleParaError", "Too many parameters", -1, -1);
-    if(paras.size() < 2)
-        throw yoexception::YoError("ConsoleParaError", "Too few parameters", -1, -1);
-    auto targetName = paras[1];
-    auto name = paras[0];
-
-    std::ifstream file(name);
-    std::istreambuf_iterator<char> begin(file);
-    std::istreambuf_iterator<char> end;
-    std::string str(begin, end);
-
-    yolexer::Lexer lexer(str);
-    lexer.generate();
-    auto tg = lexer.getTokenGroup();
-
-    parser::Parser p(tg);
-    auto stmts = p.parse();
-
-    ygen::ByteCodeGenerator bcg(stmts);
-    bcg.visit(stmts);
-    bcg.genFile(targetName);
-    std::cout<<"File generation completed! File name: '"<<targetName<<"'";
-
-}
 void ysh::insView(std::vector<std::string> paras) {
     std::string key = paras[0];
     // 处理第一个参数后面的所有参数，全部连在一起，以防出错

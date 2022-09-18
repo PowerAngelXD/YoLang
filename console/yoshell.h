@@ -32,11 +32,11 @@ namespace ysh{
         std::string stmtsToString(std::vector<AST::StmtNode*> stmts);
     }
     // Yolang版本号
-    static std::string version = "22.9.110";
+    static std::string version = "22.9.114";
     // 发行版本号
-    static std::string relVersion = "Yolang 1.4.0";
+    static std::string relVersion = "Yolang 1.4.1";
     // 完整版本
-    static std::string completeVersion = "Release-2022-9-0110";
+    static std::string completeVersion = "Release-2022-9-0114";
     // 版本更新说明
     static std::string updateIllustrate =
             "Version: " + relVersion + " Illustrate\n" +
@@ -56,7 +56,6 @@ namespace ysh{
     void insInfo(INSPARAS);
     void insExit(INSPARAS);
     void insRun(INSPARAS);
-    void insGen(INSPARAS);
     void insEnv(INSPARAS);
     void insView(INSPARAS);
     void insEVAL(INSPARAS); // 用于执行输入语句的insMethod
@@ -66,7 +65,6 @@ namespace ysh{
                                   ins("info", insInfo),
                                   ins("exit", insExit),
                                   ins("env", insEnv),
-                                  ins("gen", insGen),
                                   ins("run", insRun),
                                   ins("view", insView)
                                   };
