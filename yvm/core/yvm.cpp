@@ -958,7 +958,7 @@ void vmcore::vm::create(ygen::byteCode code,  int &current) {
         if(code.arg4 == 1) {
             // 强制类型声明
             std::string type = constPool[code.arg3];
-            if(ytype::string2BasicType(type) == value.getBasicType()) ;
+            if(ytype::string2Type(type) == value.getType()) ;
             else throw yoexception::YoError("TypeError", "The expected type does not match the type given by the actual expression", code.line, code.column);
         }
         else ;
