@@ -1269,6 +1269,7 @@ void vmcore::vm::call(ygen::byteCode code) {
                 throw yoexception::YoError("FunctionCallingError", "Overloaded function with no specified arguments", actParas[i].line, actParas[i].column);
             space.createValue(formalParas[i].second, actParas[i]);
         }
+
         // 将函数代码队列push到codeQueue中
         auto codes = fnTemp.getObjectValue().codes;
         std::vector<ygen::byteCode> cs;
@@ -1277,6 +1278,7 @@ void vmcore::vm::call(ygen::byteCode code) {
             cs.push_back(temp);
         }
         codeQueue.push_back(cs);
+
         // 运行
         run(codeQueue.size() - 1, "in_function");
         if(fnTemp.getObjectValue().retType.bt == ytype::basicType::null)
