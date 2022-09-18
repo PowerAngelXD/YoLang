@@ -56,23 +56,24 @@ ytype::compType ytype::string2CompType(std::string s) {
 ytype::ytypeUnit ytype::string2Type(std::string s) {
     std::string basic;
     std::string comp;
-    for(int i = 0; i < s.size(); i++) {
-        if(s[i]==':') break;
-        basic += s[i];
+    if(s[s.size()-1] == ']') {
+        comp = "list";
+        for(int i = 0; i < s.size(); i ++) {
+            if(s[i] == '[') break;
+            basic += s[i];
+        }
+        return {string2BasicType(basic), string2CompType(comp)};
     }
-    bool flag = false;
-    for(int j = 0; j < s.size(); j++) {
-        if(s[j]==':') flag = true;
-        if(flag) comp += s[j];
+    else {
+        return {string2BasicType(s), ytype::compType::norm};
     }
-    return {string2BasicType(basic), flag?string2CompType(comp):compType::norm};
 }
 
 bool ytype::ytypeUnit::operator==(ytypeUnit tu) {
     return this->bt == tu.bt && this->ct == tu.ct;
 }
 bool ytype::ytypeUnit::operator!=(ytypeUnit tu) {
-    return !(this->bt != tu.bt && this->ct != tu.ct);
+    return this->bt != tu.bt || this->ct != tu.ct;
 }
 
 //
