@@ -40,12 +40,7 @@ namespace ysh{
     // 版本更新说明
     static std::string updateIllustrate =
             "Version: " + relVersion + " Illustrate\n" +
-            "1, updated as operator; It can only be used to convert the value corresponding to the identifier\n" +
-            "2, Optimized escape character detection and ported it to lexer\n" +
-            "3, Updated bif: fwrite\n" +
-            "4, further optimize NULL\n" +
-            "5, Optimized for vorcstmt\n"+
-            "6, implemented the function";
+            "1, implemented the function";
     // 指令方法类型
     typedef void (*insMethod)(std::vector<std::string>);
     // 指令定义
