@@ -9,7 +9,7 @@ ysto::Value::Value(int ln, int col) {
     type = {ytype::basicType::null, ytype::compType::norm};
     line = ln, column = col;
 }
-ysto::Value::Value(std::vector<Value> v, bool isc, int ln, int col): list(v), isConstant(isc), line(ln), column(col), type(v[0].getType()), isList(true) {}
+ysto::Value::Value(std::vector<Value> v, bool isc, int ln, int col): list(v), isConstant(isc), line(ln), column(col), type({v[0].getType().bt, ytype::compType::list}), isList(true) {}
 
 ysto::Value::Value(ytype::YInteger v, bool isc, bool isdyn, int ln, int col): integerValue(v), isDynamic(isdyn), isConstant(isc), line(ln), column(col), type({ytype::basicType::integer, ytype::compType::norm}) {}
 ysto::Value::Value(ytype::YBoolean v, bool isc, bool isdyn, int ln, int col): booleanValue(v), isDynamic(isdyn), isConstant(isc), line(ln), column(col), type({ytype::basicType::boolean, ytype::compType::norm}) {}
@@ -21,7 +21,7 @@ ysto::Value::Value(bool isdyn, int ln, int col) {
     isDynamic = isdyn;
     line = ln, column = col;
 }
-ysto::Value::Value(std::vector<Value> v, bool isc, bool isdyn, int ln, int col): list(v), isDynamic(isdyn), isConstant(isc), line(ln), column(col), type(v[0].getType()), isList(true) {}
+ysto::Value::Value(std::vector<Value> v, bool isc, bool isdyn, int ln, int col): list(v), isDynamic(isdyn), isConstant(isc), line(ln), column(col), type({v[0].getType().bt, ytype::compType::list}), isList(true) {}
 
 ysto::Value::Value(std::string content) {
     stringValue = ytype::YString(content);
