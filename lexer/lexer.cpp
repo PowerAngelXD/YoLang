@@ -1,34 +1,37 @@
 #include "lexer.h"
-
+using std::string;
+using namespace yolexer;
 std::string yolexer::yoToken::toString(){
     std::string ret = "token: {" + content + ", ";
     switch (type)
     {
-    case yolexer::yoTokType::Integer:
-        ret += "Integer";
-        break;
-    case yolexer::yoTokType::Decimal:
-        ret += "Decimal";
-        break;
-    case yolexer::yoTokType::String:
-        ret += "String";
-    break;
-    case yolexer::yoTokType::Identifier:
-        ret += "Identifier";
-    break;
-    case yolexer::yoTokType::KeyWord:
-        ret += "KeyWord";
-    break;
-    case yolexer::yoTokType::Symbol:
-        ret += "Symbol";
-    break;
-}
-ret += ", " + std::to_string(line) + ", " + std::to_string(column) + "}";
-return ret;
+        case yoTokType::Integer:
+            ret += "Integer";
+            break;
+        case yoTokType::Decimal:
+            ret += "Decimal";
+            break;
+        case yoTokType::String:
+            ret += "String";
+            break;
+        case yoTokType::Identifier:
+            ret += "Identifier";
+            break;
+        case yoTokType::KeyWord:
+            ret += "KeyWord";
+            break;
+        case yoTokType::Symbol:
+            ret += "Symbol";
+            break;
+        default:
+            break;
+    }
+    ret += ", " + std::to_string(line) + ", " + std::to_string(column) + "}";
+    return ret;
 }
 
 
-yolexer::Lexer::Lexer(std::string _input): input(_input) {}
+Lexer::Lexer(std::string _input): input(_input) {}
 
 std::vector<yolexer::yoToken> yolexer::Lexer::getTokenGroup() {return tokenGroup;}
 
