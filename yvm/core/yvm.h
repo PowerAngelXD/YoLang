@@ -12,7 +12,7 @@ namespace vmcore {
             ysto::Value fread(std::vector<ysto::Value> args, ygen::byteCode code);
             ysto::Value fwrite(std::vector<ysto::Value> args,ygen::byteCode code);
             ysto::Value substr(std::vector<ysto::Value> args, ygen::byteCode code);
-            ysto::Value system(std::vector<ysto::Value> args, ygen::byteCode code);
+            ysto::Value ref(std::vector<ysto::Value> args, ygen::byteCode code);
         };
 
         struct navtiveSet {
