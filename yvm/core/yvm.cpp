@@ -111,9 +111,22 @@ ysto::Value vmcore::native::BuiltInFunctionSet::fwrite(std::vector<ysto::Value> 
     return native::null_value;
 }
 
+ysto::Value vmcore::native::BuiltInFunctionSet::ref(std::vector<ysto::Value> args, ygen::byteCode code) {
+    if(args.empty())
+        throw yoexception::YoError("FunctionCallingError", "Overloaded function with no specified arguments", code.line, code.column);
+    else if (args.size() != 1)
+        throw yoexception::YoError("FunctionCallingError", "Overloaded function with no specified arguments", args[0].line, args[0].column);
+    auto name = args[0];
+
+    if(name.getType() != (ytype::ytypeUnit){ytype::basicType::string, ytype::compType::norm})
+        throw yoexception::YoError("FunctionCallingError", "Overloaded function with no specified arguments", args[0].line, args[0].column);
+
+    return ysto::Value("flag:return_ref:" + name.getStringValue().get());
+}
+
 ysto::Value vmcore::native::BuiltInFunctionSet::substr(std::vector<ysto::Value> args, ygen::byteCode code){
     if(args.empty())
-        throw yoexception::YoError("FunctionCallingError", "Overloaded function with no specified arguments", args[0].line, args[0].column);
+        throw yoexception::YoError("FunctionCallingError", "Overloaded function with no specified arguments", code.line, code.column);
     else if (args.size() != 3)
         throw yoexception::YoError("FunctionCallingError", "Overloaded function with no specified arguments", args[0].line, args[0].column);
 
@@ -132,19 +145,6 @@ ysto::Value vmcore::native::BuiltInFunctionSet::substr(std::vector<ysto::Value> 
     std::string result = string.getStringValue().get().substr(start.getIntegerValue().get(),end.getIntegerValue().get());
     return ysto::Value(ytype::YString(result), false, string.line, string.column);
 }
-
-//ysto::Value vmcore::native::BuiltInFunctionSet::system(std::vector<ysto::Value> args, ygen::byteCode code) {
-//    if(args.empty())
-//        throw yoexception::YoError("FunctionCallingError", "Overloaded function with no specified arguments", args[0].line, args[0].column);
-//    else if (args.size() != 1)
-//        throw yoexception::YoError("FunctionCallingError", "Overloaded function with no specified arguments", args[0].line, args[0].column);
-//    else if (args[0].getBasicType() != ytype::basicType::string)
-//        throw yoexception::YoError("TypeError", "Invalid Command Argument Type", args[0].line, args[0].column);
-//    ::system(args[0].getStringValue().get().c_str());
-//    return native::null_value;
-//}
-
-//
 
 template<typename Type>
 Type vmcore::YStack<Type>::pop() {
@@ -1250,7 +1250,20 @@ void vmcore::vm::call(ygen::byteCode code) {
         else if(fnName == "fread") valueStack.push(native.bifSet.fread(args, code));
         else if(fnName == "fwrite") valueStack.push(native.bifSet.fwrite(args, code));
         else if(fnName == "substr") valueStack.push(native.bifSet.substr(args, code));
-        // else if(fnName == "system") valueStack.push(native.bifSet.system(args, code));
+        else if(fnName == "ref") {
+            auto value = native.bifSet.ref(args, code).getStringValue().get();
+            std::vector<std::string> ret;
+            int i = 0;
+            while(i < value.size()) {
+                std::string content;
+                for(; i < value.size(); i ++) {
+                    if(value[i] == ':') {i++; break;}
+                    content.push_back(value[i]);
+                }
+                ret.push_back(content);
+            }
+            valueStack.push(space.getValue(ret[2]));
+        }
     }
     else {
         // 用户定义的函数
