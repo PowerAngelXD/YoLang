@@ -57,6 +57,14 @@ namespace AST{
         std::string toString();
     };
 
+    class CellExprNode{
+    public:
+        yolexer::yoToken* op = nullptr;
+        PrimExprNode* expr = nullptr;
+
+        std::string toString();
+    };
+
     class AsOpNode {
     public:
         yolexer::yoToken* op = nullptr;

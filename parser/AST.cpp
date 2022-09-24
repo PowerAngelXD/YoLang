@@ -18,6 +18,10 @@ std::string AST::StfOpNode::toString() {
     return "StfOpNode: {" + expr->toString() + "}";
 }
 
+std::string AST::CellExprNode::toString() {
+    return "CellExprNode: {" + op->toString() + ", " + expr->toString() + "}";
+}
+
 std::string AST::IdentifierNode::toString() {
     if(dots.empty()) return "IdentifierNode: {" + idens[0]->toString() + "}";
     else{
