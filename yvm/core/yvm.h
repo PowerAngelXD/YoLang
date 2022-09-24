@@ -13,6 +13,8 @@ namespace vmcore {
             ysto::Value fwrite(std::vector<ysto::Value> args,ygen::byteCode code);
             ysto::Value substr(std::vector<ysto::Value> args, ygen::byteCode code);
             ysto::Value ref(std::vector<ysto::Value> args, ygen::byteCode code);
+            ysto::Value vmcode(std::vector<ysto::Value> args, ygen::byteCode code);
+            ysto::Value add_const(std::vector<ysto::Value> args, ygen::byteCode code);
         };
 
         struct navtiveSet {
@@ -77,7 +79,7 @@ namespace vmcore {
         void del_val();
         void del(ygen::byteCode code);
         void idenend(ygen::byteCode code);
-        void call(ygen::byteCode code);
+        void call(ygen::byteCode code, std::string arg);
         //
 
         void run(int queue_id, std::string arg); // queue指代要运行哪条栈的代码，-1为主栈

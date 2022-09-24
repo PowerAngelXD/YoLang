@@ -111,6 +111,30 @@ ysto::Value vmcore::native::BuiltInFunctionSet::fwrite(std::vector<ysto::Value> 
     return native::null_value;
 }
 
+ysto::Value vmcore::native::BuiltInFunctionSet::add_const(std::vector<ysto::Value> args, ygen::byteCode code) {
+    if(args.empty())
+        throw yoexception::YoError("FunctionCallingError", "Overloaded function with no specified arguments", code.line, code.column);
+    else if (args.size() != 1)
+        throw yoexception::YoError("FunctionCallingError", "Overloaded function with no specified arguments", args[0].line, args[0].column);
+
+    if(args[0].getType() != (ytype::ytypeUnit){ytype::basicType::string, ytype::compType::norm})
+        throw yoexception::YoError("FunctionCallingError", "Overloaded function with no specified arguments", args[0].line, args[0].column);
+
+    return ysto::Value("flag:return_const:" + args[0].getStringValue().get());
+}
+
+ysto::Value vmcore::native::BuiltInFunctionSet::vmcode(std::vector<ysto::Value> args, ygen::byteCode code) {
+    if(args.empty())
+        throw yoexception::YoError("FunctionCallingError", "Overloaded function with no specified arguments", code.line, code.column);
+    else if (args.size() != 1)
+        throw yoexception::YoError("FunctionCallingError", "Overloaded function with no specified arguments", args[0].line, args[0].column);
+
+    if(args[0].getType() != (ytype::ytypeUnit){ytype::basicType::string, ytype::compType::norm})
+        throw yoexception::YoError("FunctionCallingError", "Overloaded function with no specified arguments", args[0].line, args[0].column);
+
+    return ysto::Value("flag:return_code:" + args[0].getStringValue().get());
+}
+
 ysto::Value vmcore::native::BuiltInFunctionSet::ref(std::vector<ysto::Value> args, ygen::byteCode code) {
     if(args.empty())
         throw yoexception::YoError("FunctionCallingError", "Overloaded function with no specified arguments", code.line, code.column);
@@ -149,7 +173,7 @@ ysto::Value vmcore::native::BuiltInFunctionSet::substr(std::vector<ysto::Value> 
 template<typename Type>
 Type vmcore::YStack<Type>::pop() {
     if(stack.empty()) {
-        throw yoexception::YoError("VMError", "Attempt to pop an empty stack", -1, -1);
+        throw yoexception::YoError("VM-Runtime-Error", "Attempt to pop an empty stack", -1, -1);
     }
     Type value = stack[stack.size() - 1];
     stack.erase(stack.end());
@@ -217,7 +241,7 @@ void vmcore::vm::run(int queue_id, std::string arg) {
             case ygen::create: create(code, i); break;
             case ygen::assign: assign(code); break;
             case ygen::del: del(code); break;
-            case ygen::call: call(code); break;
+            case ygen::call: call(code, arg); break;
         }
     }
 }
@@ -1230,7 +1254,7 @@ void vmcore::vm::idenend(ygen::byteCode code) {
     valueStack.push(ysto::Value("flag:identifier_end"));
 }
 
-void vmcore::vm::call(ygen::byteCode code) {
+void vmcore::vm::call(ygen::byteCode code, std::string arg) {
     std::string fnName = valueStack.pop().getStringValue().get();
     auto temp = valueStack.pop(); // temp值，用于检测是paraend还是正常的flag
     // 是不是无参函数: true-不是，false-是
@@ -1250,6 +1274,23 @@ void vmcore::vm::call(ygen::byteCode code) {
         else if(fnName == "fread") valueStack.push(native.bifSet.fread(args, code));
         else if(fnName == "fwrite") valueStack.push(native.bifSet.fwrite(args, code));
         else if(fnName == "substr") valueStack.push(native.bifSet.substr(args, code));
+        else if(fnName == "add_const") {
+            if(arg == "repl")
+                throw yoexception::YoError("ReflectError", "This function cannot be used in REPL mode", code.line, code.column);
+            auto value = native.bifSet.add_const(args, code).getStringValue().get();
+            std::vector<std::string> ret;
+            int i = 0;
+            while(i < value.size()) {
+                std::string content;
+                for(; i < value.size(); i ++) {
+                    if(value[i] == ':') {i++; break;}
+                    content.push_back(value[i]);
+                }
+                ret.push_back(content);
+            }
+            constPool.push_back(ret[2]);
+            valueStack.push(ysto::Value(ytype::YInteger(constPool.size()-1), false, code.line, code.column));
+        }
         else if(fnName == "ref") {
             auto value = native.bifSet.ref(args, code).getStringValue().get();
             std::vector<std::string> ret;
@@ -1263,6 +1304,40 @@ void vmcore::vm::call(ygen::byteCode code) {
                 ret.push_back(content);
             }
             valueStack.push(space.getValue(ret[2]));
+        }
+        else if(fnName == "vmcode") {
+            if(arg == "repl")
+                throw yoexception::YoError("ReflectError", "This function cannot be used in REPL mode", code.line, code.column);
+            auto value = native.bifSet.vmcode(args, code).getStringValue().get();
+            std::vector<std::string> ret;
+            int i = 0;
+            while(i < value.size()) {
+                std::string content;
+                for(; i < value.size(); i ++) {
+                    if(value[i] == ':') {i++; break;}
+                    content.push_back(value[i]);
+                }
+                ret.push_back(content);
+            }
+            auto codeStr = ret[2];
+            std::vector<std::string> codes;
+            i = 0;
+            while(i < codeStr.size()) {
+                std::string content;
+                for(; i < codeStr.size(); i ++) {
+                    if(codeStr[i] == ',') {i++; break;}
+                    content.push_back(codeStr[i]);
+                }
+                codes.push_back(content);
+            }
+            if(codes.size() != 7)
+                throw yoexception::YoError("VM-Runtime-Error", "It is not a valid intermediate code", code.line, code.column);
+            ygen::btc bcode = ygen::string2Code(codes[0]);
+            auto basicType = ytype::string2BasicType(codes[1]);
+            auto compType = ytype::string2CompType(codes[2]);
+            float a1=atof(codes[3].c_str()), a2=atof(codes[4].c_str()), a3=atof(codes[5].c_str()), a4=atof(codes[6].c_str());
+            ygen::byteCode defcode = {bcode, {basicType, compType}, a1, a2, a3, a4, code.line, code.column};
+            mainQueue.push_back(defcode);
         }
     }
     else {
