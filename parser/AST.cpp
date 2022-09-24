@@ -123,6 +123,7 @@ std::string AST::PrimExprNode::toString() {
         else if(stf != nullptr) ret += stf->toString() + ", ";
         else if(boolconst != nullptr) ret += boolconst->toString() + ", ";
         else if(typecast != nullptr) ret += typecast->toString() + ", ";
+        else if(cellexpr != nullptr) ret += cellexpr->toString() + ", ";
 
         if(op != nullptr) ret += op->toString() + "}";
         else ret += "}";

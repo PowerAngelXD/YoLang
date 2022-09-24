@@ -8,6 +8,7 @@ namespace AST{
     class AddExprNode; class FuncCallNode;
     class ListExprNode; class WholeExprNode;
     class StmtNode; class StfOpNode; class TypecastExprNode;
+    class CellExprNode;
 
     class IdentifierNode{
     public:
@@ -46,6 +47,7 @@ namespace AST{
         FuncCallNode* fcall = nullptr;
         SiadExprNode* siad = nullptr;
         TypecastExprNode* typecast = nullptr;
+        CellExprNode* cellexpr = nullptr;
 
         // 括号
         yolexer::yoToken* left = nullptr;
