@@ -32,11 +32,11 @@ namespace ysh{
         std::string stmtsToString(std::vector<AST::StmtNode*> stmts);
     }
     // Yolang版本号
-    static std::string version = "22.9.114";
+    static std::string version = "22.9.119";
     // 发行版本号
-    static std::string relVersion = "Yolang 1.4.1";
+    static std::string relVersion = "Yolang 1.4.12";
     // 完整版本
-    static std::string completeVersion = "Release-2022-9-0114";
+    static std::string completeVersion = "Instable-2022-9-0119";
     // 版本更新说明
     static std::string updateIllustrate =
             "Version: " + relVersion + " Illustrate\n" +
