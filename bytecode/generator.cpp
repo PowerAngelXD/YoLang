@@ -180,8 +180,17 @@ void ygen::ByteCodeGenerator::visitStfOp(AST::StfOpNode* node){
     if(node->expr != nullptr) visitExpr(node->expr);
     STF(addPara(node->name->content));
 }
+void ygen::ByteCodeGenerator::visitCellExpr(AST::CellExprNode *node) {
+    if(node->op->content == "+");
+    else if(node->op->content == "-"){
+        buildIntegerNumber("0", node->op->line, node->op->column);
+        visitPrimExpr(node->expr);
+        SUB(node->op->line, node->op->column)
+    }
+}
 void ygen::ByteCodeGenerator::visitPrimExpr(AST::PrimExprNode* node){
     if(node->number != nullptr) visitNumber(node->number);
+    else if(node->cellexpr != nullptr) visitCellExpr(node->cellexpr);
     else if(node->string != nullptr) visitString(node->string);
     else if(node->boolconst != nullptr) visitBoolean(node->boolconst);
     else if(node->null != nullptr) visitNull(node->null);

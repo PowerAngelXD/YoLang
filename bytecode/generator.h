@@ -98,6 +98,7 @@ namespace ygen{
         void visitBoolOp(AST::BoolOpNode* node);
         void visitIndexOp(AST::IndexOpNode* node);
         void visitStfOp(AST::StfOpNode* node);
+        void visitCellExpr(AST::CellExprNode* node);
         void visitPrimExpr(AST::PrimExprNode* node);
         void visitTypecastExprNode(AST::TypecastExprNode* node);
         void visitMulExpr(AST::MulExprNode* node);
