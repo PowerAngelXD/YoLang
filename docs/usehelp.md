@@ -1,4 +1,4 @@
-# Yolang帮助文档
+# Yolang帮助文档 - YoLang Doc
 本文档用于帮助用户快速上手yolang及其Console，将分为“Console”和“Yolang语言本体”两部分进行\
 Yolang的源码文件后缀为: ".yo"
 ### Yolang语言本体
