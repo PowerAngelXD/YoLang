@@ -106,6 +106,16 @@ bool parser::Parser::isFnCallExpr() {
     }
     else return false;
 }
+bool parser::Parser::isCellExpr() {
+    if(isAddOp() || peek()->content == "&" || peek()->content == "@" || peek()->content == "%" || peek()->content == "*") {
+        token();
+        if(isPrim())
+            return true;
+        else
+            return false;
+    }
+    else return false;
+}
 bool parser::Parser::isAddOp() {
     return peek()->content == "+" || peek()->content == "-";
 }
@@ -229,6 +239,13 @@ bool parser::Parser::isStmt() {
 
 // EXPR
 
+AST::CellExprNode* parser::Parser::parseCellExprNode(){
+    AST::CellExprNode* node = new AST::CellExprNode;
+    node->op = token();
+    if(isPrim()) node->expr = parsePrimExprNode();
+    else throw yoexception::YoError("SyntaxError", "Expect a primary expression", tg[offset].line, tg[offset].column);
+    return node;
+}
 AST::SiadExprNode* parser::Parser::parseSiadExprNode(){
     AST::SiadExprNode* node = new AST::SiadExprNode; // 所有的ASTparser第一行都应该这么写： AST::XXXXNode* node = new AST::XXXXNode;
     if(peek()->content == "--" || peek()->content == "++" || peek()->type == yolexer::yoTokType::Identifier) {
