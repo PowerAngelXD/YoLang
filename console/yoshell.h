@@ -40,7 +40,8 @@ namespace ysh{
     // 版本更新说明
     static std::string updateIllustrate =
             "Version: " + relVersion + " Illustrate\n" +
-            "1, implemented the function";
+            "1, Improve variables, constant initialization\n"
+            "2, Added expressions with smaller units, supporting negative expressions";
     // 指令方法类型
     typedef void (*insMethod)(std::vector<std::string>);
     // 指令定义
