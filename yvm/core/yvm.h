@@ -15,6 +15,7 @@ namespace vmcore {
             ysto::Value ref(std::vector<ysto::Value> args, ygen::byteCode code);
             ysto::Value vmcode(std::vector<ysto::Value> args, ygen::byteCode code);
             ysto::Value add_const(std::vector<ysto::Value> args, ygen::byteCode code);
+            ysto::Value length(std::vector<ysto::Value> args, ygen::byteCode code);
         };
 
         struct navtiveSet {

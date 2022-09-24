@@ -111,13 +111,27 @@ ysto::Value vmcore::native::BuiltInFunctionSet::fwrite(std::vector<ysto::Value> 
     return native::null_value;
 }
 
+ysto::Value vmcore::native::BuiltInFunctionSet::length(std::vector<ysto::Value> args, ygen::byteCode code) {
+    if(args.empty())
+        throw yoexception::YoError("FunctionCallingError", "Overloaded function with no specified arguments", code.line, code.column);
+    else if (args.size() != 1)
+        throw yoexception::YoError("FunctionCallingError", "Overloaded function with no specified arguments", args[0].line, args[0].column);
+    else if(args[0].getType() != (ytype::ytypeUnit){ytype::basicType::string, ytype::compType::norm} && args[0].getCompType() != ytype::compType::list)
+        throw yoexception::YoError("FunctionCallingError", "Overloaded function with no specified arguments", args[0].line, args[0].column);
+
+    auto value = args[0];
+    if(value.getCompType() == ytype::compType::list)
+        return ysto::Value(ytype::YInteger(value.getList().size()), false, code.line, code.column);
+    else if(value.getBasicType() == ytype::basicType::string)
+        return ysto::Value(ytype::YInteger(value.getStringValue().get().size()), false, code.line, code.column);
+}
+
 ysto::Value vmcore::native::BuiltInFunctionSet::add_const(std::vector<ysto::Value> args, ygen::byteCode code) {
     if(args.empty())
         throw yoexception::YoError("FunctionCallingError", "Overloaded function with no specified arguments", code.line, code.column);
     else if (args.size() != 1)
         throw yoexception::YoError("FunctionCallingError", "Overloaded function with no specified arguments", args[0].line, args[0].column);
-
-    if(args[0].getType() != (ytype::ytypeUnit){ytype::basicType::string, ytype::compType::norm})
+    else if(args[0].getType() != (ytype::ytypeUnit){ytype::basicType::string, ytype::compType::norm})
         throw yoexception::YoError("FunctionCallingError", "Overloaded function with no specified arguments", args[0].line, args[0].column);
 
     return ysto::Value("flag:return_const:" + args[0].getStringValue().get());
@@ -128,8 +142,7 @@ ysto::Value vmcore::native::BuiltInFunctionSet::vmcode(std::vector<ysto::Value> 
         throw yoexception::YoError("FunctionCallingError", "Overloaded function with no specified arguments", code.line, code.column);
     else if (args.size() != 1)
         throw yoexception::YoError("FunctionCallingError", "Overloaded function with no specified arguments", args[0].line, args[0].column);
-
-    if(args[0].getType() != (ytype::ytypeUnit){ytype::basicType::string, ytype::compType::norm})
+    else if(args[0].getType() != (ytype::ytypeUnit){ytype::basicType::string, ytype::compType::norm})
         throw yoexception::YoError("FunctionCallingError", "Overloaded function with no specified arguments", args[0].line, args[0].column);
 
     return ysto::Value("flag:return_code:" + args[0].getStringValue().get());
@@ -1096,12 +1109,11 @@ void vmcore::vm::assign(ygen::byteCode code) {
         }
         //
         auto index = valueStack.pop().getIntegerValue().get();
-        space.getValue(name).getList()[index] = value;
+        space.getValue(name)[index] = value;
         space.getValue(name).getType() = value.getType();
     }
     else {
         space.getValue(name) = value;
-        space.getValue(name).getType() = value.getType();
     }
 }
 
@@ -1266,6 +1278,7 @@ void vmcore::vm::call(ygen::byteCode code, std::string arg) {
             args.push_back(valueStack.pop());
         }
     }
+    valueStack.pop();
     std::reverse(args.begin(), args.end());
     if(std::find(yolexer::bifList.begin(), yolexer::bifList.end(), fnName) != yolexer::bifList.end()) {
         // 是bif，进行bif的判断
@@ -1273,6 +1286,7 @@ void vmcore::vm::call(ygen::byteCode code, std::string arg) {
         else if(fnName == "input") valueStack.push(native.bifSet.input(args, code));
         else if(fnName == "fread") valueStack.push(native.bifSet.fread(args, code));
         else if(fnName == "fwrite") valueStack.push(native.bifSet.fwrite(args, code));
+        else if(fnName == "length") valueStack.push(native.bifSet.length(args, code));
         else if(fnName == "substr") valueStack.push(native.bifSet.substr(args, code));
         else if(fnName == "add_const") {
             if(arg == "repl")
