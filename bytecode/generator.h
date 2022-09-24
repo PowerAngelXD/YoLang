@@ -38,6 +38,8 @@ namespace ygen{
         int line, column;
     };
 
+    btc string2Code(std::string s);
+
     class ByteCodeGenerator{
         std::vector<AST::StmtNode*> stmts;
         AST::WholeExprNode* expr;

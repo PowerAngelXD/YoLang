@@ -35,6 +35,24 @@
 #define DEL_VAL minCtor(btc::del_val, node->mark->line, node->mark->column);
 #define FLAG(type) normalCtor(btc::flag, type, 0.0, node->mark->line, node->mark->column);
 
+ygen::btc ygen::string2Code(std::string s) {
+    btc code;
+    if(s=="jmp") code=btc::jmp;
+    else if(s=="push") code=btc::push;else if(s=="gto") code=btc::gto;else if(s=="tcast") code=btc::tcast;
+    else if(s=="cast") code=btc::cast;else if(s=="selfadd") code=btc::selfadd;else if(s=="selfsub") code=btc::selfsub;
+    else if(s=="add") code=btc::add;else if(s=="lt") code=btc::lt;else if(s=="scopestart") code=btc::scopestart;
+    else if(s=="sub") code=btc::sub;else if(s=="ltet") code=btc::ltet;else if(s=="scopeend") code=btc::scopeend;
+    else if(s=="mul") code=btc::mul;else if(s=="gt") code=btc::gt;else if(s=="idenend") code=btc::idenend;
+    else if(s=="div") code=btc::div;else if(s=="gtet") code=btc::gtet;else if(s=="flag") code=btc::flag;
+    else if(s=="tmo") code=btc::tmo;else if(s=="equ") code=btc::equ;else if(s=="out") code=btc::out;
+    else if(s=="idx") code=btc::idx;else if(s=="noequ") code=btc::noequ;else if(s=="create") code=btc::create;
+    else if(s=="lst") code=btc::lst;else if(s=="gmem") code=btc::gmem;else if(s=="assign") code=btc::assign;
+    else if(s=="logicand") code=btc::logicand;else if(s=="stf") code=btc::stf;else if(s=="del") code=btc::del;
+    else if(s=="logicor") code=btc::logicor;else if(s=="listend") code=btc::listend;else if(s=="call") code=btc::call;
+    else if(s=="no") code=btc::no;else if(s=="paraend") code=btc::paraend;else if(s=="del_val") code=btc::del_val;
+}
+
+
 ygen::ByteCodeGenerator::ByteCodeGenerator(std::vector<AST::StmtNode*> _stmts): stmts(_stmts) {}
 ygen::ByteCodeGenerator::ByteCodeGenerator(AST::WholeExprNode* _expr): expr(_expr) {}
 std::string ygen::ByteCodeGenerator::removeZero(float content) {
