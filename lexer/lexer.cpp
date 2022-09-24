@@ -41,14 +41,6 @@ std::vector<yolexer::yoToken> yolexer::Lexer::getTokenGroup() {return tokenGroup
  */
 void yolexer::Lexer::generate(){
     int line = 1, column = 0;
-    // yolang关键字表
-    std::vector<std::string> yoKeyWords = {
-        "var", "typeof", "const", "out", "repeat",
-        "while", "for", "for_each", "return", "func", 
-        "string", "integer", "decimal", "boolean", "delete",
-        "string[]", "integer[]", "decimal[]", "boolean[]",
-        "as", "dynamic", "static", "null", "typeof", "nameof"
-    }; // 新增关键字都在这里
     for(int i = 0; i < input.size(); i++){
         if(input[i] == '\n'){
             line ++; column = 0;
@@ -115,14 +107,10 @@ void yolexer::Lexer::generate(){
                 column += 2;
                 content += "[]";
             }
-            for(auto word: yoKeyWords){
-                if(word == content){
-                    tokenGroup.push_back({content, yoTokType::KeyWord, line, column});
-                    isKeyWord = true;
-                    continue;
-                }
+            if(std::find(yoKeyWords.begin(), yoKeyWords.end(),content) != yoKeyWords.end()){
+                tokenGroup.push_back({content, yoTokType::KeyWord, line, column});
             }
-            if(!isKeyWord)
+            else
                 tokenGroup.push_back({content, yoTokType::Identifier, line, column});
         }
         else if(input[i] == '#'){
