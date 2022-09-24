@@ -343,7 +343,6 @@ AST::BoolOpNode* parser::Parser::parseBoolOpNode(){
 AST::PrimExprNode* parser::Parser::parsePrimExprNode(){
     AST::PrimExprNode* node = new AST::PrimExprNode;
     if(isFnCallExpr()) node->fcall = parseFuncCallNode();
-    else if(isCellExpr()) node->cellexpr = parseCellExprNode();
     else if(isTypecastExpr()) node->typecast = parseTypecastExprNode();
     else if(peek()->type == yolexer::yoTokType::Integer ||
             peek()->type == yolexer::yoTokType::Decimal) node->number = token();
@@ -351,6 +350,7 @@ AST::PrimExprNode* parser::Parser::parsePrimExprNode(){
     else if(peek()->content == "null") node->null = token();
     else if(peek()->content == "true" || peek()->content == "false") node->boolconst = token();
     else if(isStfOp()) node->stf = parseStfOpNode();
+    else if(isCellExpr()) node->cellexpr = parseCellExprNode();
     else if(isIdentifier()) {
         node->iden = parseIdentifierNode();
         if(isIndexOp()) node->op = parseIndexOpNode();
