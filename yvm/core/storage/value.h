@@ -52,5 +52,8 @@ namespace ysto {
         ytype::YNull& getNullValue();
 
         std::vector<Value>& getList();
+
+        void operator=(Value value);
+        Value &operator[](int index);
     };
 }

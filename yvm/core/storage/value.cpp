@@ -76,3 +76,32 @@ std::vector<ysto::Value> &ysto::Value::getList() {
 ytype::YNull &ysto::Value::getNullValue() {
     return nullValue;
 }
+
+void ysto::Value::operator=(ysto::Value value) {
+    if(this->getType() != value.getType() && !this->isDynamic)
+        throw yoexception::YoError("AssignError", "You cannot assign a value of a different type to a variable of static type", this->line, this->column);
+    this->type = value.type;
+    switch (value.getType().bt) {
+        case ytype::integer:
+            this->integerValue = value.integerValue;
+            break;
+        case ytype::boolean:
+            this->booleanValue = value.booleanValue;
+            break;
+        case ytype::decimal:
+            this->decimalValue = value.decimalValue;
+            break;
+        case ytype::string:
+            this->stringValue = value.stringValue;
+            break;
+        case ytype::null:
+            this->nullValue = value.nullValue;
+            break;
+    }
+}
+
+ysto::Value& ysto::Value::operator[](int index) {
+    if(this->type.ct != ytype::list)
+        throw yoexception::YoError("TypeError", "The '[]' operator does not support operations on variables or constants that are not lists", this->line, this->column);
+    return list[index];
+}
