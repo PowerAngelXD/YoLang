@@ -1109,6 +1109,8 @@ void vmcore::vm::assign(ygen::byteCode code) {
         }
         //
         auto index = valueStack.pop().getIntegerValue().get();
+        if(index > space.getValue(name).getList().size() - 1)
+            throw yoexception::YoError("IndexError", "The referenced index is out of range", code.line, code.column);
         space.getValue(name)[index] = value;
         space.getValue(name).getType() = value.getType();
     }
