@@ -81,22 +81,29 @@ void ysto::Value::operator=(ysto::Value value) {
     if(this->getType() != value.getType() && !this->isDynamic)
         throw yoexception::YoError("AssignError", "You cannot assign a value of a different type to a variable of static type", this->line, this->column);
     this->type = value.type;
-    switch (value.getType().bt) {
-        case ytype::integer:
-            this->integerValue = value.integerValue;
-            break;
-        case ytype::boolean:
-            this->booleanValue = value.booleanValue;
-            break;
-        case ytype::decimal:
-            this->decimalValue = value.decimalValue;
-            break;
-        case ytype::string:
-            this->stringValue = value.stringValue;
-            break;
-        case ytype::null:
-            this->nullValue = value.nullValue;
-            break;
+    if(this->type.ct == ytype::compType::list) {
+        if(value.getType() != this->type)
+            throw yoexception::YoError("AssignError", "You cannot assign a value of a different type to a variable or a constant", this->line, this->column);
+        else list = value.getList();
+    }
+    else {
+        switch (value.getType().bt) {
+            case ytype::integer:
+                this->integerValue = value.integerValue;
+                break;
+            case ytype::boolean:
+                this->booleanValue = value.booleanValue;
+                break;
+            case ytype::decimal:
+                this->decimalValue = value.decimalValue;
+                break;
+            case ytype::string:
+                this->stringValue = value.stringValue;
+                break;
+            case ytype::null:
+                this->nullValue = value.nullValue;
+                break;
+        }
     }
 }
 
