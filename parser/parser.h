@@ -18,7 +18,7 @@ namespace parser{
         bool isStmt(); bool isOutStmt(); bool isVorcStmt(); bool isSpExprStmt(); bool isBlockStmt();
         bool isWhileStmt(); bool isIfStmt(); bool isElifStmt(); bool isElseStmt(); bool isForStmt();
         bool isRepeatStmt(); bool isDeleteStmt(); bool isBreakStmt(); bool isFuncDefStmt(); bool isDeferStmt();
-        bool isReturnStmt();
+        bool isReturnStmt(); bool isStructDefStmt();
         // 生成区: parseXXX ---> 生成XXXNode
         AST::SiadExprNode* parseSiadExprNode();
         AST::CellExprNode* parseCellExprNode();
@@ -53,6 +53,7 @@ namespace parser{
         AST::ForStmtNode* parseForStmtNode();
         AST::BreakStmtNode* parseBreakStmtNode();
         AST::FuncDefStmtNode* parseFuncDefStmtNode();
+        AST::StructDefineStmtNode* parseStructDefStmtNode();
         AST::DeferStmtNode* parseDeferStmtNode();
         AST::ReturnStmtNode* parseReturnStmtNode();
         AST::StmtNode* parseStmtNode();

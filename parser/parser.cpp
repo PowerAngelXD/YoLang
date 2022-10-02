@@ -238,6 +238,9 @@ bool parser::Parser::isDeferStmt() {
 bool parser::Parser::isReturnStmt() {
     return peek()->content == "return";
 }
+bool parser::Parser::isStructDefStmt() {
+    return peek()->content == "struct";
+}
 bool parser::Parser::isStmt() {
     return isOutStmt() || isVorcStmt() || isSpExprStmt() || isBlockStmt() || isWhileStmt() || isIfStmt() || isElifStmt() || isElseStmt() ||
             isRepeatStmt() || isDeleteStmt() || isForStmt() || isBreakStmt() || isFuncDefStmt() || isDeferStmt() || isReturnStmt();
@@ -505,6 +508,7 @@ AST::StmtNode* parser::Parser::parseStmtNode() {
     else if(isRepeatStmt()) node->repeatstmt = parseRepeatStmtNode();
     else if(isDeleteStmt()) node->delstmt = parseDeleteStmtNode();
     else if(isForStmt()) node->forstmt = parseForStmtNode();
+    else if(isStructDefStmt()) node->sdefstmt = parseStructDefStmtNode();
     else if(isSpExprStmt()) node->spexprstmt = parseSpExprStmtNode();
     else if(isBreakStmt()) node->breakstmt = parseBreakStmtNode();
     else if(isFuncDefStmt()) node->fdefstmt = parseFuncDefStmtNode();
@@ -754,6 +758,37 @@ AST::ReturnStmtNode* parser::Parser::parseReturnStmtNode() {
     if(peek()->content == ";") node->end = token();
     else throw yoexception::YoError("SyntaxError", "Expect ';'", tg[offset].line, tg[offset].column);
 
+    return node;
+}
+
+AST::StructDefineStmtNode* parser::Parser::parseStructDefStmtNode() {
+    AST::StructDefineStmtNode* node = new AST::StructDefineStmtNode;
+    node->mark = token();
+    if(peek()->content == "{") node->left = token();
+    else throw  yoexception::YoError("SyntaxError", "Expect '{'!", tg[offset].line, tg[offset].column);
+    if(std::find(yolexer::typeList.begin(), yolexer::typeList.end(), peek()->content) == yolexer::typeList.end())
+        throw yoexception::YoError("SyntaxError", "A structure cannot have no members", tg[offset].line, tg[offset].column);
+    AST::StructDefineStmtNode::memberPair* temp = new AST::StructDefineStmtNode::memberPair;
+    temp->type = token();
+    if(peek()->content == ":") temp->sep = token();
+    else throw  yoexception::YoError("SyntaxError", "Expect ':'!", tg[offset].line, tg[offset].column);
+    temp->name = token();
+    node->members.push_back(temp);
+    delete temp;
+    while(true) {
+        if(peek()->content != ",") break;
+        node->dots.push_back(token());
+
+        temp = new AST::StructDefineStmtNode::memberPair;
+        temp->type = token();
+        if(peek()->content == ":") temp->sep = token();
+        else throw  yoexception::YoError("SyntaxError", "Expect ':'!", tg[offset].line, tg[offset].column);
+        temp->name = token();
+        node->members.push_back(temp);
+        delete temp;
+    }
+    if(peek()->content == "}") node->right = token();
+    else throw  yoexception::YoError("SyntaxError", "Expect '}'!", tg[offset].line, tg[offset].column);
     return node;
 }
 
