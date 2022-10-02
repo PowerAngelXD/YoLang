@@ -1117,6 +1117,7 @@ void vmcore::vm::assign(ygen::byteCode code) {
     else {
         space.getValue(name) = value;
     }
+    valueStack.push(value);
 }
 
 void vmcore::vm::scopestart(ygen::byteCode code) {
