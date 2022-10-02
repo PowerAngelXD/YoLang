@@ -285,5 +285,20 @@ std::string AST::StmtNode::toString() {
     else if(breakstmt != nullptr) return "StmtNode: {" + breakstmt->toString() + "}";
     else if(deferstmt != nullptr) return "StmtNode: {" + deferstmt->toString() + "}";
     else if(retstmt != nullptr) return "StmtNode: {" + retstmt->toString() + "}";
+    else if(sdefstmt != nullptr) return "StmtNode: {" + sdefstmt->toString() + "}";
     return "null";
+}
+
+std::string AST::StructDefineStmtNode::toString() {
+    std::string ret = "StructDefineStmt: {" + name->toString() + ", [";
+    for(int i = 0; i < members.size(); i++) {
+        ret += members[i]->toString();
+        ret += ", ";
+    }
+    ret += "]}";
+    return ret;
+}
+
+std::string AST::StructDefineStmtNode::memberPair::toString() {
+    return "memberPair: {" + name->toString() + ", " + type->toString() + "}";
 }

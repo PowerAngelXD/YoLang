@@ -207,6 +207,33 @@ namespace AST{
         std::string toString();
     };
 
+    class StructDefineStmtNode{
+        /*
+         *struct test {
+         *     integer:a,
+         *     string:b,
+         *     integer[]:c
+         * }
+         *
+         * */
+    public:
+        struct memberPair {
+            yolexer::yoToken* type = nullptr;
+            yolexer::yoToken* sep = nullptr;
+            yolexer::yoToken* name = nullptr;
+            std::string toString();
+        };
+
+        yolexer::yoToken* mark = nullptr;
+        yolexer::yoToken* name = nullptr;
+        yolexer::yoToken* left = nullptr;
+        std::vector<memberPair*> members;
+        std::vector<yolexer::yoToken*> dots;
+        yolexer::yoToken* right = nullptr;
+
+        std::string toString();
+    };
+
     class VorcStmtNode{
     public:
         struct defineBlock {
@@ -396,6 +423,7 @@ namespace AST{
         FuncDefStmtNode* fdefstmt = nullptr;
         DeferStmtNode* deferstmt = nullptr;
         ReturnStmtNode* retstmt = nullptr;
+        StructDefineStmtNode* sdefstmt = nullptr;
 
         std::string toString();
     };
