@@ -255,6 +255,13 @@ void ysh::insEnv(std::vector<std::string> paras) {
 }
 
 void ysh::runYoShell() {
+    // VM初始化
+    yvm.space.createValue("completeVersion", ysto::Value(ytype::YString(ysh::completeVersion), true, 0, 0));
+    yvm.space.createValue("releaseVersion", ysto::Value(ytype::YString(ysh::relVersion), true, 0, 0));
+    yvm.space.createValue("_integer", ysto::Value(ytype::YString("Integer"), true, 0, 0));
+    yvm.space.createValue("_decimal", ysto::Value(ytype::YString("Decimal"), true, 0, 0));
+    yvm.space.createValue("_string", ysto::Value(ytype::YString("String"), true, 0, 0));
+    yvm.space.createValue("_boolean", ysto::Value(ytype::YString("Boolean"), true, 0, 0));
     // 输出欢迎页面
     std::cout<<"Yolang "<<ysh::completeVersion<<"("<<ysh::version<<")\n"<<"Release Version: " << ysh::relVersion <<"\ngcc version 11.3.0"<<std::endl;
     std::cout<<std::endl;
