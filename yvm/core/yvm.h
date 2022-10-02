@@ -42,8 +42,9 @@ namespace vmcore {
         std::vector<std::vector<ygen::byteCode>> codeQueue; // 代码队列
 
         native::navtiveSet native;
-        ysto::Space space; // 全局Space
     public:
+        ysto::Space space; // 全局Space
+
         vm(std::vector<ygen::byteCode> cs, std::vector<std::string> cp);
         vm()=default;
 
