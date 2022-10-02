@@ -135,6 +135,7 @@ std::string AST::WholeExprNode::toString() {
     if(addexpr != nullptr) return "WholeExprNode: {" + addexpr->toString() + "}";
     else if(boolexpr != nullptr) return "WholeExprNode: {" + boolexpr->toString() + "}";
     else if(listexpr != nullptr) return "WholeExprNode: {" + listexpr->toString() + "}";
+    else if(strexpr != nullptr) return "WholeExprNode: {" + strexpr->toString() + "}";
     else if(assign != nullptr) return "WholeExprNode: {" + assign->toString() + "}";
     else return "null";
 }
@@ -195,7 +196,7 @@ std::string AST::VorcStmtNode::toString() {
 }
 
 std::string AST::BlockStmtNode::toString() {
-    std::string ret = "BlockStmt: {[";
+    std::string ret = "BlockStmtNode: {[";
     for(auto stmt: stmts) {
         ret += stmt->toString();
     }
@@ -212,35 +213,35 @@ std::string AST::SpExprStmtNode::toString() {
 }
 
 std::string AST::WhileStmtNode::toString() {
-    return "WhileStmt: {" + cond->toString() + ", " + body->toString() + "}";
+    return "WhileStmtNode: {" + cond->toString() + ", " + body->toString() + "}";
 }
 
 std::string AST::IfStmtNode::toString() {
-    return "IfStmt: {" + cond->toString() + ", " + body->toString() + "}";
+    return "IfStmtNode: {" + cond->toString() + ", " + body->toString() + "}";
 }
 
 std::string AST::ElifStmtNode::toString() {
-    return "ElifStmt: {" + cond->toString() + ", " + body->toString() + "}";
+    return "ElifStmtNode: {" + cond->toString() + ", " + body->toString() + "}";
 }
 
 std::string AST::ElseStmtNode::toString() {
-    return "ElseStmt: {" + body->toString() + "}";
+    return "ElseStmtNode: {" + body->toString() + "}";
 }
 
 std::string AST::DeleteStmtNode::toString() {
-    return "DeleteStmt: {" + iden->toString() + "}";
+    return "DeleteStmtNode: {" + iden->toString() + "}";
 }
 
 std::string AST::RepeatStmtNode::toString() {
-    return "RepeatStmt: {" + times->toString() + ", " + body->toString() + "}";
+    return "RepeatStmtNode: {" + times->toString() + ", " + body->toString() + "}";
 }
 
 std::string AST::ForStmtNode::toString() {
-    return "ForStmt: {" + (hasVorc?vorc->toString() + ", ":"") + (hasCond?cond->toString() + ", ":"") + (hasOp?(siad != nullptr?siad->toString():assign->toString() + "}"):"}");
+    return "ForStmtNode: {" + (hasVorc?vorc->toString() + ", ":"") + (hasCond?cond->toString() + ", ":"") + (hasOp?(siad != nullptr?siad->toString():assign->toString() + "}"):"}");
 }
 
 std::string AST::FuncDefStmtNode::toString() {
-    std::string ret = "FuncDef: {" + name->toString() + ", ";
+    std::string ret = "FuncDefStmtNode: {" + name->toString() + ", ";
     if(hasPara) {
         ret += "[";
         for(int i = 0; i < paras.size() ;i++)
@@ -254,15 +255,15 @@ std::string AST::FuncDefStmtNode::toString() {
 }
 
 std::string AST::ReturnStmtNode::toString() {
-    return "ReturnStmt: {" + expr->toString() + "}";
+    return "ReturnStmtNode: {" + expr->toString() + "}";
 }
 
 std::string AST::BreakStmtNode::toString() {
-    return "BreakStmt";
+    return "BreakStmtNode";
 }
 
 std::string AST::DeferStmtNode::toString() {
-    return "DeferStmt: {" + stmt->toString() + "}";
+    return "DeferStmtNode: {" + stmt->toString() + "}";
 }
 
 std::string AST::AsOpNode::toString() {
@@ -290,7 +291,7 @@ std::string AST::StmtNode::toString() {
 }
 
 std::string AST::StructDefineStmtNode::toString() {
-    std::string ret = "StructDefineStmt: {" + name->toString() + ", [";
+    std::string ret = "StructDefineStmtNode: {" + name->toString() + ", [";
     for(int i = 0; i < members.size(); i++) {
         ret += members[i]->toString();
         ret += ", ";
@@ -301,4 +302,14 @@ std::string AST::StructDefineStmtNode::toString() {
 
 std::string AST::StructDefineStmtNode::memberPair::toString() {
     return "memberPair: {" + name->toString() + ", " + type->toString() + "}";
+}
+
+std::string AST::StructExprNode::toString() {
+    std::string ret = "StructExprNode: {[";
+    for(int i = 0; i < elements.size(); i++) {
+        ret += elements[i]->toString();
+        ret += ", ";
+    }
+    ret += "]}";
+    return ret;
 }

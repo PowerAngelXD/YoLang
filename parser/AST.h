@@ -167,11 +167,22 @@ namespace AST{
         std::string toString();
     };
 
+    class StructExprNode{
+    public:
+        yolexer::yoToken* left;
+        std::vector<yolexer::yoToken*> dots;
+        std::vector<WholeExprNode*> elements;
+        yolexer::yoToken* right;
+
+        std::string toString();
+    };
+
     class WholeExprNode{
     public:
         AddExprNode* addexpr = nullptr;
         BoolExprNode* boolexpr = nullptr;
         ListExprNode* listexpr = nullptr;
+        StructExprNode* strexpr = nullptr;
         AssignmentExprNode* assign = nullptr;
 
         std::string toString();
