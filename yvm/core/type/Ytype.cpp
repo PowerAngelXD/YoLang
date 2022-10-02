@@ -31,8 +31,8 @@ std::string ytype::compType2String(compType ct) {
             return "norm";
         case list:
             return "list";
-        case dict:
-            return "dict";
+        case strt:
+            return "strt";
         default:
             return "__null__";
     }
@@ -51,7 +51,7 @@ ytype::basicType ytype::string2BasicType(std::string s) {
 ytype::compType ytype::string2CompType(std::string s) {
     if(s=="norm") return compType::norm;
     else if(s=="list") return compType::list;
-    else if(s=="dict") return compType::dict;
+    else if(s=="strt") return compType::strt;
 }
 ytype::ytypeUnit ytype::string2Type(std::string s) {
     std::string basic;
@@ -60,6 +60,14 @@ ytype::ytypeUnit ytype::string2Type(std::string s) {
         comp = "list";
         for(int i = 0; i < s.size(); i ++) {
             if(s[i] == '[') break;
+            basic += s[i];
+        }
+        return {string2BasicType(basic), string2CompType(comp)};
+    }
+    if(s[s.size()-1] == '}') {
+        comp = "strt";
+        for(int i = 0; i < s.size(); i ++) {
+            if(s[i] == '{') break;
             basic += s[i];
         }
         return {string2BasicType(basic), string2CompType(comp)};
@@ -90,11 +98,11 @@ ytype::YObject::YObject(std::vector<byteCode> cs, std::vector<std::pair<ytype::y
 }
 
 bool ytype::YObject::isTypable() {
-    return kind == objectKind::typable?true:false;
+    return kind == objectKind::typable;
 }
 
 bool ytype::YObject::isFunction() {
-    return kind == objectKind::function?true:false;
+    return kind == objectKind::function;
 }
 
 void ytype::YObject::loadInVM() {

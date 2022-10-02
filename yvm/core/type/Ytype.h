@@ -9,7 +9,7 @@
 namespace ytype {
     // 对原先的类型系统作出修改
     enum basicType {integer = 0, boolean, decimal, string, null, object, iden, flag}; // iden类型只是为了标记为标识符所代表的值
-    enum compType {norm = 10, list, dict};
+    enum compType {norm = 10, list, strt}; // strt代指struct
     struct ytypeUnit{
         basicType bt;
         compType ct;
@@ -26,8 +26,8 @@ namespace ytype {
     compType string2CompType(std::string s);
     ytypeUnit string2Type(std::string s);
     // Object
-
-    enum objectKind {typable, function};
+    typedef std::pair<std::string, ytypeUnit> structMemberPair;
+    enum objectKind {typable, function, structable};
 
     /**
      * @brief 描述VM每一个code的结构体
@@ -42,7 +42,7 @@ namespace ytype {
     class YObject {
         objectKind kind; // Object的类型
 
-        std::vector<std::string> members; // only "typable"
+        std::vector<structMemberPair> memberPairs; // only "structable"
     public:
         std::vector<std::pair<ytype::ytypeUnit, std::string>> args; // 参数类型:参数名 only "function"
         ytype::ytypeUnit retType; // 返回类型
