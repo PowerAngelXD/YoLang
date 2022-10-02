@@ -10,7 +10,7 @@ namespace parser{
         yolexer::yoToken* token(); // 获取昂前tokenGroup的token，然后偏移
 
         // 判断区: isXXX ---> 判断是什么Node
-        bool isPrim(); bool isIdentifier(); bool isSiadExpr(); bool isMulExpr();
+        bool isPrim(); bool isIdentifier(); bool isSiadExpr(); bool isMulExpr(); bool isStructExpr();
         bool isAddExpr(); bool isCmpExpr(); bool isBoolExpr(); bool isFnCallExpr(); bool isCellExpr();
         bool isAddOp(); bool isMulOp(); bool isCmpOp(); bool isBoolOp(); bool isIndexOp(); bool isStfOp();
         bool isAsOp(); bool isListExpr(); bool isAssignmentExpr(); bool isTypecastExpr(); bool isExpr();
@@ -37,6 +37,7 @@ namespace parser{
         AST::AddExprNode* parseAddExprNode();
         AST::CmpExprNode* parseCmpExprNode();
         AST::BoolExprNode* parseBoolExprNode();
+        AST::StructExprNode* parseStructExprNode();
         AST::TypecastExprNode* parseTypecastExprNode();
         AST::AssignmentExprNode* parseAssignmentExprNode();
 

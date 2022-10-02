@@ -65,6 +65,9 @@ bool parser::Parser::isSiadExpr() {
 bool parser::Parser::isMulExpr() {
     return isPrim();
 }
+bool parser::Parser::isStructExpr() {
+    return peek()->content == "{";
+}
 bool parser::Parser::isAddExpr() {
     return isMulExpr();
 } 
@@ -191,7 +194,7 @@ bool parser::Parser::isAssignmentExpr() {
     else return false;
 }
 bool parser::Parser::isExpr() {
-    return isListExpr() || isAddExpr() || isBoolExpr();
+    return isListExpr() || isAddExpr() || isBoolExpr() || isAssignmentExpr() || isStructExpr();
 }
 bool parser::Parser::isOutStmt() {
     return peek()->content == "out";
@@ -243,7 +246,7 @@ bool parser::Parser::isStructDefStmt() {
 }
 bool parser::Parser::isStmt() {
     return isOutStmt() || isVorcStmt() || isSpExprStmt() || isBlockStmt() || isWhileStmt() || isIfStmt() || isElifStmt() || isElseStmt() ||
-            isRepeatStmt() || isDeleteStmt() || isForStmt() || isBreakStmt() || isFuncDefStmt() || isDeferStmt() || isReturnStmt();
+            isRepeatStmt() || isDeleteStmt() || isForStmt() || isBreakStmt() || isFuncDefStmt() || isDeferStmt() || isReturnStmt() || isStructDefStmt();
 }
 
 // EXPR
@@ -464,6 +467,24 @@ AST::BoolExprNode* parser::Parser::parseBoolExprNode(){
     return node;
     return node;
 }
+AST::StructExprNode* parser::Parser::parseStructExprNode() {
+    AST::StructExprNode* node = new AST::StructExprNode;
+    node->left = token();
+
+    if(isExpr()) node->elements.push_back(parseExpr());
+    else throw yoexception::YoError("SyntaxError", "Expect an expression!", tg[offset].line, tg[offset].column);
+    while(true) {
+        if(peek()->content != ",") break;
+        node->dots.push_back(token());
+
+        if(isExpr()) node->elements.push_back(parseExpr());
+        else throw yoexception::YoError("SyntaxError", "Expect an expression!", tg[offset].line, tg[offset].column);
+    }
+
+    if(peek()->content == "}") node->right = token();
+    else throw  yoexception::YoError("SyntaxError", "Expect '}'!", tg[offset].line, tg[offset].column);
+    return node;
+}
 AST::TypecastExprNode* parser::Parser::parseTypecastExprNode() {
     AST::TypecastExprNode* node = new AST::TypecastExprNode;
     node->expr = parseIdentifierNode();
@@ -491,6 +512,7 @@ AST::WholeExprNode* parser::Parser::parseExpr(){
     else if(isBoolExpr()) node->boolexpr = parseBoolExprNode();
     else if(isAddExpr()) node->addexpr = parseAddExprNode();
     else if(isListExpr()) node->listexpr = parseListExprNode();
+    else if(isStructExpr()) node->strexpr = parseStructExprNode();
     return node;
 }
 
@@ -764,8 +786,11 @@ AST::ReturnStmtNode* parser::Parser::parseReturnStmtNode() {
 AST::StructDefineStmtNode* parser::Parser::parseStructDefStmtNode() {
     AST::StructDefineStmtNode* node = new AST::StructDefineStmtNode;
     node->mark = token();
+    if(peek()->type == yolexer::yoTokType::Identifier) node->name = token();
+    else throw  yoexception::YoError("SyntaxError", "Expect an identifier!", tg[offset].line, tg[offset].column);
     if(peek()->content == "{") node->left = token();
     else throw  yoexception::YoError("SyntaxError", "Expect '{'!", tg[offset].line, tg[offset].column);
+
     if(std::find(yolexer::typeList.begin(), yolexer::typeList.end(), peek()->content) == yolexer::typeList.end())
         throw yoexception::YoError("SyntaxError", "A structure cannot have no members", tg[offset].line, tg[offset].column);
     AST::StructDefineStmtNode::memberPair* temp = new AST::StructDefineStmtNode::memberPair;
@@ -787,6 +812,7 @@ AST::StructDefineStmtNode* parser::Parser::parseStructDefStmtNode() {
         node->members.push_back(temp);
         delete temp;
     }
+
     if(peek()->content == "}") node->right = token();
     else throw  yoexception::YoError("SyntaxError", "Expect '}'!", tg[offset].line, tg[offset].column);
     return node;
