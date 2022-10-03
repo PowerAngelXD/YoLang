@@ -121,6 +121,15 @@ void ysh::insRun(std::vector<std::string> paras) {
 
             yvm.load(bcg.getConstPool(), bcg.getCodes());
             yvm.run(-1, "program");
+
+            // 运行完之后环境初始化
+            yvm = vmcore::vm();
+            yvm.space.createValue("completeVersion", ysto::Value(ytype::YString(ysh::completeVersion), true, 0, 0));
+            yvm.space.createValue("releaseVersion", ysto::Value(ytype::YString(ysh::relVersion), true, 0, 0));
+            yvm.space.createValue("_integer", ysto::Value(ytype::YString("Integer"), true, 0, 0));
+            yvm.space.createValue("_decimal", ysto::Value(ytype::YString("Decimal"), true, 0, 0));
+            yvm.space.createValue("_string", ysto::Value(ytype::YString("String"), true, 0, 0));
+            yvm.space.createValue("_boolean", ysto::Value(ytype::YString("Boolean"), true, 0, 0));
         }
         else
             throw yoexception::YoError("FileError", "Not any file that can be run", -1, -1);
@@ -247,6 +256,12 @@ void ysh::insEnv(std::vector<std::string> paras) {
         if(paras.size() == 1) {
             if(paras[0] == "clear") {
                 yvm = vmcore::vm();
+                yvm.space.createValue("completeVersion", ysto::Value(ytype::YString(ysh::completeVersion), true, 0, 0));
+                yvm.space.createValue("releaseVersion", ysto::Value(ytype::YString(ysh::relVersion), true, 0, 0));
+                yvm.space.createValue("_integer", ysto::Value(ytype::YString("Integer"), true, 0, 0));
+                yvm.space.createValue("_decimal", ysto::Value(ytype::YString("Decimal"), true, 0, 0));
+                yvm.space.createValue("_string", ysto::Value(ytype::YString("String"), true, 0, 0));
+                yvm.space.createValue("_boolean", ysto::Value(ytype::YString("Boolean"), true, 0, 0));
                 std::cout<<"[YVM SUCCESS] Operation execution completed";
             }
             else std::cout<<"[YVM ERROR] Unknown operation on virtual machine: '" + paras[0] + "'";
