@@ -1280,8 +1280,8 @@ void vmcore::vm::call(ygen::byteCode code, std::string arg) {
         while(valueStack.peek().getBasicType() != ytype::basicType::flag && temp.getStringValue().get() != "flag:para_end") {
             args.push_back(valueStack.pop());
         }
+        valueStack.pop();
     }
-    valueStack.pop();
     std::reverse(args.begin(), args.end());
     if(std::find(yolexer::bifList.begin(), yolexer::bifList.end(), fnName) != yolexer::bifList.end()) {
         // 是bif，进行bif的判断
