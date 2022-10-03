@@ -990,6 +990,16 @@ void vmcore::vm::create(ygen::byteCode code,  int &current) {
         //
         space.createValue(name, ysto::Value(ytype::YObject(codes, formalParas, retType), false, code.line, code.column));
     }
+    else if(state == "struct") {
+        std::vector<ytype::structMemberPair> members;
+        while(valueStack.peek().getBasicType() != ytype::basicType::flag && valueStack.peek().getStringValue().get() != "flag:para_end") {
+            ytype::ytypeUnit type = ytype::string2Type(valueStack.pop().getStringValue().get());
+            std::string name = valueStack.pop().getStringValue().get();
+            members.push_back(ytype::structMemberPair(name, type));
+        }
+        std::reverse(members.begin(), members.end()); // 因为栈的原因，逆序
+
+    }
     else{
         auto value = valueStack.pop();
         if(code.arg4 == 1) {
@@ -1370,7 +1380,7 @@ void vmcore::vm::call(ygen::byteCode code, std::string arg) {
         auto actParas = args;
         space.createScope("function_calling_scope", code.line, code.column); // 创建属于这个函数的作用域
         for(int i = 0; i < formalParas.size(); i++) {
-            if(formalParas[i].first != actParas[i].getType())
+            if(formalParas[i].first.bt != actParas[i].getType().bt)
                 throw yoexception::YoError("FunctionCallingError", "Overloaded function with no specified arguments", actParas[i].line, actParas[i].column);
             space.createValue(formalParas[i].second, actParas[i]);
         }
