@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.21)
 project(yolang)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_EXE_LINKER_FLAGS "-static-libgcc -static-libstdc++")
-message("C++ Standard: ${CMAKE_CXX_STANDRAD}")
+message("C++ Standard: ${CMAKE_CXX_STANDARD}")
 file(GLOB SRC_FILES "yolang.cpp", "lexer/lexer.cpp",
         "parser/*.cpp", "exception/yoexc.cpp",
         "bytecode/*.cpp",
