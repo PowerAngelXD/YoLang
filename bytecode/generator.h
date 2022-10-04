@@ -12,7 +12,7 @@ namespace ygen{
         // 栈操作类
         push = 0, gto, jmp,
         // 运算类
-        tcast, cast, selfadd, selfsub, add, sub, div, mul, tmo, idx, lst, logicand, logicor, no, lt, ltet, gt, gtet, equ, noequ, gmem, stf,
+        tcast, _new, cast, selfadd, selfsub, add, sub, div, mul, tmo, idx, lst, logicand, logicor, no, lt, ltet, gt, gtet, equ, noequ, gmem, stf,
         // 标志类
         listend, paraend, scopestart, scopeend, idenend, flag,
         // 功能类
@@ -25,7 +25,7 @@ namespace ygen{
         // outWscope指的是跳出while所属的scope外并向前偏移，如果没有则向前偏移一个单位
         // findSStart代表跳转到所属scope的scopestart处
         enum jmpt{ reqTrue = 100, reqFalse, unconditional, outScope, backScope, outLoop, outFn};
-        enum flagt{ loopEnd = 200, fnEnd};
+        enum flagt{ loopEnd = 200, fnEnd, strtExpr};
     }
 
     /**
@@ -110,6 +110,8 @@ namespace ygen{
         void visitListExpr(AST::ListExprNode* node);
         void visitAssignmentExpr(AST::AssignmentExprNode* node);
         void visitFuncCallExpr(AST::FuncCallNode* node);
+        void visitStructExpr(AST::StructExprNode* node);
+        void visitNewExpr(AST::NewExprNode* node);
         void visitExpr(AST::WholeExprNode* node); // 特殊的visitor，visit的是整个Expr
 
         void visitOutStmt(AST::OutStmtNode* node);
@@ -125,6 +127,7 @@ namespace ygen{
         void visitForStmt(AST::ForStmtNode* node);
         void visitBreakStmt(AST::BreakStmtNode* node);
         void visitFuncDefStmt(AST::FuncDefStmtNode* node);
+        void visitStructDefStmt(AST::StructDefineStmtNode* node);
         void visitReturnStmt(AST::ReturnStmtNode* node);
         AST::StmtNode* visitDeferStmt(AST::DeferStmtNode* node);
         void visit(std::vector<AST::StmtNode*> stmts); // 特殊的visitor，visit的是整个stmts

@@ -11,7 +11,7 @@
 #define MUL(line, column) normalCtor(btc::mul, 0, 0, line, column);
 #define TMO normalCtor(btc::tmo, 0, 0, node->op->line, node->op->column);
 #define IDX normalCtor(btc::idx, 0, 0, node->left->line, node->left->column);
-#define GMEM normalCtor(btc::gmem, 0, 0, node->dots[i]->line, node->dots[i]->column);
+#define GMEM normalCtor(btc::gmem, 0, 0, node->dots[0]->line, node->dots[0]->column);
 #define LST minCtor(btc::lst, node->right->line, node->right->column);
 #define GT(line, column) normalCtor(btc::gt, 0, 0, line, column);
 #define GTET(line, column) normalCtor(btc::gtet, 0, 0, line, column);
@@ -29,11 +29,13 @@
 #define DEL(name, type) normalCtor(btc::del, name, type, node->mark->line, node->mark->column);
 #define LISTEND minCtor(btc::listend, node->right->line, node->right->column);
 #define PARAEND minCtor(btc::paraend, node->right->line, node->left->column);
+#define PARAEND_LC(line, column) minCtor(btc::paraend, line, column);
 #define TCAST minCtor(btc::tcast, node->op->line, node->op->column);
 #define IDENEND(line, column) minCtor(btc::idenend, line, column);
 #define CALL minCtor(btc::call, node->left->line, node->left->column);
 #define DEL_VAL minCtor(btc::del_val, node->mark->line, node->mark->column);
-#define FLAG(type) normalCtor(btc::flag, type, 0.0, node->mark->line, node->mark->column);
+#define FLAG(type, line, column) normalCtor(btc::flag, type, 0.0, line, column);
+#define NEW(line, column) normalCtor(btc::_new, 0, 0, line, column);
 
 ygen::btc ygen::string2Code(std::string s) {
     btc code;
@@ -50,6 +52,7 @@ ygen::btc ygen::string2Code(std::string s) {
     else if(s=="logicand") code=btc::logicand;else if(s=="stf") code=btc::stf;else if(s=="del") code=btc::del;
     else if(s=="logicor") code=btc::logicor;else if(s=="listend") code=btc::listend;else if(s=="call") code=btc::call;
     else if(s=="no") code=btc::no;else if(s=="paraend") code=btc::paraend;else if(s=="del_val") code=btc::del_val;
+    else if(s=="new") code=btc::_new;
     return code;
 }
 
@@ -113,12 +116,11 @@ void ygen::ByteCodeGenerator::visitIdentifier(AST::IdentifierNode* node){
         PUSH(addPara(node->idens[0]->content), ytype::type(ytype::basicType::iden, ytype::norm), node->idens[0]->line, node->idens[0]->column)
     }
     else{
-        for(int i = 0; i < node->idens.size(); i++) {
-            PUSH(addPara(node->idens[i]->content), ytype::type(ytype::basicType::iden, ytype::norm), node->idens[i]->line, node->idens[i]->column);
-            if(i == node->idens.size() - 1); // 防止末尾还添加gmem
-            else GMEM
+        PUSH(addPara(node->idens[0]->content), ytype::type(ytype::basicType::string, ytype::norm), node->idens[0]->line, node->idens[0]->column)
+        for(int i = 1; i < node->idens.size(); i++) {
+            PUSH(addPara(node->idens[i]->content), ytype::type(ytype::basicType::string, ytype::norm), node->idens[i]->line, node->idens[i]->column);
+            GMEM
         }
-        IDENEND(node->idens[0]->line, node->idens[0]->column)
     }
 }
 void ygen::ByteCodeGenerator::visitIdentifierText(AST::IdentifierNode* node, bool isref){
@@ -286,6 +288,10 @@ void ygen::ByteCodeGenerator::visitExpr(AST::WholeExprNode* node){
         visitAssignmentExpr(node->assign);
     else if(node->listexpr != nullptr)
         visitListExpr(node->listexpr);
+    else if(node->strexpr != nullptr)
+        visitStructExpr(node->strexpr);
+    else if(node->newexpr != nullptr)
+        visitNewExpr(node->newexpr);
 }
 void ygen::ByteCodeGenerator::visitFuncCallExpr(AST::FuncCallNode* node) {
     PARAEND
@@ -294,10 +300,37 @@ void ygen::ByteCodeGenerator::visitFuncCallExpr(AST::FuncCallNode* node) {
         for(int i = 0; i < node->paras.size(); i ++) {
             visitExpr(node->paras[i]);
         }
-        //PARAEND
     }
     visitIdentifierText(node->iden); // push一个iden的text用于调用函数
     CALL
+}
+void ygen::ByteCodeGenerator::visitStructExpr(AST::StructExprNode *node) {
+    PARAEND
+    if(!node->elements.empty()) {
+        // 函数调用有参数，生成参数指令
+        for(int i = 0; i < node->elements.size(); i ++) {
+            visitExpr(node->elements[i]);
+        }
+    }
+    FLAG(ygen::paraHelper::flagt::strtExpr, node->left->line, node->left->column)
+}
+void ygen::ByteCodeGenerator::visitNewExpr(AST::NewExprNode* node) {
+    if(node->initlist == nullptr) {
+        PARAEND_LC(node->mark->line, node->mark->column)
+        visitIdentifierText(node->iden);
+        NEW(node->mark->line, node->mark->column)
+    }
+    else {
+        PARAEND_LC(node->mark->line, node->mark->column)
+        if(!node->initlist->elements.empty()) {
+            // 函数调用有参数，生成参数指令
+            for(int i = 0; i < node->initlist->elements.size(); i ++) {
+                visitExpr(node->initlist->elements[i]);
+            }
+        }
+        visitIdentifierText(node->iden);
+        NEW(node->mark->line, node->mark->column)
+    }
 }
 
 // STMT
@@ -305,6 +338,17 @@ void ygen::ByteCodeGenerator::visitFuncCallExpr(AST::FuncCallNode* node) {
 void ygen::ByteCodeGenerator::visitOutStmt(AST::OutStmtNode* node) {
     visitExpr(node->expr);
     OUT
+}
+void ygen::ByteCodeGenerator::visitStructDefStmt(AST::StructDefineStmtNode *node) {
+    visitString(node->name);
+    PARAEND
+    if(!node->members.empty()) {
+        for(int i = 0; i < node->members.size(); i++) {
+            visitString(node->members[i]->name);
+            visitString(node->members[i]->type);
+        }
+    }
+    CREATE(addPara(node->name->content), addPara(node->mark->content), 0, 0)
 }
 void ygen::ByteCodeGenerator::visitVorcStmt(AST::VorcStmtNode* node) {
     for(int i = 0; i < node->defintions.size(); i++) {
@@ -342,7 +386,7 @@ void ygen::ByteCodeGenerator::visitWhileStmt(AST::WhileStmtNode* node) {
     SCOPE_END
     JMP(paraHelper::jmpt::reqTrue, paraHelper::jmpt::backScope, node->mark->line, node->mark->column)
 
-    FLAG(paraHelper::flagt::loopEnd);
+    FLAG(paraHelper::flagt::loopEnd, node->mark->line, node->mark->column);
 }
 void ygen::ByteCodeGenerator::visitIfStmt(AST::IfStmtNode* node) {
     visitBoolExpr(node->cond);
@@ -391,7 +435,7 @@ void ygen::ByteCodeGenerator::visitRepeatStmt(AST::RepeatStmtNode *node) {
     DEL_VAL
     // repit的处理
     DEL(addPara("_rit" + std::to_string(repit) + "_"), 1.0)
-    FLAG(paraHelper::flagt::loopEnd);
+    FLAG(paraHelper::flagt::loopEnd, node->mark->line, node->mark->column);
     repit --;
 }
 
@@ -420,7 +464,7 @@ void ygen::ByteCodeGenerator::visitForStmt(AST::ForStmtNode* node) {
     JMP(paraHelper::jmpt::reqTrue, paraHelper::jmpt::backScope, node->mark->line, node->mark->column)
     DEL_VAL
     // 释放局部变量
-    FLAG(paraHelper::flagt::loopEnd);
+    FLAG(paraHelper::flagt::loopEnd, node->mark->line, node->mark->column);
     if(node->hasVorc)
         DEL(addPara(node->vorc->defintions[0]->name->content), 1.0)
 }
@@ -445,7 +489,7 @@ void ygen::ByteCodeGenerator::visitFuncDefStmt(AST::FuncDefStmtNode* node) {
     }
     CREATE(addPara(node->name->content), addPara(node->mark->content), addPara(node->rettype->content), node->hasPara)
     visitBlockStmt(node->body);
-    FLAG(paraHelper::flagt::fnEnd);
+    FLAG(paraHelper::flagt::fnEnd, node->mark->line, node->mark->column);
 }
 
 AST::StmtNode* ygen::ByteCodeGenerator::visitDeferStmt(AST::DeferStmtNode *node) {
@@ -476,6 +520,7 @@ void ygen::ByteCodeGenerator::visit(std::vector<AST::StmtNode*> stmts) {
         else if(stmt->forstmt != nullptr) visitForStmt(stmt->forstmt);
         else if(stmt->breakstmt != nullptr) visitBreakStmt(stmt->breakstmt);
         else if(stmt->fdefstmt != nullptr) visitFuncDefStmt(stmt->fdefstmt);
+        else if(stmt->sdefstmt != nullptr) visitStructDefStmt(stmt->sdefstmt);
         else if(stmt->retstmt != nullptr) visitReturnStmt(stmt->retstmt);
     }
 }
