@@ -222,6 +222,32 @@ void ysh::insEVAL(std::vector<std::string> paras) {
             }
             std::cout<<"]";
         }
+        else if(result.getCompType() == ytype::compType::llike_strt) {
+            std::cout<<"{";
+            for(int i = 0; i < result.getList().size(); i ++) {
+                auto elt = result.getList()[i];
+                if(elt.getBasicType() == ytype::basicType::integer)
+                    std::cout<<elt.getIntegerValue().get();
+                else if(elt.getBasicType() == ytype::basicType::decimal)
+                    std::cout<<elt.getDecimalValue().get();
+                else if(elt.getBasicType() == ytype::basicType::string)
+                    std::cout<<"\""<<elt.getStringValue().get()<<"\"";
+                else if(elt.getBasicType() == ytype::basicType::boolean) {
+                    if(elt.getBooleanValue().get())
+                        std::cout<<"true";
+                    else
+                        std::cout<<"false";
+                }
+                else if(elt.getBasicType() == ytype::basicType::null) {
+                    std::cout<<"<null>";
+                }
+
+                if(i != result.getList().size() - 1) {
+                    std::cout<<", ";
+                }
+            }
+            std::cout<<"}";
+        }
         else{
             if(result.getBasicType() == ytype::basicType::integer)
                 std::cout<<result.getIntegerValue().get()<<std::endl;
