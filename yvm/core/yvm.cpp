@@ -220,7 +220,10 @@ void vmcore::vm::run(int queue_id, std::string arg) {
     for(int i = 0; i < queue.size(); i ++) {
         auto& code  = queue[i];
         switch (code.code) {
+            case ygen::gmem: gmem(code); break;
+            case ygen::_new: _new(code); break;
             case ygen::tcast: tcast(code); break;
+            case ygen::flag: flag(code); break;
             case ygen::del_val: del_val(); break;
             case ygen::add: add(code); break;
             case ygen::push: push(code); break;
@@ -242,8 +245,6 @@ void vmcore::vm::run(int queue_id, std::string arg) {
             case ygen::gtet: gtet(code); break;
             case ygen::equ: equ(code); break;
             case ygen::noequ: noequ(code); break;
-            case ygen::gmem:
-                break;
             case ygen::stf: stf(code); break;
             case ygen::listend: lstend(code); break;
             case ygen::paraend: paraend(code); break;
@@ -292,7 +293,10 @@ void vmcore::vm::push(ygen::byteCode code) {
                 throw yoexception::YoError("NameError", "Unknown identifier: '" + name + "'", code.line, code.column);
 
             if(space.getValue(name).isListValue()) {
-                valueStack.push(ysto::Value(space.getValue(name).getList(), false, code.line, code.column));
+                valueStack.push(ysto::Value(space.getValue(name).getList(), false, code.line, code.column, false));
+            }
+            else if(space.getValue(name).getCompType() == ytype::compType::llike_strt) {
+                valueStack.push(ysto::Value(space.getValue(name).getList(), false, code.line, code.column, true));
             }
             else {
                 switch (space.getValue(name).getBasicType()) {
@@ -321,7 +325,22 @@ void vmcore::vm::push(ygen::byteCode code) {
         }
     }
 }
-
+void vmcore::vm::flag(ygen::byteCode code) {
+    if(code.arg1 == ygen::paraHelper::flagt::strtExpr) {
+        std::vector<ysto::Value> strt;
+        while(valueStack.peek().getBasicType() != ytype::basicType::flag) {
+            strt.push_back(valueStack.pop());
+        }
+        // 因为std中的reverse函数需要调用重载运算符=，这样会导致bug，于是重新写一个类似的算法
+        std::vector<ysto::Value> ret;
+        for(int i = strt.size()-1; i >= 0; i--) {
+            ret.push_back(strt[i]);
+        }
+        //
+        valueStack.pop();
+        valueStack.push(ysto::Value(ret, false, code.line, code.column, true));
+    }
+}
 void vmcore::vm::tcast(ygen::byteCode code) {
     auto right = valueStack.pop().getStringValue().get();
     auto left = valueStack.pop();
@@ -337,7 +356,7 @@ void vmcore::vm::tcast(ygen::byteCode code) {
                 valueStack.push(ysto::Value(ytype::YString(oss.str()), false, code.line, code.column));
             }
             else if(right == "boolean") {
-                valueStack.push(ysto::Value(ytype::YBoolean(left.getIntegerValue().get() == 0?false:true), false, code.line, code.column));
+                valueStack.push(ysto::Value(ytype::YBoolean(!(left.getIntegerValue().get() == 0)), false, code.line, code.column));
             }
             else if(right == "null")
                 valueStack.push(ysto::Value(code.line, code.column));
@@ -354,7 +373,7 @@ void vmcore::vm::tcast(ygen::byteCode code) {
                 valueStack.push(ysto::Value(ytype::YString(oss.str()), false, code.line, code.column));
             }
             else if(right == "boolean") {
-                valueStack.push(ysto::Value(ytype::YBoolean(left.getDecimalValue().get() == 0?false:true), false, code.line, code.column));
+                valueStack.push(ysto::Value(ytype::YBoolean(!(left.getDecimalValue().get() == 0)), false, code.line, code.column));
             }
             else if(right == "null")
                 valueStack.push(ysto::Value(code.line, code.column));
@@ -453,7 +472,6 @@ void vmcore::vm::add(ygen::byteCode code) {
         default: throw yoexception::YoError("TypeError", "This operator does not support this type of operation",code.line, code.column); break;
     }
 }
-
 void vmcore::vm::sub(ygen::byteCode code) {
     auto right = valueStack.pop();
     auto left = valueStack.pop();
@@ -489,7 +507,6 @@ void vmcore::vm::sub(ygen::byteCode code) {
         default: throw yoexception::YoError("TypeError", "This operator does not support this type of operation",code.line, code.column); break;
     }
 }
-
 void vmcore::vm::mul(ygen::byteCode code) {
     auto right = valueStack.pop();
     auto left = valueStack.pop();
@@ -547,7 +564,6 @@ void vmcore::vm::mul(ygen::byteCode code) {
         default: throw yoexception::YoError("TypeError", "This operator does not support this type of operation",code.line, code.column); break;
     }
 }
-
 void vmcore::vm::div(ygen::byteCode code) {
     auto right = valueStack.pop();
     auto left = valueStack.pop();
@@ -592,7 +608,6 @@ void vmcore::vm::div(ygen::byteCode code) {
         default: throw yoexception::YoError("TypeError", "This operator does not support this type of operation",code.line, code.column); break;
     }
 }
-
 void vmcore::vm::mod(ygen::byteCode code) {
     auto right = valueStack.pop();
     auto left = valueStack.pop();
@@ -604,7 +619,6 @@ void vmcore::vm::mod(ygen::byteCode code) {
     }
     else throw yoexception::YoError("TypeError", "This operator does not support this type of operation",code.line, code.column);
 }
-
 void vmcore::vm::stf(ygen::byteCode code) {
     std::string name = constPool[code.arg1];
     if(name == "typeof") {
@@ -631,7 +645,6 @@ void vmcore::vm::stf(ygen::byteCode code) {
         }
     }
 }
-
 void vmcore::vm::lt(ygen::byteCode code) {
     auto right = valueStack.pop();
     auto left = valueStack.pop();
@@ -667,7 +680,6 @@ void vmcore::vm::lt(ygen::byteCode code) {
         default: throw yoexception::YoError("TypeError", "This operator does not support this type of operation",code.line, code.column); break;
     }
 }
-
 void vmcore::vm::gt(ygen::byteCode code) {
     auto right = valueStack.pop();
     auto left = valueStack.pop();
@@ -703,7 +715,6 @@ void vmcore::vm::gt(ygen::byteCode code) {
         default: throw yoexception::YoError("TypeError", "This operator does not support this type of operation",code.line, code.column); break;
     }
 }
-
 void vmcore::vm::ltet(ygen::byteCode code) {
     auto right = valueStack.pop();
     auto left = valueStack.pop();
@@ -739,7 +750,6 @@ void vmcore::vm::ltet(ygen::byteCode code) {
         default: throw yoexception::YoError("TypeError", "This operator does not support this type of operation",code.line, code.column); break;
     }
 }
-
 void vmcore::vm::gtet(ygen::byteCode code) {
     auto right = valueStack.pop();
     auto left = valueStack.pop();
@@ -775,14 +785,12 @@ void vmcore::vm::gtet(ygen::byteCode code) {
         default: throw yoexception::YoError("TypeError", "This operator does not support this type of operation",code.line, code.column); break;
     }
 }
-
 void vmcore::vm::no(ygen::byteCode code) {
     auto value = valueStack.pop();
     if(value.getBasicType() == ytype::basicType::boolean)
         valueStack.push(ysto::Value(ytype::YBoolean(!value.getBooleanValue().get()), false, code.line, code.column));
     else throw yoexception::YoError("TypeError", "This operator does not support this type of operation",code.line, code.column);
 }
-
 void vmcore::vm::logicAnd(ygen::byteCode code) {
     auto left = valueStack.pop();
     auto right = valueStack.pop();
@@ -790,7 +798,6 @@ void vmcore::vm::logicAnd(ygen::byteCode code) {
         valueStack.push(ysto::Value(ytype::YBoolean(left.getBooleanValue().get() && right.getBooleanValue().get()), false, code.line, code.column));
     else throw yoexception::YoError("TypeError", "This operator does not support this type of operation",code.line, code.column);
 }
-
 void vmcore::vm::logicOr(ygen::byteCode code) {
     auto left = valueStack.pop();
     auto right = valueStack.pop();
@@ -798,7 +805,6 @@ void vmcore::vm::logicOr(ygen::byteCode code) {
         valueStack.push(ysto::Value(ytype::YBoolean(left.getBooleanValue().get() || right.getBooleanValue().get()), false, code.line, code.column));
     else throw yoexception::YoError("TypeError", "This operator does not support this type of operation",code.line, code.column);
 }
-
 void vmcore::vm::equ(ygen::byteCode code) {
     auto right = valueStack.pop();
     auto left = valueStack.pop();
@@ -844,7 +850,6 @@ void vmcore::vm::equ(ygen::byteCode code) {
         default: throw yoexception::YoError("TypeError", "This operator does not support this type of operation",code.line, code.column); break;
     }
 }
-
 void vmcore::vm::noequ(ygen::byteCode code) {
     auto right = valueStack.pop();
     auto left = valueStack.pop();
@@ -890,15 +895,12 @@ void vmcore::vm::noequ(ygen::byteCode code) {
         default: throw yoexception::YoError("TypeError", "This operator does not support this type of operation",code.line, code.column); break;
     }
 }
-
 void vmcore::vm::lstend(ygen::byteCode code) {
      valueStack.push(ysto::Value("flag:list_end"));
 }
-
 void vmcore::vm::paraend(ygen::byteCode code) {
     valueStack.push(ysto::Value("flag:para_end"));
 }
-
 void vmcore::vm::lst(ygen::byteCode code) {
     std::vector<ysto::Value> list;
     while(valueStack.peek().getBasicType() != ytype::basicType::flag && valueStack.peek().getStringValue().get() != "flag:list_end") {
@@ -906,9 +908,8 @@ void vmcore::vm::lst(ygen::byteCode code) {
     }
     valueStack.pop(); // flag抛出去
     std::reverse(list.begin(), list.end());
-    valueStack.push(ysto::Value(list, false, code.line, code.column));
+    valueStack.push(ysto::Value(list, false, code.line, code.column, false));
 }
-
 void vmcore::vm::out(ygen::byteCode code) {
     auto result = valueStack.pop();
     if(result.isList) {
@@ -937,6 +938,32 @@ void vmcore::vm::out(ygen::byteCode code) {
         }
         std::cout<<"]";
     }
+    else if(result.getCompType() == ytype::compType::llike_strt) {
+        std::cout<<"{";
+        for(int i = 0; i < result.getList().size(); i ++) {
+            auto elt = result.getList()[i];
+            if(elt.getBasicType() == ytype::basicType::integer)
+                std::cout<<elt.getIntegerValue().get();
+            else if(elt.getBasicType() == ytype::basicType::decimal)
+                std::cout<<elt.getDecimalValue().get();
+            else if(elt.getBasicType() == ytype::basicType::string)
+                std::cout<<"\""<<elt.getStringValue().get()<<"\"";
+            else if(elt.getBasicType() == ytype::basicType::boolean) {
+                if(elt.getBooleanValue().get())
+                    std::cout<<"true";
+                else
+                    std::cout<<"false";
+            }
+            else if(elt.getBasicType() == ytype::basicType::null) {
+                std::cout<<"<null>";
+            }
+
+            if(i != result.getList().size() - 1) {
+                std::cout<<", ";
+            }
+        }
+        std::cout<<"}";
+    }
     else{
         if(result.getBasicType() == ytype::basicType::integer)
             std::cout<<result.getIntegerValue().get()<<std::endl;
@@ -955,7 +982,6 @@ void vmcore::vm::out(ygen::byteCode code) {
         }
     }
 }
-
 void vmcore::vm::create(ygen::byteCode code,  int &current) {
     std::string name = constPool[code.arg1];
     std::string state = constPool[code.arg2]; // 初始化的类型，变量还是常量；或者是Dynamic还是Static
@@ -998,7 +1024,7 @@ void vmcore::vm::create(ygen::byteCode code,  int &current) {
             members.push_back(ytype::structMemberPair(name, type));
         }
         std::reverse(members.begin(), members.end()); // 因为栈的原因，逆序
-
+        space.createValue(name, ysto::Value(ytype::YObject(members), true, false, code.line, code.column));
     }
     else{
         auto value = valueStack.pop();
@@ -1011,58 +1037,67 @@ void vmcore::vm::create(ygen::byteCode code,  int &current) {
         else ;
 
         if(value.isListValue()) {
-            space.createValue(name, ysto::Value(value.getList(), state == "var" || state == "dynamic"|| state == "static"?false:true, state == "dynamic"?true:false, code.line, code.column));
+            space.createValue(name, ysto::Value(value.getList(),
+                                                !(state == "var" || state == "dynamic" || state == "static"),
+                                                state == "dynamic", code.line, code.column, false));
+        }
+        else if(value.getCompType() == ytype::compType::llike_strt) {
+            space.createValue(name, ysto::Value(value.getList(),
+                                                !(state == "var" || state == "dynamic" || state == "static"),
+                                                code.line, code.column, true));
+        }
+        else if(value.getCompType() == ytype::compType::strt) {
+            space.createValue(name, ysto::Value(value.getStrt(),
+                                                !(state == "var" || state == "dynamic" || state == "static"),
+                                                code.line, code.column));
         }
         else {
             switch (value.getBasicType()) {
                 case ytype::integer:
                     space.createValue(name, ysto::Value(ytype::YInteger(value.getIntegerValue().get()),
-                                                        state == "var" || state == "dynamic"|| state == "static"?false:true,
-                                                        state == "dynamic"?true:false,
+                                                        !(state == "var" || state == "dynamic" || state == "static"),
+                                                        state == "dynamic",
                                                         code.line,
                                                         code.column));
                     break;
                 case ytype::boolean:
                     space.createValue(name, ysto::Value(ytype::YBoolean(value.getBooleanValue().get()),
-                                                        state == "var" || state == "dynamic"|| state == "static"?false:true,
-                                                        state == "dynamic"?true:false,
+                                                        !(state == "var" || state == "dynamic" || state == "static"),
+                                                        state == "dynamic",
                                                         code.line,
                                                         code.column));
                     break;
                 case ytype::decimal:
                     space.createValue(name, ysto::Value(ytype::YDecimal(value.getDecimalValue().get()),
-                                                        state == "var" || state == "dynamic"|| state == "static"?false:true,
-                                                        state == "dynamic"?true:false,
+                                                        !(state == "var" || state == "dynamic" || state == "static"),
+                                                        state == "dynamic",
                                                         code.line,
                                                         code.column));
                     break;
                 case ytype::string:
                     space.createValue(name, ysto::Value(ytype::YString(value.getStringValue().get()),
-                                                        state == "var" || state == "dynamic"|| state == "static"?false:true,
-                                                        state == "dynamic"?true:false,
+                                                        !(state == "var" || state == "dynamic" || state == "static"),
+                                                        state == "dynamic",
                                                         code.line,
                                                         code.column));
                     break;
                 case ytype::null:
-                    space.createValue(name, ysto::Value(state == "dynamic"?true:false,code.line, code.column));
+                    space.createValue(name, ysto::Value(state == "dynamic", code.line, code.column));
                     break;
 
             }
         }
     }
 }
-
 void vmcore::vm::idx(ygen::byteCode code) {
     auto idx = valueStack.pop();
     auto value = valueStack.pop();
-    if(value.isListValue()) {
-        if(idx.getIntegerValue().get() > value.getList().size() - 1)
-            throw yoexception::YoError("ListError", "The referenced index is out of range",code.line, code.column);
-        valueStack.push(ysto::Value(value.getList()[idx.getIntegerValue().get()]));
-    }
-    else throw yoexception::YoError("TypeError", "This operator does not support this type of operation",code.line, code.column);
+    if(!value.isListValue() && value.getCompType() != ytype::compType::llike_strt)
+        throw yoexception::YoError("TypeError", "This operator does not support this type of operation",code.line, code.column);
+    if(idx.getIntegerValue().get() > value.getList().size() - 1)
+        throw yoexception::YoError("ListError", "The referenced index is out of range",code.line, code.column);
+    valueStack.push(ysto::Value(value.getList()[idx.getIntegerValue().get()]));
 }
-
 void vmcore::vm::selfadd(ygen::byteCode code) {
     auto name = valueStack.pop().getStringValue().get();
 
@@ -1082,7 +1117,6 @@ void vmcore::vm::selfadd(ygen::byteCode code) {
         space.getValue(name).getIntegerValue() = ytype::YInteger(space.getValue(name).getIntegerValue().get() + 1);
     }
 }
-
 void vmcore::vm::selfsub(ygen::byteCode code) {
     auto name = valueStack.pop().getStringValue().get();
 
@@ -1102,7 +1136,6 @@ void vmcore::vm::selfsub(ygen::byteCode code) {
         space.getValue(name).getIntegerValue() = ytype::YInteger(space.getValue(name).getIntegerValue().get() - 1);
     }
 }
-
 void vmcore::vm::assign(ygen::byteCode code) {
     auto value = valueStack.pop();
     auto name = valueStack.pop().getStringValue().get();
@@ -1113,35 +1146,33 @@ void vmcore::vm::assign(ygen::byteCode code) {
     if(code.arg1) {
         // index assignment
         // 检查是否有类型不一致的存在
-        for(auto v: space.getValue(name).getList()){
-            if(value.getBasicType() != v.getBasicType())
-                throw yoexception::YoError("TypeError", "This operator does not support this type of operation",code.line, code.column);
+        if(space.getValue(name).getCompType() == ytype::compType::llike_strt);
+        else {
+            for(auto v: space.getValue(name).getList()){
+                if(value.getBasicType() != v.getBasicType())
+                    throw yoexception::YoError("TypeError", "This operator does not support this type of operation",code.line, code.column);
+            }
         }
         //
         auto index = valueStack.pop().getIntegerValue().get();
         if(index > space.getValue(name).getList().size() - 1)
             throw yoexception::YoError("IndexError", "The referenced index is out of range", code.line, code.column);
         space.getValue(name)[index] = value;
-        space.getValue(name).getType() = value.getType();
     }
     else {
         space.getValue(name) = value;
     }
     valueStack.push(value);
 }
-
 void vmcore::vm::scopestart(ygen::byteCode code) {
     space.createScope("vm_created_scope", code.line, code.column);
 }
-
 void vmcore::vm::scopeend(ygen::byteCode code) {
     space.deleteScope();
 }
-
 void vmcore::vm::del_val() {
     valueStack.pop();
 }
-
 int vmcore::vm::jmp(ygen::byteCode code, std::vector<ygen::byteCode>& queue, int current) {
     switch ((int)code.arg1) {
         case ygen::paraHelper::jmpt::reqTrue: {
@@ -1254,7 +1285,6 @@ int vmcore::vm::jmp(ygen::byteCode code, std::vector<ygen::byteCode>& queue, int
     }
     return current;
 }
-
 void vmcore::vm::del(ygen::byteCode code) {
     if(code.arg2 == 1.0) {
         // 判断是否启用了不传入push名称的模式
@@ -1274,11 +1304,9 @@ void vmcore::vm::del(ygen::byteCode code) {
             throw yoexception::YoError("NameError", "There is no identifier named: '" + name + "'", code.line, code.column);
     }
 }
-
 void vmcore::vm::idenend(ygen::byteCode code) {
     valueStack.push(ysto::Value("flag:identifier_end"));
 }
-
 void vmcore::vm::call(ygen::byteCode code, std::string arg) {
     std::string fnName = valueStack.pop().getStringValue().get();
     auto temp = valueStack.pop(); // temp值，用于检测是paraend还是正常的flag
@@ -1406,4 +1434,45 @@ void vmcore::vm::call(ygen::byteCode code, std::string arg) {
             throw yoexception::YoError("FunctionCallingError", "The return value is inconsistent with the design return value", code.line, code.column);
         else valueStack.push(ret);
     }
+}
+void vmcore::vm::_new(ygen::byteCode code) {
+    auto name = valueStack.pop().getStringValue().get();
+    if(!space.findValue(name))
+        throw yoexception::YoError("NameError", "Unknown identifier: '" + name + "'", code.line, code.column);
+    if(space.getValue(name).getBasicType() != ytype::basicType::object)
+        throw yoexception::YoError("SyntaxError", "Non object types cannot use the new operator", code.line, code.column);
+
+    std::vector<ysto::Value> temp;
+    std::vector<ysto::Value> initlist;
+    // 判断有没有给初始化列表
+    if(valueStack.peek().getBasicType() == ytype::flag) ;
+    else {
+        while(valueStack.peek().getBasicType() != ytype::flag) {
+            temp.push_back(valueStack.pop());
+        }
+        valueStack.pop();
+        for(int i = temp.size()-1; i >= 0; i--) {
+            initlist.push_back(temp[i]);
+        }
+
+        if(space.getValue(name).getObjectValue().memberPairs.size() != initlist.size())
+            throw yoexception::YoError("InitError", "The length of initialization list is different from that of sample list", code.line, code.column);
+    }
+
+    auto sample = space.getValue(name);
+    if(sample.getObjectValue().getKind() == ytype::objectKind::structable) {
+        // 是struct
+        std::map<std::string, ysto::Value> strt;
+        for(int i = 0; i < sample.getObjectValue().memberPairs.size(); i ++) {
+            if(initlist[i].getType() != sample.getObjectValue().memberPairs[i].second)
+                throw yoexception::YoError("TypeError", "Different types from the sample are used for initialization", code.line, code.column);
+            strt.emplace(sample.getObjectValue().memberPairs[i].first, initlist[i]);
+        }
+        valueStack.push(ysto::Value(strt, false, code.line, code.column));
+    }
+}
+void vmcore::vm::gmem(ygen::byteCode code) {
+    auto ref = valueStack.pop().getStringValue().get();
+    auto sample = valueStack.pop().getStringValue().get();
+    valueStack.push(space.getValue(sample).getMap(ref));
 }
