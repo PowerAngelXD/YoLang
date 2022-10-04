@@ -11,7 +11,7 @@ namespace parser{
 
         // 判断区: isXXX ---> 判断是什么Node
         bool isPrim(); bool isIdentifier(); bool isSiadExpr(); bool isMulExpr(); bool isStructExpr();
-        bool isAddExpr(); bool isCmpExpr(); bool isBoolExpr(); bool isFnCallExpr(); bool isCellExpr();
+        bool isAddExpr(); bool isCmpExpr(); bool isBoolExpr(); bool isFnCallExpr(); bool isCellExpr(); bool isNewExpr();
         bool isAddOp(); bool isMulOp(); bool isCmpOp(); bool isBoolOp(); bool isIndexOp(); bool isStfOp();
         bool isAsOp(); bool isListExpr(); bool isAssignmentExpr(); bool isTypecastExpr(); bool isExpr();
 
@@ -29,6 +29,7 @@ namespace parser{
         AST::CmpOpNode* parseCmpOpNode();
         AST::AsOpNode* parseAsOp();
         AST::BoolOpNode* parseBoolOpNode();
+        AST::NewExprNode* parseNewExprNode();
         AST::StfOpNode* parseStfOpNode();
         AST::FuncCallNode* parseFuncCallNode();
         AST::ListExprNode* parseListExprNode();

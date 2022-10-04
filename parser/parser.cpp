@@ -125,6 +125,9 @@ bool parser::Parser::isCellExpr() {
     }
     else return false;
 }
+bool parser::Parser::isNewExpr() {
+    return peek()->content == "new";
+}
 bool parser::Parser::isAddOp() {
     return peek()->content == "+" || peek()->content == "-";
 }
@@ -194,7 +197,7 @@ bool parser::Parser::isAssignmentExpr() {
     else return false;
 }
 bool parser::Parser::isExpr() {
-    return isListExpr() || isAddExpr() || isBoolExpr() || isAssignmentExpr() || isStructExpr();
+    return isListExpr() || isAddExpr() || isBoolExpr() || isAssignmentExpr() || isNewExpr() || isStructExpr();
 }
 bool parser::Parser::isOutStmt() {
     return peek()->content == "out";
@@ -346,6 +349,16 @@ AST::BoolOpNode* parser::Parser::parseBoolOpNode(){
     node->op = token();
     return node;
 }
+AST::NewExprNode* parser::Parser::parseNewExprNode() {
+    AST::NewExprNode* node = new AST::NewExprNode;
+    node->mark = token();
+    if(isIdentifier()) node->iden = parseIdentifierNode();
+    else throw yoexception::YoError("SyntaxError", "Expect an identifier!", tg[offset].line, tg[offset].column);
+    if(isStructExpr()) node->initlist = parseStructExprNode();
+    else ; // 无初始化列表即为默认初始化
+    return node;
+
+}
 AST::PrimExprNode* parser::Parser::parsePrimExprNode(){
     AST::PrimExprNode* node = new AST::PrimExprNode;
     if(isFnCallExpr()) node->fcall = parseFuncCallNode();
@@ -471,15 +484,17 @@ AST::StructExprNode* parser::Parser::parseStructExprNode() {
     AST::StructExprNode* node = new AST::StructExprNode;
     node->left = token();
 
-    if(isExpr()) node->elements.push_back(parseExpr());
-    else throw yoexception::YoError("SyntaxError", "Expect an expression!", tg[offset].line, tg[offset].column);
-    while(true) {
-        if(peek()->content != ",") break;
-        node->dots.push_back(token());
+    if(isExpr()) {
+        node->elements.push_back(parseExpr());
+        while(true) {
+            if(peek()->content != ",") break;
+            node->dots.push_back(token());
 
-        if(isExpr()) node->elements.push_back(parseExpr());
-        else throw yoexception::YoError("SyntaxError", "Expect an expression!", tg[offset].line, tg[offset].column);
+            if(isExpr()) node->elements.push_back(parseExpr());
+            else throw yoexception::YoError("SyntaxError", "Expect an expression!", tg[offset].line, tg[offset].column);
+        }
     }
+    else ;
 
     if(peek()->content == "}") node->right = token();
     else throw  yoexception::YoError("SyntaxError", "Expect '}'!", tg[offset].line, tg[offset].column);
@@ -513,6 +528,7 @@ AST::WholeExprNode* parser::Parser::parseExpr(){
     else if(isAddExpr()) node->addexpr = parseAddExprNode();
     else if(isListExpr()) node->listexpr = parseListExprNode();
     else if(isStructExpr()) node->strexpr = parseStructExprNode();
+    else if(isNewExpr()) node->newexpr = parseNewExprNode();
     return node;
 }
 
@@ -580,7 +596,11 @@ AST::VorcStmtNode* parser::Parser::parseVorcStmtNode(bool asStmt){
         else throw yoexception::YoError("SyntaxError", "Expect type specifier ", tg[offset].line, tg[offset].column);
         if(peek()->content == "=") {
             defintion->equ = token();
-            if(isExpr()) defintion->expr = parseExpr();
+            if(isExpr()) {
+                if(isNewExpr() && defintion->type != nullptr)
+                    throw yoexception::YoError("SyntaxError", "Cannot use new expression to initialize a non primitive type when specifying a primitive type", tg[offset].line, tg[offset].column);
+                defintion->expr = parseExpr();
+            }
             else throw yoexception::YoError("SyntaxError", "Expect an expression", tg[offset].line, tg[offset].column);
         }
     }
@@ -606,7 +626,11 @@ AST::VorcStmtNode* parser::Parser::parseVorcStmtNode(bool asStmt){
             else throw yoexception::YoError("SyntaxError", "Expect type specifier ", tg[offset].line, tg[offset].column);
             if(peek()->content == "=") {
                 def->equ = token();
-                if(isExpr()) def->expr = parseExpr();
+                if(isExpr()) {
+                    if(isNewExpr() && defintion->type != nullptr)
+                        throw yoexception::YoError("SyntaxError", "Cannot use new expression to initialize a non primitive type when specifying a primitive type", tg[offset].line, tg[offset].column);
+                    defintion->expr = parseExpr();
+                }
                 else throw yoexception::YoError("SyntaxError", "Expect an expression", tg[offset].line, tg[offset].column);
             }
         }
@@ -791,26 +815,24 @@ AST::StructDefineStmtNode* parser::Parser::parseStructDefStmtNode() {
     if(peek()->content == "{") node->left = token();
     else throw  yoexception::YoError("SyntaxError", "Expect '{'!", tg[offset].line, tg[offset].column);
 
-    if(std::find(yolexer::typeList.begin(), yolexer::typeList.end(), peek()->content) == yolexer::typeList.end())
+    if(peek()->type != yolexer::yoTokType::Identifier)
         throw yoexception::YoError("SyntaxError", "A structure cannot have no members", tg[offset].line, tg[offset].column);
     AST::StructDefineStmtNode::memberPair* temp = new AST::StructDefineStmtNode::memberPair;
-    temp->type = token();
+    temp->name = token();
     if(peek()->content == ":") temp->sep = token();
     else throw  yoexception::YoError("SyntaxError", "Expect ':'!", tg[offset].line, tg[offset].column);
-    temp->name = token();
+    temp->type = token();
     node->members.push_back(temp);
-    delete temp;
     while(true) {
         if(peek()->content != ",") break;
         node->dots.push_back(token());
 
         temp = new AST::StructDefineStmtNode::memberPair;
-        temp->type = token();
+        temp->name = token();
         if(peek()->content == ":") temp->sep = token();
         else throw  yoexception::YoError("SyntaxError", "Expect ':'!", tg[offset].line, tg[offset].column);
-        temp->name = token();
+        temp->type = token();
         node->members.push_back(temp);
-        delete temp;
     }
 
     if(peek()->content == "}") node->right = token();
