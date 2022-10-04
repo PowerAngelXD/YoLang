@@ -137,6 +137,7 @@ std::string AST::WholeExprNode::toString() {
     else if(listexpr != nullptr) return "WholeExprNode: {" + listexpr->toString() + "}";
     else if(strexpr != nullptr) return "WholeExprNode: {" + strexpr->toString() + "}";
     else if(assign != nullptr) return "WholeExprNode: {" + assign->toString() + "}";
+    else if(newexpr != nullptr) return "WholeExprNode: {" + newexpr->toString() + "}";
     else return "null";
 }
 
@@ -302,6 +303,10 @@ std::string AST::StructDefineStmtNode::toString() {
 
 std::string AST::StructDefineStmtNode::memberPair::toString() {
     return "memberPair: {" + name->toString() + ", " + type->toString() + "}";
+}
+
+std::string AST::NewExprNode::toString() {
+    return "NewExprNode: {" + iden->toString() + ", " + initlist->toString() + "}";
 }
 
 std::string AST::StructExprNode::toString() {

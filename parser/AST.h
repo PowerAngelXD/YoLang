@@ -148,6 +148,25 @@ namespace AST{
         std::string toString();
     };
 
+    class StructExprNode{
+    public:
+        yolexer::yoToken* left;
+        std::vector<yolexer::yoToken*> dots;
+        std::vector<WholeExprNode*> elements;
+        yolexer::yoToken* right;
+
+        std::string toString();
+    };
+
+    class NewExprNode {
+    public:
+        yolexer::yoToken* mark = nullptr;
+        IdentifierNode* iden = nullptr;
+        StructExprNode* initlist = nullptr;
+
+        std::string toString();
+    };
+
     class AssignmentExprNode{
     public:
         IdentifierNode* iden = nullptr;
@@ -167,22 +186,13 @@ namespace AST{
         std::string toString();
     };
 
-    class StructExprNode{
-    public:
-        yolexer::yoToken* left;
-        std::vector<yolexer::yoToken*> dots;
-        std::vector<WholeExprNode*> elements;
-        yolexer::yoToken* right;
-
-        std::string toString();
-    };
-
     class WholeExprNode{
     public:
         AddExprNode* addexpr = nullptr;
         BoolExprNode* boolexpr = nullptr;
         ListExprNode* listexpr = nullptr;
         StructExprNode* strexpr = nullptr;
+        NewExprNode* newexpr = nullptr;
         AssignmentExprNode* assign = nullptr;
 
         std::string toString();
