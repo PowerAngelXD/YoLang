@@ -97,14 +97,15 @@ ytype::YObject::YObject(std::vector<byteCode> cs, std::vector<std::pair<ytype::y
     kind = objectKind::function;
 }
 
-bool ytype::YObject::isTypable() {
-    return kind == objectKind::typable;
-}
-
-bool ytype::YObject::isFunction() {
-    return kind == objectKind::function;
+ytype::YObject::YObject(std::vector<structMemberPair> members) {
+    kind = objectKind::structable;
+    memberPairs = members;
 }
 
 void ytype::YObject::loadInVM() {
 
+}
+
+ytype::objectKind ytype::YObject::getKind() {
+    return this->kind;
 }

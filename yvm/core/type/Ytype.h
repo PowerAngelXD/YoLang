@@ -9,7 +9,7 @@
 namespace ytype {
     // 对原先的类型系统作出修改
     enum basicType {integer = 0, boolean, decimal, string, null, object, iden, flag}; // iden类型只是为了标记为标识符所代表的值
-    enum compType {norm = 10, list, strt}; // strt代指struct
+    enum compType {norm = 10, list, strt, llike_strt}; // strt代指struct，llike_strt指类似于列表的结构体表达式
     struct ytypeUnit{
         basicType bt;
         compType ct;
@@ -42,8 +42,8 @@ namespace ytype {
     class YObject {
         objectKind kind; // Object的类型
 
-        std::vector<structMemberPair> memberPairs; // only "structable"
     public:
+        std::vector<structMemberPair> memberPairs; // only "structable"
         std::vector<std::pair<ytype::ytypeUnit, std::string>> args; // 参数类型:参数名 only "function"
         ytype::ytypeUnit retType; // 返回类型
         std::vector<byteCode> codes; // 储存的代码片段（包含scopestart scopeend） only "function"
@@ -52,9 +52,9 @@ namespace ytype {
         YObject()=default;
         // 构造一个函数Object的方法
         YObject(std::vector<byteCode> cs, std::vector<std::pair<ytype::ytypeUnit, std::string>> as, ytype::ytypeUnit rety);
+        YObject(std::vector<structMemberPair> members);
 
-        bool isTypable();
-        bool isFunction();
+        objectKind getKind();
 
         void loadInVM(); // 将代码片段加载进VM中
     };
