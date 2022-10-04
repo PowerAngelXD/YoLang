@@ -1,5 +1,9 @@
 #include "value.h"
 
+ysto::Value::Value(std::map<std::string, Value> newedstrt, bool isc, int ln, int col): newedStruct(newedstrt), isConstant(isc), line(ln), column(col), type({ytype::basicType::object, ytype::compType::strt}) {
+    isDynamic = false;
+}
+
 ysto::Value::Value(ytype::YInteger v, bool isc, int ln, int col): integerValue(v), isConstant(isc), line(ln), column(col), type({ytype::basicType::integer, ytype::compType::norm}) {}
 ysto::Value::Value(ytype::YBoolean v, bool isc, int ln, int col): booleanValue(v), isConstant(isc), line(ln), column(col), type({ytype::basicType::boolean, ytype::compType::norm}) {}
 ysto::Value::Value(ytype::YString v, bool isc, int ln, int col): stringValue(v), isConstant(isc), line(ln), column(col), type({ytype::basicType::string, ytype::compType::norm}) {}
@@ -9,7 +13,7 @@ ysto::Value::Value(int ln, int col) {
     type = {ytype::basicType::null, ytype::compType::norm};
     line = ln, column = col;
 }
-ysto::Value::Value(std::vector<Value> v, bool isc, int ln, int col): list(v), isConstant(isc), line(ln), column(col), type({v[0].getType().bt, ytype::compType::list}), isList(true) {}
+ysto::Value::Value(std::vector<Value> v, bool isc, int ln, int col, bool isstrt): list(v), isConstant(isc), line(ln), column(col), type({v[0].getType().bt, isstrt?ytype::compType::llike_strt:ytype::compType::list}), isList(isstrt?false:true) {}
 
 ysto::Value::Value(ytype::YInteger v, bool isc, bool isdyn, int ln, int col): integerValue(v), isDynamic(isdyn), isConstant(isc), line(ln), column(col), type({ytype::basicType::integer, ytype::compType::norm}) {}
 ysto::Value::Value(ytype::YBoolean v, bool isc, bool isdyn, int ln, int col): booleanValue(v), isDynamic(isdyn), isConstant(isc), line(ln), column(col), type({ytype::basicType::boolean, ytype::compType::norm}) {}
@@ -21,7 +25,7 @@ ysto::Value::Value(bool isdyn, int ln, int col) {
     isDynamic = isdyn;
     line = ln, column = col;
 }
-ysto::Value::Value(std::vector<Value> v, bool isc, bool isdyn, int ln, int col): list(v), isDynamic(isdyn), isConstant(isc), line(ln), column(col), type({v[0].getType().bt, ytype::compType::list}), isList(true) {}
+ysto::Value::Value(std::vector<Value> v, bool isc, bool isdyn, int ln, int col, bool isstrt): list(v), isDynamic(isdyn), isConstant(isc), line(ln), column(col), type({v[0].getType().bt, isstrt?ytype::compType::llike_strt:ytype::compType::list}), isList(isstrt?false:true) {}
 
 ysto::Value::Value(std::string content) {
     stringValue = ytype::YString(content);
@@ -86,6 +90,12 @@ void ysto::Value::operator=(ysto::Value value) {
             throw yoexception::YoError("AssignError", "You cannot assign a value of a different type to a variable or a constant", this->line, this->column);
         else list = value.getList();
     }
+    else if(this->type.ct == ytype::compType::llike_strt) {
+        list = value.getList();
+    }
+    else if(this->type.ct == ytype::compType::strt) {
+        newedStruct = value.newedStruct;
+    }
     else {
         switch (value.getType().bt) {
             case ytype::integer:
@@ -108,7 +118,28 @@ void ysto::Value::operator=(ysto::Value value) {
 }
 
 ysto::Value& ysto::Value::operator[](int index) {
-    if(this->type.ct != ytype::list)
+    if(this->type.ct != ytype::compType::list && this->type.ct != ytype::compType::llike_strt)
         throw yoexception::YoError("TypeError", "The '[]' operator does not support operations on variables or constants that are not lists", this->line, this->column);
     return list[index];
+}
+
+bool ysto::Value::hasKey(std::string key) {
+    for(auto e: newedStruct) {
+        if(e.first == key) return true;
+    }
+    return false;
+}
+
+ysto::Value ysto::Value::getMap(std::string key) {
+    if(hasKey(key)) {
+        for(auto e: newedStruct) {
+            if(e.first == key) return e.second;
+        }
+    }
+    else
+        throw yoexception::YoError("NameError", "Unknown member: '" + key + "'", line, column);
+}
+
+std::map<std::string, ysto::Value> &ysto::Value::getStrt() {
+    return newedStruct;
 }
