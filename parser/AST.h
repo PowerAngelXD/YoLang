@@ -229,14 +229,6 @@ namespace AST{
     };
 
     class StructDefineStmtNode{
-        /*
-         *struct test {
-         *     integer:a,
-         *     string:b,
-         *     integer[]:c
-         * }
-         *
-         * */
     public:
         struct memberPair {
             yolexer::yoToken* type = nullptr;
