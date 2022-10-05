@@ -1,5 +1,23 @@
 #include "yoshell.h"
 
+void ysh::vmSetup() {
+    yovm.space.createValue("Point", yovm.native.bisSet.Point());
+    yovm.space.createValue("Application", yovm.native.bisSet.Application());
+
+    yovm.space.createValue("yolang", yovm.native.bisiSet.appFromApplication());
+
+    yovm.space.createValue("completeVersion", ysto::Value(ytype::YString(ysh::completeVersion), true, 0, 0));
+    yovm.space.createValue("releaseVersion", ysto::Value(ytype::YString(ysh::relVersion), true, 0, 0));
+    yovm.space.createValue("_integer", ysto::Value(ytype::YString("Integer"), true, 0, 0));
+    yovm.space.createValue("_decimal", ysto::Value(ytype::YString("Decimal"), true, 0, 0));
+    yovm.space.createValue("_string", ysto::Value(ytype::YString("String"), true, 0, 0));
+    yovm.space.createValue("_boolean", ysto::Value(ytype::YString("Boolean"), true, 0, 0));
+}
+void ysh::vmClear() {
+    yovm = vmcore::vm();
+    vmSetup();
+}
+
 // TOOLS
 std::vector<std::string> ysh::tools::split(std::string str, char sp) {
     std::vector<std::string> ret;
@@ -118,18 +136,9 @@ void ysh::insRun(std::vector<std::string> paras) {
 
             ygen::ByteCodeGenerator bcg(stmts);
             bcg.visit(stmts);
-
-            yvm.load(bcg.getConstPool(), bcg.getCodes());
-            yvm.run(-1, "program");
-
-            // 运行完之后环境初始化
-            yvm = vmcore::vm();
-            yvm.space.createValue("completeVersion", ysto::Value(ytype::YString(ysh::completeVersion), true, 0, 0));
-            yvm.space.createValue("releaseVersion", ysto::Value(ytype::YString(ysh::relVersion), true, 0, 0));
-            yvm.space.createValue("_integer", ysto::Value(ytype::YString("Integer"), true, 0, 0));
-            yvm.space.createValue("_decimal", ysto::Value(ytype::YString("Decimal"), true, 0, 0));
-            yvm.space.createValue("_string", ysto::Value(ytype::YString("String"), true, 0, 0));
-            yvm.space.createValue("_boolean", ysto::Value(ytype::YString("Boolean"), true, 0, 0));
+            ysh::yovm.load(bcg.getConstPool(), bcg.getCodes());
+            ysh::yovm.run(-1, "program");
+            ysh::vmClear();
         }
         else
             throw yoexception::YoError("FileError", "Not any file that can be run", -1, -1);
@@ -191,9 +200,9 @@ void ysh::insEVAL(std::vector<std::string> paras) {
         ygen::ByteCodeGenerator bcg(expr);
         bcg.visitExpr(expr);
 
-        yvm.load(bcg.getConstPool(), bcg.getCodes());
-        yvm.run(-1, "repl");
-        auto result = yvm.getResult();
+        ysh::yovm.load(bcg.getConstPool(), bcg.getCodes());
+        ysh::yovm.run(-1, "repl");
+        auto result = ysh::yovm.getResult();
         std::cout<<"(return) ";
         // 返回值输出
         ysto::printValue(result);
@@ -204,8 +213,8 @@ void ysh::insEVAL(std::vector<std::string> paras) {
         ygen::ByteCodeGenerator bcg(stmts);
         bcg.visit(stmts);
 
-        yvm.load(bcg.getConstPool(), bcg.getCodes());
-        yvm.run(-1, "normal");
+        ysh::yovm.load(bcg.getConstPool(), bcg.getCodes());
+        ysh::yovm.run(-1, "normal");
     }
 }
 void ysh::insEnv(std::vector<std::string> paras) {
@@ -213,13 +222,7 @@ void ysh::insEnv(std::vector<std::string> paras) {
     else {
         if(paras.size() == 1) {
             if(paras[0] == "clear") {
-                yvm = vmcore::vm();
-                yvm.space.createValue("completeVersion", ysto::Value(ytype::YString(ysh::completeVersion), true, 0, 0));
-                yvm.space.createValue("releaseVersion", ysto::Value(ytype::YString(ysh::relVersion), true, 0, 0));
-                yvm.space.createValue("_integer", ysto::Value(ytype::YString("Integer"), true, 0, 0));
-                yvm.space.createValue("_decimal", ysto::Value(ytype::YString("Decimal"), true, 0, 0));
-                yvm.space.createValue("_string", ysto::Value(ytype::YString("String"), true, 0, 0));
-                yvm.space.createValue("_boolean", ysto::Value(ytype::YString("Boolean"), true, 0, 0));
+                ysh::vmClear();
                 std::cout<<"[YVM SUCCESS] Operation execution completed";
             }
             else std::cout<<"[YVM ERROR] Unknown operation on virtual machine: '" + paras[0] + "'";
@@ -228,13 +231,7 @@ void ysh::insEnv(std::vector<std::string> paras) {
 }
 
 void ysh::runYoShell() {
-    // VM初始化
-    yvm.space.createValue("completeVersion", ysto::Value(ytype::YString(ysh::completeVersion), true, 0, 0));
-    yvm.space.createValue("releaseVersion", ysto::Value(ytype::YString(ysh::relVersion), true, 0, 0));
-    yvm.space.createValue("_integer", ysto::Value(ytype::YString("Integer"), true, 0, 0));
-    yvm.space.createValue("_decimal", ysto::Value(ytype::YString("Decimal"), true, 0, 0));
-    yvm.space.createValue("_string", ysto::Value(ytype::YString("String"), true, 0, 0));
-    yvm.space.createValue("_boolean", ysto::Value(ytype::YString("Boolean"), true, 0, 0));
+    ysh::vmSetup();
     // 输出欢迎页面
     std::cout<<"Yolang "<<ysh::completeVersion<<"("<<ysh::version<<")\n"<<"Release Version: " << ysh::relVersion <<"\ngcc version 11.3.0"<<std::endl;
     std::cout<<std::endl;

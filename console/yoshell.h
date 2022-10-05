@@ -1,5 +1,5 @@
 #pragma once
-#include "../yvm/core/yvm.h"
+#include "../yvm/vmfront.h"
 #define INSPARAS std::vector<std::string> paras
 
 namespace ysh{
@@ -31,21 +31,23 @@ namespace ysh{
         std::string mulStr(std::string str, int times);
         std::string stmtsToString(std::vector<AST::StmtNode*> stmts);
     }
+    // 指令方法类型
+    typedef void (*insMethod)(std::vector<std::string>);
+    // 指令定义
+    typedef std::pair<std::string, insMethod> ins;
     // Yolang版本号
     static std::string version = "22.10.130";
     // 发行版本号
     static std::string relVersion = "Yolang 1.5.0";
     // 完整版本
     static std::string completeVersion = "Release-2022-10-0130";
+    // vm
+    static vmcore::vm yovm;
     // 版本更新说明
     static std::string updateIllustrate =
-            "Version: " + relVersion + " Illustrate\n" +
+            "Version: " + ysh::relVersion + " Illustrate\n" +
             "1, Added 'new' expression\n" +
             "2, Updated structure and its corresponding expression";
-    // 指令方法类型
-    typedef void (*insMethod)(std::vector<std::string>);
-    // 指令定义
-    typedef std::pair<std::string, insMethod> ins;
     // 指令池
     // 指令方法命名规范：insXXX（XXX为指令名称，首字母大写）
     void insHelp(INSPARAS);
@@ -65,8 +67,7 @@ namespace ysh{
                                   ins("view", insView)
                                   };
 
-    // vm实例
-    static vmcore::vm yvm;
-    
+    void vmSetup();
+    void vmClear();
     void runYoShell();
 }
