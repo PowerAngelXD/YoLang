@@ -1,63 +1,28 @@
 # YoLang
-### *提示：由于作者血学业繁忙，故更新时间稳定在每周六下午到每周日上午*
 
 ![yopic.png](yopic.png)
-Yolang 是一个轻量级的，简单易上手的解释性编程语言 <br>
-通过 Yolang 源码生成中间码并递交到 YOVM 进行运行，新版的 YOVM 在原版的基础上代码构架更清晰，效率也提高了不少
+Yolang is a lightweight, easy-to-use interpreted programming language <br>
+By generating intermediate code from Yolang source code and submitting it to YOVM for operation, the new version of YOVM has a clearer code architecture and improved efficiency on the basis of the original version
 
-### 构建
+### Build
 
-本项目由 CMake 构建，请您开发前确保您已经在您的设备上准备好开发环境，关于构建这里就不深入介绍了，您可以通过搜索引擎了解如何通过 CMake 构建项目
+This project is built by CMake, please make sure that you have a development environment ready on your device before development, about the construction is not described in depth here, you can learn how to build a project with CMake through the search engine
 
-### 许可证
+### License
 
-本项目遵循 MIT 开源[许可证](LICENSE)
+This project follows the MIT Open Source [License] (LICENSE)
 
-### 使用
+### How to use
 
-关于如何使用 Yolang 及其 Console，请参阅：[帮助文档](docs/usehelp.md)
+For more information on how to use Yolang and its console, see [HelpDocument](docs/usehelp.md)
+ps: Translation work for the Help document will begin, during which time the translated document will continue to use Chinese
 
-### 下载
+### DownLoad
 
-如果您要获取 Yolang 解释器的应用程序包，请在本仓库页面的右侧找到 **Release**并根据需要获取其中的版本 <br>
-而在 Yolang，分为开发版本和发行版本两种版本号 <br>
-Yolang 的开发完整版本号遵循以下规则： <br>
-<br>
-**_Modifier_**-**Year**-**Month**-**_Number_**
+If you want to get the Yolang interpreter's application package, find Release on the right side of this repository page and get the version thereof as needed\
+In Yolang, there are two version numbers: development version and release version\
 
--   Modifier：用于修饰当前版本的字段，例如：“LTS”，“Instable”，“Release”等
--   Year：版本发布的年份
--   Month：版本发布的月份
--   Number：版本序号，为一个四位数字，起始值为：“0001”
-    例如：LTS-2022-5-0001 就是一个正确的 Yolang 版本号，它代表着一个 LTS 版本，在 2022 年 5 月份发布，序号为 0001 <br>
-    下面是对于修饰字段（Modifier）的说明：
+### Acknowledgement
 
-| 修饰字段名称 | 意义                                                                                |
-| ------------ | ----------------------------------------------------------------------------------- |
-| Instable     | 不稳定版，也叫做测试版，通常这种版本不适用于日常开发，一般用于测试某个新功能        |
-| Release      | 发行版，稳定的版本，很少有严重漏洞，bug 等                                          |
-| Build        | 快照版本，拥有比 Release 和 Instable 本更多的内容；相应的，比 Instable 版本更不稳定 |
-
-而在日常称呼中，您可以选择更简短的版本号称呼方式： <br>
-**_年份后两位_**.**_月数_**.**_Number 字段中去掉开头所有 0 的部分_** <br>
-这样解释起来可能有点麻烦，下面来看一个实际的例子： <br>
-完整版本号：LTS-2020-7-02030 <br>
-缩略版本号：20.7.2030 <br>
-<br>
-Yolang 的发行版本号遵循以下规则： <br>
-<br>
-**_Yolang_** 数字·数字·数字 <br>
-例如：Yolang 1.0.0 就是一个符合规定的发行版本号 <br>
-
-### 未来会实现
-
--   [x] null 值
--   [x] 变量默认初始化
--   [x] 完善的 vm 管理
--   [x] Objects 和对应操作
--   [x] 函数的声明与调用
-
-### 鸣谢
-
-通过 Clion 开发 ![clion.png](clion.png) <br>
-感谢 JetBrain 的绝佳的 IDE ![jb.png](jb.png)
+Developed with Clion ![clion.png](clion.png) <br>
+Thanks to JetBrain for the great IDE ![jb.png](jb.png)
