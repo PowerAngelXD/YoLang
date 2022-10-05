@@ -183,6 +183,29 @@ ysto::Value vmcore::native::BuiltInFunctionSet::substr(std::vector<ysto::Value> 
     return ysto::Value(ytype::YString(result), false, string.line, string.column);
 }
 
+//struct
+ysto::Value vmcore::native::BuiltInStructSet::Point() {
+    std::vector<ytype::structMemberPair> members = {{"x", ytype::ytypeUnit{ytype::basicType::decimal, ytype::compType::norm}},
+                                                    {"y", ytype::ytypeUnit{ytype::basicType::decimal, ytype::compType::norm}}};
+    return ysto::Value(ytype::YObject(members), true, false, 0, 0);
+}
+
+ysto::Value vmcore::native::BuiltInStructSet::Application() {
+    std::vector<ytype::structMemberPair> members = {{"author", ytype::ytypeUnit{ytype::basicType::string, ytype::compType::norm}},
+                                                    {"date", ytype::ytypeUnit{ytype::basicType::string, ytype::compType::norm}},
+                                                    {"version", ytype::ytypeUnit{ytype::basicType::string, ytype::compType::norm}}};
+    return ysto::Value(ytype::YObject(members), true, false, 0, 0);
+}
+
+//struct instance
+ysto::Value vmcore::native::BuiltInStructInstanceSet::appFromApplication() {
+    std::map<std::string, ysto::Value> strt = {std::pair<std::string, ysto::Value>("author", ysto::Value(ytype::YString("PowerAngelXD"), true, false, 0, 0)),
+                                               std::pair<std::string, ysto::Value>("date", ysto::Value(ytype::YString("2022-10-5"), true, false, 0, 0)),
+                                               std::pair<std::string, ysto::Value>("version", ysto::Value(ytype::YString("Yolang 1.5.0"), true, false, 0, 0))};
+    return ysto::Value(strt, true, 0, 0);
+}
+//
+
 template<typename Type>
 Type vmcore::YStack<Type>::pop() {
     if(stack.empty()) {

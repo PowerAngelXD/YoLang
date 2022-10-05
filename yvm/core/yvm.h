@@ -18,7 +18,20 @@ namespace vmcore {
             ysto::Value length(std::vector<ysto::Value> args, ygen::byteCode code);
         };
 
+        class BuiltInStructSet {
+        public:
+            ysto::Value Point();
+            ysto::Value Application();
+        };
+
+        class BuiltInStructInstanceSet {
+        public:
+            ysto::Value appFromApplication();
+        };
+
         struct navtiveSet {
+            BuiltInStructInstanceSet bisiSet;
+            BuiltInStructSet bisSet;
             BuiltInFunctionSet bifSet;
         };
     }
@@ -40,13 +53,6 @@ namespace vmcore {
 
         std::vector<ygen::byteCode> mainQueue; // 主代码队列
         std::vector<std::vector<ygen::byteCode>> codeQueue; // 代码队列
-
-        native::navtiveSet native;
-    public:
-        ysto::Space space; // 全局Space
-
-        vm(std::vector<ygen::byteCode> cs, std::vector<std::string> cp);
-        vm()=default;
 
         // 指令对应的函数实现
         void _new(ygen::byteCode code);
@@ -86,6 +92,12 @@ namespace vmcore {
         void idenend(ygen::byteCode code);
         void call(ygen::byteCode code, std::string arg);
         //
+    public:
+        ysto::Space space; // 全局Space
+        native::navtiveSet native;
+
+        vm(std::vector<ygen::byteCode> cs, std::vector<std::string> cp);
+        vm()=default;
 
         void run(int queue_id, std::string arg); // queue指代要运行哪条栈的代码，-1为主栈
         ysto::Value getResult();
