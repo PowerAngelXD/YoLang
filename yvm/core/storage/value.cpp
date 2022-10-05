@@ -9,6 +9,7 @@ ysto::Value::Value(ytype::YBoolean v, bool isc, int ln, int col): booleanValue(v
 ysto::Value::Value(ytype::YString v, bool isc, int ln, int col): stringValue(v), isConstant(isc), line(ln), column(col), type({ytype::basicType::string, ytype::compType::norm}) {}
 ysto::Value::Value(ytype::YDecimal v, bool isc, int ln, int col): decimalValue(v), isConstant(isc), line(ln), column(col), type({ytype::basicType::decimal, ytype::compType::norm}) {}
 ysto::Value::Value(ytype::YObject v, bool isc, int ln, int col): objectValue(v), isConstant(isc), line(ln), column(col), type({ytype::basicType::object, ytype::compType::norm}) {}
+ysto::Value::Value(ysto::Value *ref, bool isc, int ln, int col): refValue(ref), isConstant(isc), line(ln), column(col), type({ref->type.bt, ytype::compType::ref}) {}
 ysto::Value::Value(int ln, int col) {
     type = {ytype::basicType::null, ytype::compType::norm};
     line = ln, column = col;
@@ -20,6 +21,7 @@ ysto::Value::Value(ytype::YBoolean v, bool isc, bool isdyn, int ln, int col): bo
 ysto::Value::Value(ytype::YString v, bool isc, bool isdyn, int ln, int col): stringValue(v), isDynamic(isdyn), isConstant(isc), line(ln), column(col), type({ytype::basicType::string, ytype::compType::norm}) {}
 ysto::Value::Value(ytype::YDecimal v, bool isc, bool isdyn, int ln, int col): decimalValue(v), isDynamic(isdyn), isConstant(isc), line(ln), column(col), type({ytype::basicType::decimal, ytype::compType::norm}) {}
 ysto::Value::Value(ytype::YObject v, bool isc, bool isdyn, int ln, int col): objectValue(v), isDynamic(isdyn), isConstant(isc), line(ln), column(col), type({ytype::basicType::object, ytype::compType::norm}) {}
+ysto::Value::Value(ysto::Value *ref, bool isdyn, bool isc, int ln, int col): refValue(ref), isDynamic(isdyn), isConstant(isc), line(ln), column(col), type({ref->type.bt, ytype::compType::ref}) {}
 ysto::Value::Value(bool isdyn, int ln, int col) {
     type = {ytype::basicType::null, ytype::compType::norm};
     isDynamic = isdyn;
@@ -81,8 +83,12 @@ ytype::YNull &ysto::Value::getNullValue() {
     return nullValue;
 }
 
+ysto::Value* ysto::Value::getRef() {
+    return refValue;
+}
+
 void ysto::Value::operator=(ysto::Value value) {
-    if(this->getType() != value.getType() && !this->isDynamic)
+    if(this->getType().bt != value.getType().bt && !this->isDynamic)
         throw yoexception::YoError("AssignError", "You cannot assign a value of a different type to a variable of static type", this->line, this->column);
     this->type = value.type;
     if(this->type.ct == ytype::compType::list) {
@@ -130,11 +136,9 @@ bool ysto::Value::hasKey(std::string key) {
     return false;
 }
 
-ysto::Value ysto::Value::getMap(std::string key) {
+ysto::Value* ysto::Value::getMap(std::string key) {
     if(hasKey(key)) {
-        for(auto e: newedStruct) {
-            if(e.first == key) return e.second;
-        }
+        return &newedStruct.at(key);
     }
     else
         throw yoexception::YoError("NameError", "Unknown member: '" + key + "'", line, column);
@@ -142,4 +146,150 @@ ysto::Value ysto::Value::getMap(std::string key) {
 
 std::map<std::string, ysto::Value> &ysto::Value::getStrt() {
     return newedStruct;
+}
+
+//print
+void ysto::printValue(Value result) {
+    if(result.getCompType() == ytype::compType::ref) {
+        if(result.getRef()->isList) {
+            std::cout<<"[";
+            for(int i = 0; i < result.getRef()->getList().size(); i ++) {
+                auto elt = result.getRef()->getList()[i];
+                if(elt.getBasicType() == ytype::basicType::integer)
+                    std::cout<<elt.getIntegerValue().get();
+                else if(elt.getBasicType() == ytype::basicType::decimal)
+                    std::cout<<elt.getDecimalValue().get();
+                else if(elt.getBasicType() == ytype::basicType::string)
+                    std::cout<<"\""<<elt.getStringValue().get()<<"\"";
+                else if(elt.getBasicType() == ytype::basicType::boolean) {
+                    if(elt.getBooleanValue().get())
+                        std::cout<<"true";
+                    else
+                        std::cout<<"false";
+                }
+                else if(elt.getBasicType() == ytype::basicType::null) {
+                    std::cout<<"<null>";
+                }
+
+                if(i != result.getRef()->getList().size() - 1) {
+                    std::cout<<", ";
+                }
+            }
+            std::cout<<"]";
+        }
+        else if(result.getRef()->getCompType() == ytype::compType::llike_strt) {
+            std::cout<<"{";
+            for(int i = 0; i < result.getRef()->getList().size(); i ++) {
+                auto elt = result.getRef()->getList()[i];
+                if(elt.getBasicType() == ytype::basicType::integer)
+                    std::cout<<elt.getIntegerValue().get();
+                else if(elt.getBasicType() == ytype::basicType::decimal)
+                    std::cout<<elt.getDecimalValue().get();
+                else if(elt.getBasicType() == ytype::basicType::string)
+                    std::cout<<"\""<<elt.getStringValue().get()<<"\"";
+                else if(elt.getBasicType() == ytype::basicType::boolean) {
+                    if(elt.getBooleanValue().get())
+                        std::cout<<"true";
+                    else
+                        std::cout<<"false";
+                }
+                else if(elt.getBasicType() == ytype::basicType::null) {
+                    std::cout<<"<null>";
+                }
+
+                if(i != result.getRef()->getList().size() - 1) {
+                    std::cout<<", ";
+                }
+            }
+            std::cout<<"}";
+        }
+        else{
+            if(result.getRef()->getBasicType() == ytype::basicType::integer)
+                std::cout<<result.getRef()->getIntegerValue().get()<<std::endl;
+            else if(result.getRef()->getBasicType() == ytype::basicType::decimal)
+                std::cout<<result.getRef()->getDecimalValue().get()<<std::endl;
+            else if(result.getRef()->getBasicType() == ytype::basicType::string)
+                std::cout<<"\""<<result.getRef()->getStringValue().get()<<"\""<<std::endl;
+            else if(result.getRef()->getBasicType() == ytype::basicType::boolean) {
+                if(result.getRef()->getBooleanValue().get())
+                    std::cout<<"true"<<std::endl;
+                else
+                    std::cout<<"false"<<std::endl;
+            }
+            else if(result.getRef()->getBasicType() == ytype::basicType::null) {
+                std::cout<<"<null>"<<std::endl;
+            }
+        }
+    }
+    else {
+        if(result.isList) {
+            std::cout<<"[";
+            for(int i = 0; i < result.getList().size(); i ++) {
+                auto elt = result.getList()[i];
+                if(elt.getBasicType() == ytype::basicType::integer)
+                    std::cout<<elt.getIntegerValue().get();
+                else if(elt.getBasicType() == ytype::basicType::decimal)
+                    std::cout<<elt.getDecimalValue().get();
+                else if(elt.getBasicType() == ytype::basicType::string)
+                    std::cout<<"\""<<elt.getStringValue().get()<<"\"";
+                else if(elt.getBasicType() == ytype::basicType::boolean) {
+                    if(elt.getBooleanValue().get())
+                        std::cout<<"true";
+                    else
+                        std::cout<<"false";
+                }
+                else if(elt.getBasicType() == ytype::basicType::null) {
+                    std::cout<<"<null>";
+                }
+
+                if(i != result.getList().size() - 1) {
+                    std::cout<<", ";
+                }
+            }
+            std::cout<<"]";
+        }
+        else if(result.getCompType() == ytype::compType::llike_strt) {
+            std::cout<<"{";
+            for(int i = 0; i < result.getList().size(); i ++) {
+                auto elt = result.getList()[i];
+                if(elt.getBasicType() == ytype::basicType::integer)
+                    std::cout<<elt.getIntegerValue().get();
+                else if(elt.getBasicType() == ytype::basicType::decimal)
+                    std::cout<<elt.getDecimalValue().get();
+                else if(elt.getBasicType() == ytype::basicType::string)
+                    std::cout<<"\""<<elt.getStringValue().get()<<"\"";
+                else if(elt.getBasicType() == ytype::basicType::boolean) {
+                    if(elt.getBooleanValue().get())
+                        std::cout<<"true";
+                    else
+                        std::cout<<"false";
+                }
+                else if(elt.getBasicType() == ytype::basicType::null) {
+                    std::cout<<"<null>";
+                }
+
+                if(i != result.getList().size() - 1) {
+                    std::cout<<", ";
+                }
+            }
+            std::cout<<"}";
+        }
+        else{
+            if(result.getBasicType() == ytype::basicType::integer)
+                std::cout<<result.getIntegerValue().get()<<std::endl;
+            else if(result.getBasicType() == ytype::basicType::decimal)
+                std::cout<<result.getDecimalValue().get()<<std::endl;
+            else if(result.getBasicType() == ytype::basicType::string)
+                std::cout<<"\""<<result.getStringValue().get()<<"\""<<std::endl;
+            else if(result.getBasicType() == ytype::basicType::boolean) {
+                if(result.getBooleanValue().get())
+                    std::cout<<"true"<<std::endl;
+                else
+                    std::cout<<"false"<<std::endl;
+            }
+            else if(result.getBasicType() == ytype::basicType::null) {
+                std::cout<<"<null>"<<std::endl;
+            }
+        }
+    }
 }
