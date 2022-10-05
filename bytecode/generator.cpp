@@ -116,7 +116,7 @@ void ygen::ByteCodeGenerator::visitIdentifier(AST::IdentifierNode* node){
         PUSH(addPara(node->idens[0]->content), ytype::type(ytype::basicType::iden, ytype::norm), node->idens[0]->line, node->idens[0]->column)
     }
     else{
-        PUSH(addPara(node->idens[0]->content), ytype::type(ytype::basicType::string, ytype::norm), node->idens[0]->line, node->idens[0]->column)
+        PUSH(addPara(node->idens[0]->content), ytype::type(ytype::basicType::iden, ytype::norm), node->idens[0]->line, node->idens[0]->column)
         for(int i = 1; i < node->idens.size(); i++) {
             PUSH(addPara(node->idens[i]->content), ytype::type(ytype::basicType::string, ytype::norm), node->idens[i]->line, node->idens[i]->column);
             GMEM
@@ -269,12 +269,12 @@ void ygen::ByteCodeGenerator::visitListExpr(AST::ListExprNode* node){
 void ygen::ByteCodeGenerator::visitAssignmentExpr(AST::AssignmentExprNode* node){
     if (node->idx != nullptr) {
         visitAddExpr(node->idx->index);
-        visitIdentifierText(node->iden);
+        visitIdentifier(node->iden);
         visitExpr(node->expr);
         ASSIGN(1.0)
     }
     else {
-        visitIdentifierText(node->iden);
+        visitIdentifier(node->iden);
         visitExpr(node->expr);
         ASSIGN(0.0)
     }
