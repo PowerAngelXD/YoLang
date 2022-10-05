@@ -8,5 +8,5 @@ file(GLOB SRC_FILES "yolang.cpp", "lexer/lexer.cpp",
         "parser/*.cpp", "exception/yoexc.cpp",
         "bytecode/*.cpp",
         "console/*.cpp", "yvm/core/type/*.cpp",
-        "yvm/core/storage/*.cpp", "yvm/core/yvm.cpp")
+        "yvm/core/storage/*.cpp", "yvm/core/yvm.cpp", "yvm/*.cpp")
 add_executable(${CMAKE_PROJECT_NAME} ${SRC_FILES} )
