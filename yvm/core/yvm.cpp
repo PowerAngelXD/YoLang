@@ -288,40 +288,7 @@ void vmcore::vm::push(ygen::byteCode code) {
         }
         case ytype::basicType::iden: {
             std::string name = constPool[code.arg1];
-
-            if(!space.findValue(name))
-                throw yoexception::YoError("NameError", "Unknown identifier: '" + name + "'", code.line, code.column);
-
-            if(space.getValue(name).isListValue()) {
-                valueStack.push(ysto::Value(space.getValue(name).getList(), false, code.line, code.column, false));
-            }
-            else if(space.getValue(name).getCompType() == ytype::compType::llike_strt) {
-                valueStack.push(ysto::Value(space.getValue(name).getList(), false, code.line, code.column, true));
-            }
-            else {
-                switch (space.getValue(name).getBasicType()) {
-                    case ytype::basicType::integer: {
-                        valueStack.push(ysto::Value(ytype::YInteger(space.getValue(name).getIntegerValue()), false, code.line, code.column));
-                        break;
-                    }
-                    case ytype::basicType::decimal: {
-                        valueStack.push(ysto::Value(ytype::YDecimal(space.getValue(name).getDecimalValue()), false, code.line, code.column));
-                        break;
-                    }
-                    case ytype::basicType::string: {
-                        valueStack.push(ysto::Value(ytype::YString(space.getValue(name).getStringValue()), false, code.line, code.column));
-                        break;
-                    }
-                    case ytype::basicType::boolean: {
-                        valueStack.push(ysto::Value(ytype::YBoolean(space.getValue(name).getBooleanValue().get()), false, code.line, code.column));
-                        break;
-                    }
-                    case ytype::basicType::null: {
-                        valueStack.push(ysto::Value(code.line, code.column));
-                        break;
-                    }
-                }
-            }
+            valueStack.push(ysto::Value(&space.getValue(name), false, code.line, code.column));
         }
     }
 }
@@ -343,7 +310,7 @@ void vmcore::vm::flag(ygen::byteCode code) {
 }
 void vmcore::vm::tcast(ygen::byteCode code) {
     auto right = valueStack.pop().getStringValue().get();
-    auto left = valueStack.pop();
+    auto left = *valueStack.pop().getRef();
     switch (left.getBasicType()) {
         case ytype::integer: {
             if(right == "integer")
@@ -399,9 +366,7 @@ void vmcore::vm::tcast(ygen::byteCode code) {
             else if(right == "decimal")
                 valueStack.push(left);
             else if(right == "string") {
-                std::ostringstream oss;
-                oss << left.getDecimalValue().get();
-                valueStack.push(ysto::Value(ytype::YString(oss.str()), false, code.line, code.column));
+                valueStack.push(ysto::Value(ytype::YString(left.getBooleanValue().get()?"true":"false"), false, code.line, code.column));
             }
             else if(right == "boolean") {
                 valueStack.push(left);
@@ -428,8 +393,8 @@ void vmcore::vm::tcast(ygen::byteCode code) {
     }
 }
 void vmcore::vm::add(ygen::byteCode code) {
-    auto right = valueStack.pop();
-    auto left = valueStack.pop();
+    auto right = valueStack.peek().getCompType() == ytype::compType::ref?*valueStack.pop().getRef():valueStack.pop();
+    auto left = valueStack.peek().getCompType() == ytype::compType::ref?*valueStack.pop().getRef():valueStack.pop();
     switch (left.getBasicType()) {
         case ytype::basicType::integer: {
             switch (right.getBasicType()) {
@@ -473,8 +438,8 @@ void vmcore::vm::add(ygen::byteCode code) {
     }
 }
 void vmcore::vm::sub(ygen::byteCode code) {
-    auto right = valueStack.pop();
-    auto left = valueStack.pop();
+    auto right = valueStack.peek().getCompType() == ytype::compType::ref?*valueStack.pop().getRef():valueStack.pop();
+    auto left = valueStack.peek().getCompType() == ytype::compType::ref?*valueStack.pop().getRef():valueStack.pop();
     switch (left.getBasicType()) {
         case ytype::basicType::integer: {
             switch (right.getBasicType()) {
@@ -508,8 +473,8 @@ void vmcore::vm::sub(ygen::byteCode code) {
     }
 }
 void vmcore::vm::mul(ygen::byteCode code) {
-    auto right = valueStack.pop();
-    auto left = valueStack.pop();
+    auto right = valueStack.peek().getCompType() == ytype::compType::ref?*valueStack.pop().getRef():valueStack.pop();
+    auto left = valueStack.peek().getCompType() == ytype::compType::ref?*valueStack.pop().getRef():valueStack.pop();
     switch (left.getBasicType()) {
         case ytype::basicType::integer: {
             switch (right.getBasicType()) {
@@ -565,8 +530,8 @@ void vmcore::vm::mul(ygen::byteCode code) {
     }
 }
 void vmcore::vm::div(ygen::byteCode code) {
-    auto right = valueStack.pop();
-    auto left = valueStack.pop();
+    auto right = valueStack.peek().getCompType() == ytype::compType::ref?*valueStack.pop().getRef():valueStack.pop();
+    auto left = valueStack.peek().getCompType() == ytype::compType::ref?*valueStack.pop().getRef():valueStack.pop();
     switch (left.getBasicType()) {
         case ytype::basicType::integer: {
             switch (right.getBasicType()) {
@@ -609,8 +574,8 @@ void vmcore::vm::div(ygen::byteCode code) {
     }
 }
 void vmcore::vm::mod(ygen::byteCode code) {
-    auto right = valueStack.pop();
-    auto left = valueStack.pop();
+    auto right = valueStack.peek().getCompType() == ytype::compType::ref?*valueStack.pop().getRef():valueStack.pop();
+    auto left = valueStack.peek().getCompType() == ytype::compType::ref?*valueStack.pop().getRef():valueStack.pop();
     if(left.getBasicType() == ytype::basicType::integer) {
         if(right.getBasicType() == ytype::basicType::integer) {
             valueStack.push(ysto::Value(ytype::YInteger(left.getIntegerValue().get() % right.getIntegerValue().get()), false, code.line, code.column));
@@ -622,7 +587,7 @@ void vmcore::vm::mod(ygen::byteCode code) {
 void vmcore::vm::stf(ygen::byteCode code) {
     std::string name = constPool[code.arg1];
     if(name == "typeof") {
-        auto value = valueStack.pop();
+        auto value = valueStack.peek().getCompType() == ytype::compType::ref?*valueStack.pop().getRef():valueStack.pop();
         switch (value.getBasicType()) {
             case ytype::integer:
                 valueStack.push(ysto::Value(ytype::YString("Integer"), false, code.line, code.column));
@@ -646,8 +611,8 @@ void vmcore::vm::stf(ygen::byteCode code) {
     }
 }
 void vmcore::vm::lt(ygen::byteCode code) {
-    auto right = valueStack.pop();
-    auto left = valueStack.pop();
+    auto right = valueStack.peek().getCompType() == ytype::compType::ref?*valueStack.pop().getRef():valueStack.pop();
+    auto left = valueStack.peek().getCompType() == ytype::compType::ref?*valueStack.pop().getRef():valueStack.pop();
     switch (left.getBasicType()) {
         case ytype::basicType::integer: {
             switch (right.getBasicType()) {
@@ -681,8 +646,8 @@ void vmcore::vm::lt(ygen::byteCode code) {
     }
 }
 void vmcore::vm::gt(ygen::byteCode code) {
-    auto right = valueStack.pop();
-    auto left = valueStack.pop();
+    auto right = valueStack.peek().getCompType() == ytype::compType::ref?*valueStack.pop().getRef():valueStack.pop();
+    auto left = valueStack.peek().getCompType() == ytype::compType::ref?*valueStack.pop().getRef():valueStack.pop();
     switch (left.getBasicType()) {
         case ytype::basicType::integer: {
             switch (right.getBasicType()) {
@@ -716,8 +681,8 @@ void vmcore::vm::gt(ygen::byteCode code) {
     }
 }
 void vmcore::vm::ltet(ygen::byteCode code) {
-    auto right = valueStack.pop();
-    auto left = valueStack.pop();
+    auto right = valueStack.peek().getCompType() == ytype::compType::ref?*valueStack.pop().getRef():valueStack.pop();
+    auto left = valueStack.peek().getCompType() == ytype::compType::ref?*valueStack.pop().getRef():valueStack.pop();
     switch (left.getBasicType()) {
         case ytype::basicType::integer: {
             switch (right.getBasicType()) {
@@ -751,8 +716,8 @@ void vmcore::vm::ltet(ygen::byteCode code) {
     }
 }
 void vmcore::vm::gtet(ygen::byteCode code) {
-    auto right = valueStack.pop();
-    auto left = valueStack.pop();
+    auto right = valueStack.peek().getCompType() == ytype::compType::ref?*valueStack.pop().getRef():valueStack.pop();
+    auto left = valueStack.peek().getCompType() == ytype::compType::ref?*valueStack.pop().getRef():valueStack.pop();
     switch (left.getBasicType()) {
         case ytype::basicType::integer: {
             switch (right.getBasicType()) {
@@ -786,28 +751,28 @@ void vmcore::vm::gtet(ygen::byteCode code) {
     }
 }
 void vmcore::vm::no(ygen::byteCode code) {
-    auto value = valueStack.pop();
+    auto value = valueStack.peek().getCompType() == ytype::compType::ref?*valueStack.pop().getRef():valueStack.pop();
     if(value.getBasicType() == ytype::basicType::boolean)
         valueStack.push(ysto::Value(ytype::YBoolean(!value.getBooleanValue().get()), false, code.line, code.column));
     else throw yoexception::YoError("TypeError", "This operator does not support this type of operation",code.line, code.column);
 }
 void vmcore::vm::logicAnd(ygen::byteCode code) {
-    auto left = valueStack.pop();
-    auto right = valueStack.pop();
+    auto left =valueStack.peek().getCompType() == ytype::compType::ref?*valueStack.pop().getRef():valueStack.pop();
+    auto right = valueStack.peek().getCompType() == ytype::compType::ref?*valueStack.pop().getRef():valueStack.pop();
     if(left.getBasicType() == ytype::basicType::boolean && right.getBasicType() == ytype::basicType::boolean)
         valueStack.push(ysto::Value(ytype::YBoolean(left.getBooleanValue().get() && right.getBooleanValue().get()), false, code.line, code.column));
     else throw yoexception::YoError("TypeError", "This operator does not support this type of operation",code.line, code.column);
 }
 void vmcore::vm::logicOr(ygen::byteCode code) {
-    auto left = valueStack.pop();
-    auto right = valueStack.pop();
+    auto left = valueStack.peek().getCompType() == ytype::compType::ref?*valueStack.pop().getRef():valueStack.pop();
+    auto right = valueStack.peek().getCompType() == ytype::compType::ref?*valueStack.pop().getRef():valueStack.pop();
     if(left.getBasicType() == ytype::basicType::boolean && right.getBasicType() == ytype::basicType::boolean)
         valueStack.push(ysto::Value(ytype::YBoolean(left.getBooleanValue().get() || right.getBooleanValue().get()), false, code.line, code.column));
     else throw yoexception::YoError("TypeError", "This operator does not support this type of operation",code.line, code.column);
 }
 void vmcore::vm::equ(ygen::byteCode code) {
-    auto right = valueStack.pop();
-    auto left = valueStack.pop();
+    auto right = valueStack.peek().getCompType() == ytype::compType::ref?*valueStack.pop().getRef():valueStack.pop();
+    auto left = valueStack.peek().getCompType() == ytype::compType::ref?*valueStack.pop().getRef():valueStack.pop();
     switch (left.getBasicType()) {
         case ytype::basicType::integer: {
             switch (right.getBasicType()) {
@@ -851,8 +816,8 @@ void vmcore::vm::equ(ygen::byteCode code) {
     }
 }
 void vmcore::vm::noequ(ygen::byteCode code) {
-    auto right = valueStack.pop();
-    auto left = valueStack.pop();
+    auto right = valueStack.peek().getCompType() == ytype::compType::ref?*valueStack.pop().getRef():valueStack.pop();
+    auto left = valueStack.peek().getCompType() == ytype::compType::ref?*valueStack.pop().getRef():valueStack.pop();
     switch (left.getBasicType()) {
         case ytype::basicType::integer: {
             switch (right.getBasicType()) {
@@ -912,75 +877,7 @@ void vmcore::vm::lst(ygen::byteCode code) {
 }
 void vmcore::vm::out(ygen::byteCode code) {
     auto result = valueStack.pop();
-    if(result.isList) {
-        std::cout<<"[";
-        for(int i = 0; i < result.getList().size(); i ++) {
-            auto elt = result.getList()[i];
-            if(elt.getBasicType() == ytype::basicType::integer)
-                std::cout<<elt.getIntegerValue().get();
-            else if(elt.getBasicType() == ytype::basicType::decimal)
-                std::cout<<elt.getDecimalValue().get();
-            else if(elt.getBasicType() == ytype::basicType::string)
-                std::cout<<elt.getStringValue().get();
-            else if(elt.getBasicType() == ytype::basicType::boolean) {
-                if(elt.getBooleanValue().get())
-                    std::cout<<"true";
-                else
-                    std::cout<<"false";
-            }
-            else if(elt.getBasicType() == ytype::basicType::null) {
-                std::cout<<"<null>";
-            }
-
-            if(i != result.getList().size() - 1) {
-                std::cout<<", ";
-            }
-        }
-        std::cout<<"]";
-    }
-    else if(result.getCompType() == ytype::compType::llike_strt) {
-        std::cout<<"{";
-        for(int i = 0; i < result.getList().size(); i ++) {
-            auto elt = result.getList()[i];
-            if(elt.getBasicType() == ytype::basicType::integer)
-                std::cout<<elt.getIntegerValue().get();
-            else if(elt.getBasicType() == ytype::basicType::decimal)
-                std::cout<<elt.getDecimalValue().get();
-            else if(elt.getBasicType() == ytype::basicType::string)
-                std::cout<<"\""<<elt.getStringValue().get()<<"\"";
-            else if(elt.getBasicType() == ytype::basicType::boolean) {
-                if(elt.getBooleanValue().get())
-                    std::cout<<"true";
-                else
-                    std::cout<<"false";
-            }
-            else if(elt.getBasicType() == ytype::basicType::null) {
-                std::cout<<"<null>";
-            }
-
-            if(i != result.getList().size() - 1) {
-                std::cout<<", ";
-            }
-        }
-        std::cout<<"}";
-    }
-    else{
-        if(result.getBasicType() == ytype::basicType::integer)
-            std::cout<<result.getIntegerValue().get()<<std::endl;
-        else if(result.getBasicType() == ytype::basicType::decimal)
-            std::cout<<result.getDecimalValue().get()<<std::endl;
-        else if(result.getBasicType() == ytype::basicType::string)
-            std::cout<<result.getStringValue().get()<<std::endl;
-        else if(result.getBasicType() == ytype::basicType::boolean) {
-            if(result.getBooleanValue().get())
-                std::cout<<"true"<<std::endl;
-            else
-                std::cout<<"false"<<std::endl;
-        }
-        else if(result.getBasicType() == ytype::basicType::null) {
-            std::cout<<"<null>"<<std::endl;
-        }
-    }
+    ysto::printValue(result);
 }
 void vmcore::vm::create(ygen::byteCode code,  int &current) {
     std::string name = constPool[code.arg1];
@@ -1017,9 +914,23 @@ void vmcore::vm::create(ygen::byteCode code,  int &current) {
         space.createValue(name, ysto::Value(ytype::YObject(codes, formalParas, retType), false, code.line, code.column));
     }
     else if(state == "struct") {
+        //struct A{i:integer} struct B{a:A,o:integer} var b=new B{new A{1}, 8};
         std::vector<ytype::structMemberPair> members;
         while(valueStack.peek().getBasicType() != ytype::basicType::flag && valueStack.peek().getStringValue().get() != "flag:para_end") {
-            ytype::ytypeUnit type = ytype::string2Type(valueStack.pop().getStringValue().get());
+            ytype::ytypeUnit type;
+            // type
+            if(std::find(yolexer::typeList.begin(), yolexer::typeList.end(), valueStack.peek().getStringValue().get()) != yolexer::typeList.end()) {
+                type = ytype::string2Type(valueStack.pop().getStringValue().get());
+            }
+            else {
+                auto name = valueStack.pop().getStringValue().get();
+                if(!space.findValue(name))
+                    throw yoexception::YoError("NameError", "Unknown identifier: '" + name + "'", code.line, code.column);
+                if(space.getValue(name).getObjectValue().getKind() == ytype::objectKind::structable) {
+                    type = {ytype::basicType::object, ytype::compType::strt};
+                }
+            }
+            //
             std::string name = valueStack.pop().getStringValue().get();
             members.push_back(ytype::structMemberPair(name, type));
         }
@@ -1092,11 +1003,14 @@ void vmcore::vm::create(ygen::byteCode code,  int &current) {
 void vmcore::vm::idx(ygen::byteCode code) {
     auto idx = valueStack.pop();
     auto value = valueStack.pop();
-    if(!value.isListValue() && value.getCompType() != ytype::compType::llike_strt)
+    if(!value.isListValue() && value.getCompType() != ytype::compType::llike_strt && value.getCompType() != ytype::compType::ref)
         throw yoexception::YoError("TypeError", "This operator does not support this type of operation",code.line, code.column);
     if(idx.getIntegerValue().get() > value.getList().size() - 1)
         throw yoexception::YoError("ListError", "The referenced index is out of range",code.line, code.column);
-    valueStack.push(ysto::Value(value.getList()[idx.getIntegerValue().get()]));
+    if(value.getCompType() == ytype::compType::ref)
+        valueStack.push(ysto::Value(value.getRef()->getList()[idx.getIntegerValue().get()]));
+    else
+        valueStack.push(ysto::Value(value.getList()[idx.getIntegerValue().get()]));
 }
 void vmcore::vm::selfadd(ygen::byteCode code) {
     auto name = valueStack.pop().getStringValue().get();
@@ -1138,30 +1052,15 @@ void vmcore::vm::selfsub(ygen::byteCode code) {
 }
 void vmcore::vm::assign(ygen::byteCode code) {
     auto value = valueStack.pop();
-    auto name = valueStack.pop().getStringValue().get();
-    if(space.getValue(name).isConst())
-        throw yoexception::YoError("AssignError", "You cannot assign value to a constant", code.line, code.column);
-    if(space.getValue(name).getBasicType()!=value.getBasicType() && !space.getValue(name).isDyn())
-        throw yoexception::YoError("TypeError", "The type of assignment to static variable: '" + name + "' must be its original type", code.line, code.column);
+    auto sample = valueStack.pop();
     if(code.arg1) {
-        // index assignment
-        // 检查是否有类型不一致的存在
-        if(space.getValue(name).getCompType() == ytype::compType::llike_strt);
-        else {
-            for(auto v: space.getValue(name).getList()){
-                if(value.getBasicType() != v.getBasicType())
-                    throw yoexception::YoError("TypeError", "This operator does not support this type of operation",code.line, code.column);
-            }
-        }
-        //
         auto index = valueStack.pop().getIntegerValue().get();
-        if(index > space.getValue(name).getList().size() - 1)
+        if(index > sample.getRef()->getList().size() - 1)
             throw yoexception::YoError("IndexError", "The referenced index is out of range", code.line, code.column);
-        space.getValue(name)[index] = value;
+        sample.getRef()->getList()[index] = value;
     }
-    else {
-        space.getValue(name) = value;
-    }
+    else *sample.getRef() = value;
+
     valueStack.push(value);
 }
 void vmcore::vm::scopestart(ygen::byteCode code) {
@@ -1444,20 +1343,16 @@ void vmcore::vm::_new(ygen::byteCode code) {
 
     std::vector<ysto::Value> temp;
     std::vector<ysto::Value> initlist;
-    // 判断有没有给初始化列表
-    if(valueStack.peek().getBasicType() == ytype::flag) ;
-    else {
-        while(valueStack.peek().getBasicType() != ytype::flag) {
-            temp.push_back(valueStack.pop());
-        }
-        valueStack.pop();
-        for(int i = temp.size()-1; i >= 0; i--) {
-            initlist.push_back(temp[i]);
-        }
-
-        if(space.getValue(name).getObjectValue().memberPairs.size() != initlist.size())
-            throw yoexception::YoError("InitError", "The length of initialization list is different from that of sample list", code.line, code.column);
+    while(valueStack.peek().getBasicType() != ytype::flag) {
+        temp.push_back(valueStack.pop());
     }
+    valueStack.pop();
+    for(int i = temp.size()-1; i >= 0; i--) {
+        initlist.push_back(temp[i]);
+    }
+
+    if(space.getValue(name).getObjectValue().memberPairs.size() != initlist.size())
+        throw yoexception::YoError("InitError", "The length of initialization list is different from that of sample list", code.line, code.column);
 
     auto sample = space.getValue(name);
     if(sample.getObjectValue().getKind() == ytype::objectKind::structable) {
@@ -1473,6 +1368,6 @@ void vmcore::vm::_new(ygen::byteCode code) {
 }
 void vmcore::vm::gmem(ygen::byteCode code) {
     auto ref = valueStack.pop().getStringValue().get();
-    auto sample = valueStack.pop().getStringValue().get();
-    valueStack.push(space.getValue(sample).getMap(ref));
+    auto sample = valueStack.pop();
+    valueStack.push(ysto::Value(sample.getRef()->getMap(ref), false, code.line, code.column));
 }
