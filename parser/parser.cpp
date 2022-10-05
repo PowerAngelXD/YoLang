@@ -355,7 +355,7 @@ AST::NewExprNode* parser::Parser::parseNewExprNode() {
     if(isIdentifier()) node->iden = parseIdentifierNode();
     else throw yoexception::YoError("SyntaxError", "Expect an identifier!", tg[offset].line, tg[offset].column);
     if(isStructExpr()) node->initlist = parseStructExprNode();
-    else ; // 无初始化列表即为默认初始化
+    else throw yoexception::YoError("SyntaxError", "Expect an initialization list!", tg[offset].line, tg[offset].column);
     return node;
 
 }
