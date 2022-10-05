@@ -1,6 +1,6 @@
 #include "lexer.h"
 using std::string;
-using namespace yolexer;
+
 std::string yolexer::yoToken::toString(){
     std::string ret = "token: {" + content + ", ";
     switch (type)
@@ -31,7 +31,7 @@ std::string yolexer::yoToken::toString(){
 }
 
 
-Lexer::Lexer(std::string _input): input(_input) {}
+yolexer::Lexer::Lexer(std::string _input): input(_input) {}
 
 std::vector<yolexer::yoToken> yolexer::Lexer::getTokenGroup() {return tokenGroup;}
 
