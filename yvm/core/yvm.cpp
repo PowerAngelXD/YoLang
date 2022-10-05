@@ -1211,6 +1211,8 @@ void vmcore::vm::del(ygen::byteCode code) {
     if(code.arg2 == 1.0) {
         // 判断是否启用了不传入push名称的模式
         auto name = constPool[code.arg1];
+        if(std::find(native.nativeIdenList.begin(), native.nativeIdenList.end(), name) != native.nativeIdenList.end())
+            throw yoexception::YoError("NativeError", "Built in variables/constants/structures cannot be deleted", code.line, code.column);
         if(space.findValue(name)) {
             space.deleteValue(name);
         }
@@ -1219,6 +1221,8 @@ void vmcore::vm::del(ygen::byteCode code) {
     }
     else {
         auto name = valueStack.pop().getStringValue().get();
+        if(std::find(native.nativeIdenList.begin(), native.nativeIdenList.end(), name) != native.nativeIdenList.end())
+            throw yoexception::YoError("NativeError", "Built in variables/constants/structures cannot be deleted", code.line, code.column);
         if(space.findValue(name)) {
             space.deleteValue(name);
         }

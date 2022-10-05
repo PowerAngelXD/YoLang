@@ -30,6 +30,7 @@ namespace vmcore {
         };
 
         struct navtiveSet {
+            std::vector<std::string> nativeIdenList= {"Point", "Application", "yolang", "releaseVersion", "completeVersion", "_integer", "_decimal", "_string", "_boolean"};
             BuiltInStructInstanceSet bisiSet;
             BuiltInStructSet bisSet;
             BuiltInFunctionSet bifSet;
