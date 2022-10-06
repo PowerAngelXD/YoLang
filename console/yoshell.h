@@ -50,7 +50,7 @@ namespace ysh{
             "2, Updated structure and its corresponding expression\n" +
             "3, Fixed something\n" +
             "4, Overwrite all nodes about identifiers\n" +
-            "5, Update bif: randint, randdeci, randstr\n" +
+            "5, Update bif: randint, randdeci, randstr, split\n" +
             "6, Added '+=', '-=' operator";
     // 指令池
     // 指令方法命名规范：insXXX（XXX为指令名称，首字母大写）
