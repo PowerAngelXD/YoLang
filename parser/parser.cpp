@@ -21,7 +21,7 @@ bool parser::Parser::isPrim() {
             isCellExpr();
 }
 bool parser::Parser::isIdentifier() {
-    if(peek()->type == yolexer::yoTokType::Identifier){
+    if(isCellIdentifier()){
         int temp = offset; // 存档记位
         parseIdentifierNode(); // 生成identifier，看后面是不是++或者--
         if(peek()->content == "++" || peek()->content == "--") {
@@ -171,6 +171,12 @@ bool parser::Parser::isTypecastExpr() {
     }
     else return false;
 }
+bool parser::Parser::isCallOp() {
+    return peek()->content == "(";
+}
+bool parser::Parser::isCellIdentifier() {
+    return peek()->type == yolexer::yoTokType::Identifier;
+}
 bool parser::Parser::isAssignmentExpr() {
     if(isIdentifier()){
         int temp = offset; // 存档记位
@@ -282,9 +288,31 @@ AST::SiadExprNode* parser::Parser::parseSiadExprNode(){
                 tg[offset].column);
     return node;
 }
+AST::CallOpNode* parser::Parser::parseCallOpNode() {
+    AST::CallOpNode* node = new AST::CallOpNode;
+    node->left = token();
+    if(isExpr()) {
+        node->paras.push_back(parseExpr());
+        while(peek()->content == ",") {
+            node->dots.push_back(token());
+            node->paras.push_back(parseExpr());
+        }
+    }
+    if(peek()->content == ")") node->right = token();
+    else throw yoexception::YoError("SyntaxError", "Expect ')'",
+                                    tg[offset].line,
+                                    tg[offset].column);
+    return node;
+}
+AST::CellIdentifierNode* parser::Parser::parseCellIdentifierNode() {
+    AST::CellIdentifierNode* node = new AST::CellIdentifierNode;
+    node->iden = token();
+    if(isCallOp()) node->call = parseCallOpNode();
+    return node;
+}
 AST::IdentifierNode* parser::Parser::parseIdentifierNode() {
     AST::IdentifierNode* node = new AST::IdentifierNode;
-    node->iden = token();
+    node->iden = parseCellIdentifierNode();
     if(isIndexOp()) node->idx = parseIndexOpNode();
     return node;
 }
@@ -370,8 +398,7 @@ AST::NewExprNode* parser::Parser::parseNewExprNode() {
 }
 AST::PrimExprNode* parser::Parser::parsePrimExprNode(){
     AST::PrimExprNode* node = new AST::PrimExprNode;
-    if(isFnCallExpr()) node->fcall = parseFuncCallNode();
-    else if(isTypecastExpr()) node->typecast = parseTypecastExprNode();
+    if(isTypecastExpr()) node->typecast = parseTypecastExprNode();
     else if(peek()->type == yolexer::yoTokType::Integer ||
             peek()->type == yolexer::yoTokType::Decimal) node->number = token();
     else if(peek()->type == yolexer::yoTokType::String) node->string = token();
@@ -392,26 +419,6 @@ AST::PrimExprNode* parser::Parser::parsePrimExprNode(){
                                         tg[offset].column);
     }
     else throw yoexception::YoError("SyntaxError", "Unsupported expression or operator", tg[offset].line, tg[offset].column);
-    return node;
-}
-AST::FuncCallNode* parser::Parser::parseFuncCallNode(){
-    AST::FuncCallNode* node = new AST::FuncCallNode;
-    node->iden = parseIdentifierExprNode();
-    if(peek()->content == "(") node->left = token();
-    else throw yoexception::YoError("SyntaxError", "Expect '('",
-                                    tg[offset].line,
-                                    tg[offset].column);
-    if(isExpr()) {
-        node->paras.push_back(parseExpr());
-        while(peek()->content == ",") {
-            node->dots.push_back(token());
-            node->paras.push_back(parseExpr());
-        }
-    }
-    if(peek()->content == ")") node->right = token();
-    else throw yoexception::YoError("SyntaxError", "Expect ')'",
-                                    tg[offset].line,
-                                    tg[offset].column);
     return node;
 }
 AST::ListExprNode* parser::Parser::parseListExprNode(){
@@ -664,7 +671,6 @@ AST::SpExprStmtNode* parser::Parser::parseSpExprStmtNode() {
     AST::SpExprStmtNode* node = new AST::SpExprStmtNode;
     if(isSiadExpr()) node->siad = parseSiadExprNode();
     else if(isAssignmentExpr()) node->assign = parseAssignmentExprNode();
-    else if(isFnCallExpr()) node->fcall = parseFuncCallNode();
     else if(isTypecastExpr()) node->typecast = parseTypecastExprNode();
     if(peek()->content == ";") node->end = token();
     else throw yoexception::YoError("SyntaxError", "Expect ';'", tg[offset].line, tg[offset].column);

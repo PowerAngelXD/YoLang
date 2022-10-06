@@ -12,8 +12,8 @@ namespace parser{
         // 判断区: isXXX ---> 判断是什么Node
         bool isPrim(); bool isIdentifierExpr(); bool isSiadExpr(); bool isMulExpr(); bool isStructExpr(); bool isIdentifier();
         bool isAddExpr(); bool isCmpExpr(); bool isBoolExpr(); bool isFnCallExpr(); bool isCellExpr(); bool isNewExpr();
-        bool isAddOp(); bool isMulOp(); bool isCmpOp(); bool isBoolOp(); bool isIndexOp(); bool isStfOp();
-        bool isAsOp(); bool isListExpr(); bool isAssignmentExpr(); bool isTypecastExpr(); bool isExpr();
+        bool isAddOp(); bool isMulOp(); bool isCmpOp(); bool isBoolOp(); bool isIndexOp(); bool isStfOp(); bool isCallOp();
+        bool isAsOp(); bool isListExpr(); bool isAssignmentExpr(); bool isTypecastExpr(); bool isCellIdentifier(); bool isExpr();
 
         bool isStmt(); bool isOutStmt(); bool isVorcStmt(); bool isSpExprStmt(); bool isBlockStmt();
         bool isWhileStmt(); bool isIfStmt(); bool isElifStmt(); bool isElseStmt(); bool isForStmt();
@@ -22,6 +22,8 @@ namespace parser{
         // 生成区: parseXXX ---> 生成XXXNode
         AST::SiadExprNode* parseSiadExprNode();
         AST::CellExprNode* parseCellExprNode();
+        AST::CallOpNode* parseCallOpNode();
+        AST::CellIdentifierNode* parseCellIdentifierNode();
         AST::IdentifierNode* parseIdentifierNode();
         AST::IdentifierExprNode* parseIdentifierExprNode();
         AST::IndexOpNode* parseIndexOpNode();
@@ -32,7 +34,6 @@ namespace parser{
         AST::BoolOpNode* parseBoolOpNode();
         AST::NewExprNode* parseNewExprNode();
         AST::StfOpNode* parseStfOpNode();
-        AST::FuncCallNode* parseFuncCallNode();
         AST::ListExprNode* parseListExprNode();
         AST::PrimExprNode* parsePrimExprNode();
         AST::MulExprNode* parseMulExprNode();
