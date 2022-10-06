@@ -12,6 +12,10 @@ void ysh::vmSetup() {
     yovm.space.createValue("_decimal", ysto::Value(ytype::YString("Decimal"), true, 0, 0));
     yovm.space.createValue("_string", ysto::Value(ytype::YString("String"), true, 0, 0));
     yovm.space.createValue("_boolean", ysto::Value(ytype::YString("Boolean"), true, 0, 0));
+
+    for(auto fn: yolexer::bifList) {
+        yovm.space.createValue(fn, ysto::Value(ytype::YObject({}, {}, {}, fn), true, 0, 0));
+    }
 }
 void ysh::vmClear() {
     yovm = vmcore::vm();
