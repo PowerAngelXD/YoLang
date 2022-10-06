@@ -10,9 +10,26 @@ namespace AST{
     class StmtNode; class StfOpNode; class TypecastExprNode;
     class CellExprNode;
 
-    class IdentifierNode{
+    class IndexOpNode{
     public:
-        std::vector<yolexer::yoToken*> idens;
+        yolexer::yoToken* left = nullptr;
+        AddExprNode* index = nullptr;
+        yolexer::yoToken* right = nullptr;
+
+        std::string toString();
+    };
+
+    class IdentifierNode {
+    public:
+        yolexer::yoToken* iden = nullptr;
+        IndexOpNode* idx = nullptr;
+
+        std::string toString();
+    };
+
+    class IdentifierExprNode{
+    public:
+        std::vector<IdentifierNode*> idens;
         std::vector<yolexer::yoToken*> dots;
 
         std::string toString();
@@ -21,17 +38,8 @@ namespace AST{
     class SiadExprNode{
     public:
         bool isFront = false; // 是否为前置
-        IdentifierNode* iden = nullptr;
+        IdentifierExprNode* iden = nullptr;
         yolexer::yoToken* op = nullptr;
-
-        std::string toString();
-    };
-
-    class IndexOpNode{
-    public:
-        yolexer::yoToken* left = nullptr;
-        AddExprNode* index = nullptr;
-        yolexer::yoToken* right = nullptr;
 
         std::string toString();
     };
@@ -42,7 +50,7 @@ namespace AST{
         yolexer::yoToken* string = nullptr;
         yolexer::yoToken* null = nullptr;
         yolexer::yoToken* boolconst = nullptr;
-        IdentifierNode* iden = nullptr;
+        IdentifierExprNode* iden = nullptr;
         StfOpNode* stf = nullptr;
         FuncCallNode* fcall = nullptr;
         SiadExprNode* siad = nullptr;
@@ -139,7 +147,7 @@ namespace AST{
     class FuncCallNode{
         bool isBif = false;
     public:
-        IdentifierNode* iden = nullptr;
+        IdentifierExprNode* iden = nullptr;
         yolexer::yoToken* left = nullptr;
         std::vector<WholeExprNode*> paras;
         std::vector<yolexer::yoToken*> dots;
@@ -161,7 +169,7 @@ namespace AST{
     class NewExprNode {
     public:
         yolexer::yoToken* mark = nullptr;
-        IdentifierNode* iden = nullptr;
+        IdentifierExprNode* iden = nullptr;
         StructExprNode* initlist = nullptr;
 
         std::string toString();
@@ -169,8 +177,7 @@ namespace AST{
 
     class AssignmentExprNode{
     public:
-        IdentifierNode* iden = nullptr;
-        IndexOpNode* idx = nullptr;
+        IdentifierExprNode* iden = nullptr;
         yolexer::yoToken* equ = nullptr;
         WholeExprNode* expr = nullptr;
 
@@ -179,7 +186,7 @@ namespace AST{
 
     class TypecastExprNode{
     public:
-        IdentifierNode* expr = nullptr;
+        IdentifierExprNode* expr = nullptr;
         AsOpNode* op = nullptr;
         yolexer::yoToken* type = nullptr;
 
@@ -323,7 +330,7 @@ namespace AST{
     class DeleteStmtNode {
     public:
         yolexer::yoToken* mark = nullptr;
-        IdentifierNode* iden = nullptr;
+        IdentifierExprNode* iden = nullptr;
         yolexer::yoToken* end = nullptr;
 
         std::string toString();

@@ -22,10 +22,10 @@ std::string AST::CellExprNode::toString() {
     return "CellExprNode: {" + op->toString() + ", " + expr->toString() + "}";
 }
 
-std::string AST::IdentifierNode::toString() {
-    if(dots.empty()) return "IdentifierNode: {" + idens[0]->toString() + "}";
+std::string AST::IdentifierExprNode::toString() {
+    if(dots.empty()) return "IdentifierExprNode: {" + idens[0]->toString() + "}";
     else{
-        std::string ret = "IdentifierNode: { [";
+        std::string ret = "IdentifierExprNode: { [";
         ret += idens[0]->toString() + ", ";
         for(int i = 0; i < dots.size(); i++){
             ret += idens[i + 1]->toString();
@@ -142,7 +142,7 @@ std::string AST::WholeExprNode::toString() {
 }
 
 std::string AST::AssignmentExprNode::toString() {
-    return "AssignmentExprNode: {" + iden->toString() + ", " + expr->toString() + (idx != nullptr? ", " + idx->toString():"") + "}";
+    return "AssignmentExprNode: {" + iden->toString() + "}";
 }
 
 
@@ -317,4 +317,8 @@ std::string AST::StructExprNode::toString() {
     }
     ret += "]}";
     return ret;
+}
+
+std::string AST::IdentifierNode::toString() {
+    return "IdentifierNode: {" + iden->toString() + ", " + idx->toString() + "}";
 }
