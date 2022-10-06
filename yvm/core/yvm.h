@@ -19,7 +19,7 @@ namespace vmcore {
             ysto::Value randint(std::vector<ysto::Value> args, ygen::byteCode code);
             ysto::Value rand_deci(std::vector<ysto::Value> args, ygen::byteCode code);
             ysto::Value randstr(std::vector<ysto::Value> args, ygen::byteCode code);
-            ysto::Value printobj(std::vector<ysto::Value> args, ygen::byteCode code);
+            ysto::Value split(std::vector<ysto::Value> args, ygen::byteCode code);
         };
 
         class BuiltInStructSet {
@@ -31,6 +31,8 @@ namespace vmcore {
         class NativeClassSet {
         public:
             ysto::Value Process();
+            ysto::Value File();
+            ysto::Value IO();
         };
 
         class BuiltInStructInstanceSet {

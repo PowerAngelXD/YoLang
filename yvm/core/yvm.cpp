@@ -9,6 +9,7 @@ ysto::Value vmcore::native::BuiltInFunctionSet::println(std::vector<ysto::Value>
         throw yoexception::YoError("FunctionCallingError", "Overloaded function with no specified arguments", args[0].line, args[0].column);
     auto content = args[0];
     ysto::printValue(content, "out");
+    std::cout<<std::endl;
     return native::null_value; // 默认返回null
 }
 
@@ -216,8 +217,26 @@ ysto::Value vmcore::native::BuiltInFunctionSet::randstr(std::vector<ysto::Value>
     return ysto::Value(ytype::YString(buffer), false, code.line, code.column);
 }
 
-ysto::Value vmcore::native::BuiltInFunctionSet::printobj(std::vector<ysto::Value> args, ygen::byteCode code) {
+ysto::Value vmcore::native::BuiltInFunctionSet::split(std::vector<ysto::Value> args, ygen::byteCode code) {
+    if(args.empty())
+        throw yoexception::YoError("FunctionCallingError", "Overloaded function with no specified arguments", code.line, code.column);
+    else if (args.size() != 2)
+        throw yoexception::YoError("FunctionCallingError", "Overloaded function with no specified arguments", args[0].line, args[0].column);
+    if(args[0].getType() != ytype::type(ytype::basicType::string, ytype::compType::norm) || args[1].getType() != ytype::type(ytype::basicType::string, ytype::compType::norm))
+        throw yoexception::YoError("FunctionCallingError", "Overloaded function with no specified arguments", args[0].line, args[0].column);
 
+    std::vector<ysto::Value> ret;
+    int i = 0;
+    while(i < args[0].getStringValue().get().size()) {
+        std::string content;
+        for(; i < args[0].getStringValue().get().size(); i ++) {
+            if(args[0].getStringValue().get()[i] == args[1].getStringValue().get()[0]) {i++; break;}
+            content.push_back(args[0].getStringValue().get()[i]);
+        }
+        ret.push_back(ysto::Value(ytype::YString(content), false, code.line, code.column));
+    }
+
+    return ysto::Value(ret, false,  code.line, code.column, false);
 }
 
 
@@ -1269,8 +1288,9 @@ void vmcore::vm::call(ygen::byteCode code, std::string arg) {
         else if(fnName == "length") valueStack.push(native.bifSet.length(args, code));
         else if(fnName == "substr") valueStack.push(native.bifSet.substr(args, code));
         else if(fnName == "randint") valueStack.push(native.bifSet.randint(args, code));
-        else if(fnName == "randdeci") valueStack.push(native.bifSet.rand_deci(args, code));
+        else if(fnName == "rand_deci") valueStack.push(native.bifSet.rand_deci(args, code));
         else if(fnName == "randstr") valueStack.push(native.bifSet.randstr(args, code));
+        else if(fnName == "split") valueStack.push(native.bifSet.split(args, code));
         else if(fnName == "add_const") {
             if(arg == "repl")
                 throw yoexception::YoError("ReflectError", "This function cannot be used in REPL mode", code.line, code.column);
