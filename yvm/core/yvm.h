@@ -17,7 +17,7 @@ namespace vmcore {
             ysto::Value add_const(std::vector<ysto::Value> args, ygen::byteCode code);
             ysto::Value length(std::vector<ysto::Value> args, ygen::byteCode code);
             ysto::Value randint(std::vector<ysto::Value> args, ygen::byteCode code);
-            ysto::Value randdeci(std::vector<ysto::Value> args, ygen::byteCode code);
+            ysto::Value rand_deci(std::vector<ysto::Value> args, ygen::byteCode code);
             ysto::Value randstr(std::vector<ysto::Value> args, ygen::byteCode code);
             ysto::Value printobj(std::vector<ysto::Value> args, ygen::byteCode code);
         };

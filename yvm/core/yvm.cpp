@@ -174,7 +174,7 @@ ysto::Value vmcore::native::BuiltInFunctionSet::randint(std::vector<ysto::Value>
     return ysto::Value(ytype::YInteger(ri(rd)), false, code.line, code.column);
 }
 
-ysto::Value vmcore::native::BuiltInFunctionSet::randdeci(std::vector<ysto::Value> args, ygen::byteCode code) {
+ysto::Value vmcore::native::BuiltInFunctionSet::rand_deci(std::vector<ysto::Value> args, ygen::byteCode code) {
     if(args.empty())
         throw yoexception::YoError("FunctionCallingError", "Overloaded function with no specified arguments", code.line, code.column);
     else if (args.size() != 2)
@@ -1269,7 +1269,7 @@ void vmcore::vm::call(ygen::byteCode code, std::string arg) {
         else if(fnName == "length") valueStack.push(native.bifSet.length(args, code));
         else if(fnName == "substr") valueStack.push(native.bifSet.substr(args, code));
         else if(fnName == "randint") valueStack.push(native.bifSet.randint(args, code));
-        else if(fnName == "randdeci") valueStack.push(native.bifSet.randdeci(args, code));
+        else if(fnName == "randdeci") valueStack.push(native.bifSet.rand_deci(args, code));
         else if(fnName == "randstr") valueStack.push(native.bifSet.randstr(args, code));
         else if(fnName == "add_const") {
             if(arg == "repl")
