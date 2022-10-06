@@ -90,10 +90,11 @@ ytype::YObject::YObject(ytype::objectKind k) {
     kind = k;
 }
 
-ytype::YObject::YObject(std::vector<byteCode> cs, std::vector<std::pair<ytype::ytypeUnit, std::string>> as, ytype::ytypeUnit rety) {
+ytype::YObject::YObject(std::vector<byteCode> cs, std::vector<std::pair<ytype::ytypeUnit, std::string>> as, ytype::ytypeUnit rety, std::string name) {
     codes = cs;
     retType = rety;
     args = as;
+    fnName = name;
     kind = objectKind::function;
 }
 

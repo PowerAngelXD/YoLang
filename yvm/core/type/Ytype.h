@@ -43,6 +43,7 @@ namespace ytype {
         objectKind kind; // Object的类型
 
     public:
+        std::string fnName; // only "function"
         std::vector<structMemberPair> memberPairs; // only "structable"
         std::vector<std::pair<ytype::ytypeUnit, std::string>> args; // 参数类型:参数名 only "function"
         ytype::ytypeUnit retType; // 返回类型
@@ -51,7 +52,7 @@ namespace ytype {
         YObject(objectKind k);
         YObject()=default;
         // 构造一个函数Object的方法
-        YObject(std::vector<byteCode> cs, std::vector<std::pair<ytype::ytypeUnit, std::string>> as, ytype::ytypeUnit rety);
+        YObject(std::vector<byteCode> cs, std::vector<std::pair<ytype::ytypeUnit, std::string>> as, ytype::ytypeUnit rety, std::string name);
         YObject(std::vector<structMemberPair> members);
 
         objectKind getKind();
