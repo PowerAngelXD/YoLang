@@ -8,7 +8,7 @@ namespace AST{
     class AddExprNode; class FuncCallNode;
     class ListExprNode; class WholeExprNode;
     class StmtNode; class StfOpNode; class TypecastExprNode;
-    class CellExprNode;
+    class CellExprNode; class IdentifierExprNode;
 
     class IndexOpNode{
     public:
@@ -19,9 +19,28 @@ namespace AST{
         std::string toString();
     };
 
-    class IdentifierNode {
+    class CallOpNode{
+    public:
+        yolexer::yoToken* left = nullptr;
+        std::vector<WholeExprNode*> paras;
+        std::vector<yolexer::yoToken*> dots;
+        yolexer::yoToken* right = nullptr;
+
+        std::string toString();
+    };
+
+
+    class CellIdentifierNode {
     public:
         yolexer::yoToken* iden = nullptr;
+        CallOpNode* call = nullptr;
+
+        std::string toString();
+    };
+
+    class IdentifierNode {
+    public:
+        CellIdentifierNode* iden = nullptr;
         IndexOpNode* idx = nullptr;
 
         std::string toString();
@@ -141,18 +160,6 @@ namespace AST{
         std::vector<CmpExprNode*> cmps;
         std::vector<BoolOpNode*> ops;
 
-        std::string toString();
-    };
-
-    class FuncCallNode{
-        bool isBif = false;
-    public:
-        IdentifierExprNode* iden = nullptr;
-        yolexer::yoToken* left = nullptr;
-        std::vector<WholeExprNode*> paras;
-        std::vector<yolexer::yoToken*> dots;
-        yolexer::yoToken* right = nullptr;
-        
         std::string toString();
     };
 

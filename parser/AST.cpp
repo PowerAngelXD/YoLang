@@ -1,8 +1,8 @@
 #include "AST.h"
 
-std::string AST::FuncCallNode::toString() {
+std::string AST::CallOpNode::toString() {
     std::string ret = "FuncCallNode: {";
-    if(dots.empty()) return "FuncCallNode: {" + iden->toString() + (paras.empty()?"}":paras[0]->toString() + "}");
+    if(dots.empty()) return "FuncCallNode: {" + paras[0]->toString() + (paras.empty()?"}":paras[0]->toString() + "}");
     else{
         ret += "[" + paras[0]->toString() + ", ";
         for(int i = 1; i < dots.size(); i++){
@@ -118,7 +118,6 @@ std::string AST::PrimExprNode::toString() {
         if(number != nullptr) ret += number->toString() + ", ";
         else if(string != nullptr) ret += string->toString() + ", ";
         else if(iden != nullptr) ret += iden->toString() + ", ";
-        else if(fcall != nullptr) ret += fcall->toString() + ", ";
         else if(siad != nullptr) ret += siad->toString() + ", ";
         else if(stf != nullptr) ret += stf->toString() + ", ";
         else if(boolconst != nullptr) ret += boolconst->toString() + ", ";
@@ -208,7 +207,7 @@ std::string AST::BlockStmtNode::toString() {
 std::string AST::SpExprStmtNode::toString() {
     if(siad != nullptr) return "SpExprStmtNode: {" + siad->toString() + "}";
     else if(assign != nullptr) return "SpExprStmtNode: {" + assign->toString() + "}";
-    else if(fcall != nullptr) return "SpExprStmtNode: {" + fcall->toString() + "}";
+
     else if(typecast != nullptr) return "SpExprStmtNode: {" + typecast->toString() + "}";
     else return "null";
 }
@@ -321,4 +320,8 @@ std::string AST::StructExprNode::toString() {
 
 std::string AST::IdentifierNode::toString() {
     return "IdentifierNode: {" + iden->toString() + ", " + idx->toString() + "}";
+}
+
+std::string AST::CellIdentifierNode::toString() {
+    return "CellIdentifierNode: {" + iden->toString() + ", " + call->toString() + "}";
 }
