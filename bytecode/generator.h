@@ -90,6 +90,8 @@ namespace ygen{
         void visitString(yolexer::yoToken* token);
         void visitNull(yolexer::yoToken* token);
         void visitBoolean(yolexer::yoToken* token);
+        void visitCallOp(AST::CallOpNode* node);
+        void visitCellIdentifier(AST::CellIdentifierNode* node);
         void visitIdentifier(AST::IdentifierExprNode* node);
         void visitIdentifierExpr(AST::IdentifierExprNode* node);
         void visitIdentifierExprText(AST::IdentifierExprNode* node, bool isref = false);
@@ -111,7 +113,6 @@ namespace ygen{
         void visitBoolExpr(AST::BoolExprNode* node);
         void visitListExpr(AST::ListExprNode* node);
         void visitAssignmentExpr(AST::AssignmentExprNode* node);
-        void visitFuncCallExpr(AST::FuncCallNode* node);
         void visitStructExpr(AST::StructExprNode* node);
         void visitNewExpr(AST::NewExprNode* node);
         void visitExpr(AST::WholeExprNode* node); // 特殊的visitor，visit的是整个Expr
