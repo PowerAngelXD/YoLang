@@ -121,10 +121,7 @@ void ysh::insRun(std::vector<std::string> paras) {
         throw yoexception::YoError("ConsoleParaError", "Too few parameters", -1, -1);
     else {
         auto name = paras[0];
-        if(tools::compareFileType(name, ".yvmc")) {
-            // 是vm文件
-        }
-        else if(tools::compareFileType(name, ".yo")) {
+        if(tools::compareFileType(name, ".yo")) {
             std::ifstream file(name);
             std::istreambuf_iterator<char> begin(file);
             std::istreambuf_iterator<char> end;
@@ -234,7 +231,6 @@ void ysh::insEnv(std::vector<std::string> paras) {
 }
 
 void ysh::runYoShell() {
-    ysh::vmSetup();
     // 输出欢迎页面
     std::cout<<"Yolang "<<ysh::completeVersion<<"("<<ysh::version<<")\n"<<"Release Version: " << ysh::relVersion <<"\ngcc version 11.3.0"<<std::endl;
     std::cout<<std::endl;
