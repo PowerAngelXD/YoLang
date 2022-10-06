@@ -36,18 +36,20 @@ namespace ysh{
     // 指令定义
     typedef std::pair<std::string, insMethod> ins;
     // Yolang版本号
-    static std::string version = "22.10.135";
+    static std::string version = "22.10.139";
     // 发行版本号
-    static std::string relVersion = "Yolang 1.5.2";
+    static std::string relVersion = "Yolang 1.5.22";
     // 完整版本
-    static std::string completeVersion = "Release-2022-10-0135";
+    static std::string completeVersion = "Instable-2022-10-0139";
     // vm
     static vmcore::vm yovm;
     // 版本更新说明
     static std::string updateIllustrate =
             "Version: " + ysh::relVersion + " Illustrate\n" +
             "1, Added 'new' expression\n" +
-            "2, Updated structure and its corresponding expression";
+            "2, Updated structure and its corresponding expression\n" +
+            "3, Fixed something\n" +
+            "4, Overwrite all nodes about identifiers";
     // 指令池
     // 指令方法命名规范：insXXX（XXX为指令名称，首字母大写）
     void insHelp(INSPARAS);
