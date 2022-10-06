@@ -98,21 +98,6 @@ bool parser::Parser::isCmpExpr() {
 bool parser::Parser::isBoolExpr() {
     return isCmpExpr();
 }
-bool parser::Parser::isFnCallExpr() {
-    if(isIdentifier()){
-        int temp = offset; // 存档记位
-        parseIdentifierNode(); // 生成identifier，看后面是不是括号
-        if(peek()->content == "(") {
-            offset = temp; // 归位
-            return true;
-        }
-        else {
-            offset = temp; // 归位
-            return false;
-        }
-    }
-    else return false;
-}
 bool parser::Parser::isCellExpr() {
     if(isAddOp() || peek()->content == "&" || peek()->content == "@" || peek()->content == "%" || peek()->content == "*") {
         int temp = offset;
@@ -221,7 +206,7 @@ bool parser::Parser::isWhileStmt() {
     return peek()->content == "while";
 }
 bool parser::Parser::isSpExprStmt() {
-    return isSiadExpr() || isAssignmentExpr() || isFnCallExpr() || isTypecastExpr();
+    return isSiadExpr() || isAssignmentExpr() || isIdentifierExpr() || isTypecastExpr();
 }
 bool parser::Parser::isIfStmt() {
     return peek()->content == "if";
@@ -671,7 +656,13 @@ AST::SpExprStmtNode* parser::Parser::parseSpExprStmtNode() {
     AST::SpExprStmtNode* node = new AST::SpExprStmtNode;
     if(isSiadExpr()) node->siad = parseSiadExprNode();
     else if(isAssignmentExpr()) node->assign = parseAssignmentExprNode();
+    else if(isIdentifierExpr()) {
+        node->iden = parseIdentifierExprNode();
+        if(node->iden->idens[node->iden->idens.size() - 1]->iden->call == nullptr)
+            throw yoexception::YoError("SyntaxError", "Not any statement", tg[offset].line, tg[offset].column);
+    }
     else if(isTypecastExpr()) node->typecast = parseTypecastExprNode();
+    else throw yoexception::YoError("SyntaxError", "Not any statement", tg[offset].line, tg[offset].column);
     if(peek()->content == ";") node->end = token();
     else throw yoexception::YoError("SyntaxError", "Expect ';'", tg[offset].line, tg[offset].column);
     return node;

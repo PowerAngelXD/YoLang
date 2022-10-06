@@ -11,7 +11,7 @@ namespace parser{
 
         // 判断区: isXXX ---> 判断是什么Node
         bool isPrim(); bool isIdentifierExpr(); bool isSiadExpr(); bool isMulExpr(); bool isStructExpr(); bool isIdentifier();
-        bool isAddExpr(); bool isCmpExpr(); bool isBoolExpr(); bool isFnCallExpr(); bool isCellExpr(); bool isNewExpr();
+        bool isAddExpr(); bool isCmpExpr(); bool isBoolExpr(); bool isCellExpr(); bool isNewExpr();
         bool isAddOp(); bool isMulOp(); bool isCmpOp(); bool isBoolOp(); bool isIndexOp(); bool isStfOp(); bool isCallOp();
         bool isAsOp(); bool isListExpr(); bool isAssignmentExpr(); bool isTypecastExpr(); bool isCellIdentifier(); bool isExpr();
 
