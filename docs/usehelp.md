@@ -11,8 +11,9 @@ Yolang的源码文件后缀为: ".yo"
 |boolean|布尔值|
 |string|字符串|
 |null|空类型|
+|object|实例类型|
 
-需要注意的是，上表所罗列的类型名称在Yolang中均为关键字，同时在1.2.0版本之后，char类型已被移除\
+需要注意的是，上表所罗列的，除object，string以外的类型名称在Yolang中均为关键字，同时在1.2.0版本之后，char类型已被移除\
 ***例：***
 ```go
 var str:string = "hello"; # 声明了一个字符串类型的变量
@@ -24,6 +25,8 @@ var str:string = "hello"; # 声明了一个字符串类型的变量
 |AddExpression|基础表达式，四则运算和模运算|
 |BoolExpression|布尔表达式|
 |ListExpression|列表表达式，类似于“[1,2,3,4,5,5]”这种的都叫做列表表达式|
+|StructExpression|类列表结构体表达式，与列表表达式不同的是他的写法，但是使用方式与列表表达式相同|
+|NewExpression|new表达式，初始化结构体或者类|
 |SpecialExpression|特殊表达式，指那些能够单独成stmt的表达式，例如自增加表达式，自减表达式和赋值表达式|
 
 下面对这些表达式中的部分进行解读：
@@ -232,3 +235,58 @@ for (; count < 10; count ++) {
 如您所见，definition是可以省略的\
 condition：是一个布尔表达式，与while的condition作用一样，您也可以将其省略，但是会让您的程序陷入死循环\
 operation：是对您的计数器的操作，通常可以是自增加，自减等操作
+###### break语句
+在Yolang中，break语句使用这样的写法：
+```go
+break;
+```
+break语句只能被用在循环体中，当他作用时，会跳出当前所在的循环体
+###### defer语句
+在Yolang中，defer语句使用这样的写法：
+```go
+defer statement;
+```
+其中，statement可以是任意一个语句，下面请看例子
+```go
+defer println(1);
+println(2);
+println(3);
+```
+上述程序的输出应为：
+```
+2
+3
+1
+```
+如您所见，defer语句就是将当前的stmt重新push到stmt栈尾的，其原理十分简单
+###### 函数
+在Yolang中，一般这样定义一个函数，下面看一个定义函数的例子
+```go
+func null fn(a:integer) {
+    repeat(a){
+        println("hello world");
+    }
+}
+```
+其中，fn下的花括号部分，也就是一个BlockStatement，我们将其称之为函数体\
+而func则是定义函数的关键字，它后面跟着的null是这个函数返回值的类型，目前只支持基础类型和复合列表类型的返回值，其他类型的返回值将在后续逐一支持\
+小括号内的是所定义函数的形式参数列表，以: 'identifier : type'的格式出现\
+\
+相信您已经掌握了在Yolang中定义一个函数了，下面来看它的使用方法：
+```go
+func integer add(a:integer, b:integer) {
+    return a+b;
+}
+
+var a=add(1,2);
+
+println(a);
+```
+没错，调用Yolang的函数就是这么简单，只需要将函数的标识符写上，后面加上一堆小括号，里面写上所传递的实际参数，这样函数就可以工作了！\
+当然，如果传入了不正确类型或者不正确个数的参数，会触发下面的报错：
+```
+An exception is thrown when the program is running:
+{{FunctionCallingError}}:
+    Overloaded function with no specified arguments
+line: X, column: X
+```
