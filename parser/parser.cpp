@@ -35,10 +35,13 @@ bool parser::Parser::isIdentifier() {
     }
     else return false;
 }
+bool parser::Parser::isIdentifierExpr() {
+    return isIdentifier();
+}
 bool parser::Parser::isSiadExpr() {
     if(peek()->type == yolexer::yoTokType::Identifier){
         int temp = offset; // 存档记位
-        parseIdentifierNode(); // 生成identifier，看后面是不是++或者--
+        parseIdentifierExprNode(); // 生成identifier，看后面是不是++或者--
         if(peek()->content == "++" || peek()->content == "--") {
             offset = temp; // 归位
             return true;
@@ -156,7 +159,7 @@ bool parser::Parser::isAsOp() {
 bool parser::Parser::isTypecastExpr() {
     if(isIdentifier()) {
         int temp = offset;
-        parseIdentifierNode();
+        parseIdentifierExprNode();
         if(peek()->content == "as") {
             offset = temp;
             return true;
@@ -171,7 +174,7 @@ bool parser::Parser::isTypecastExpr() {
 bool parser::Parser::isAssignmentExpr() {
     if(isIdentifier()){
         int temp = offset; // 存档记位
-        parseIdentifierNode(); // 生成identifier，看后面是不是括号
+        parseIdentifierExprNode(); // 生成identifier，看后面是不是括号
         if(isIndexOp()){
             parseIndexOpNode();
             if(peek()->content == "=") {
@@ -267,10 +270,10 @@ AST::SiadExprNode* parser::Parser::parseSiadExprNode(){
         if(peek()->content == "--" || peek()->content == "++") {
             node->isFront = true; // 是前置
             node->op = token();
-            node->iden = parseIdentifierNode();
+            node->iden = parseIdentifierExprNode();
         }
         else if(peek()->type == yolexer::yoTokType::Identifier) {
-            node->iden = parseIdentifierNode();
+            node->iden = parseIdentifierExprNode();
             node->op = token();
         }
     }
@@ -279,13 +282,19 @@ AST::SiadExprNode* parser::Parser::parseSiadExprNode(){
                 tg[offset].column);
     return node;
 }
-AST::IdentifierNode* parser::Parser::parseIdentifierNode(){
+AST::IdentifierNode* parser::Parser::parseIdentifierNode() {
     AST::IdentifierNode* node = new AST::IdentifierNode;
-    node->idens.push_back(token());
+    node->iden = token();
+    if(isIndexOp()) node->idx = parseIndexOpNode();
+    return node;
+}
+AST::IdentifierExprNode* parser::Parser::parseIdentifierExprNode(){
+    AST::IdentifierExprNode* node = new AST::IdentifierExprNode;
+    node->idens.push_back(parseIdentifierNode());
     while(true){
         if(peek()->content != ".") break;
         node->dots.push_back(token());
-        node->idens.push_back(token());
+        node->idens.push_back(parseIdentifierNode());
     }
     return node;
 }
@@ -352,7 +361,7 @@ AST::BoolOpNode* parser::Parser::parseBoolOpNode(){
 AST::NewExprNode* parser::Parser::parseNewExprNode() {
     AST::NewExprNode* node = new AST::NewExprNode;
     node->mark = token();
-    if(isIdentifier()) node->iden = parseIdentifierNode();
+    if(isIdentifier()) node->iden = parseIdentifierExprNode();
     else throw yoexception::YoError("SyntaxError", "Expect an identifier!", tg[offset].line, tg[offset].column);
     if(isStructExpr()) node->initlist = parseStructExprNode();
     else throw yoexception::YoError("SyntaxError", "Expect an initialization list!", tg[offset].line, tg[offset].column);
@@ -370,9 +379,8 @@ AST::PrimExprNode* parser::Parser::parsePrimExprNode(){
     else if(peek()->content == "true" || peek()->content == "false") node->boolconst = token();
     else if(isStfOp()) node->stf = parseStfOpNode();
     else if(isCellExpr()) node->cellexpr = parseCellExprNode();
-    else if(isIdentifier()) {
-        node->iden = parseIdentifierNode();
-        if(isIndexOp()) node->op = parseIndexOpNode();
+    else if(isIdentifierExpr()) {
+        node->iden = parseIdentifierExprNode();
     }
     else if(isSiadExpr()) node->siad = parseSiadExprNode();
     else if(peek()->content == "("){
@@ -388,7 +396,7 @@ AST::PrimExprNode* parser::Parser::parsePrimExprNode(){
 }
 AST::FuncCallNode* parser::Parser::parseFuncCallNode(){
     AST::FuncCallNode* node = new AST::FuncCallNode;
-    node->iden = parseIdentifierNode();
+    node->iden = parseIdentifierExprNode();
     if(peek()->content == "(") node->left = token();
     else throw yoexception::YoError("SyntaxError", "Expect '('",
                                     tg[offset].line,
@@ -502,7 +510,7 @@ AST::StructExprNode* parser::Parser::parseStructExprNode() {
 }
 AST::TypecastExprNode* parser::Parser::parseTypecastExprNode() {
     AST::TypecastExprNode* node = new AST::TypecastExprNode;
-    node->expr = parseIdentifierNode();
+    node->expr = parseIdentifierExprNode();
     node->op = parseAsOp();
     if(std::find(yolexer::typeList.begin(),
                  yolexer::typeList.end(),
@@ -514,8 +522,7 @@ AST::TypecastExprNode* parser::Parser::parseTypecastExprNode() {
 }
 AST::AssignmentExprNode* parser::Parser::parseAssignmentExprNode() {
     AST::AssignmentExprNode* node = new AST::AssignmentExprNode;
-    node->iden = parseIdentifierNode();
-    if(isIndexOp()) node->idx = parseIndexOpNode();
+    node->iden = parseIdentifierExprNode();
     node->equ = token();
     if(isExpr()) node->expr = parseExpr();
     else throw yoexception::YoError("SyntaxError", "An expression is required here", tg[offset].line, tg[offset].column);
@@ -772,7 +779,7 @@ AST::RepeatStmtNode* parser::Parser::parseRepeatStmtNode() {
 AST::DeleteStmtNode* parser::Parser::parseDeleteStmtNode() {
     AST::DeleteStmtNode* node = new AST::DeleteStmtNode;
     node->mark = token();
-    if(isIdentifier()) node->iden = parseIdentifierNode();
+    if(isIdentifier()) node->iden = parseIdentifierExprNode();
     else throw yoexception::YoError("SyntaxError", "Expect an identifier!", tg[offset].line, tg[offset].column);
     if(peek()->content == ";") node->end = token();
     else throw yoexception::YoError("SyntaxError", "Expect ';'", tg[offset].line, tg[offset].column);
