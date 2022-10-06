@@ -160,6 +160,67 @@ ysto::Value vmcore::native::BuiltInFunctionSet::substr(std::vector<ysto::Value> 
     return ysto::Value(ytype::YString(result), false, string.line, string.column);
 }
 
+ysto::Value vmcore::native::BuiltInFunctionSet::randint(std::vector<ysto::Value> args, ygen::byteCode code) {
+    if(args.empty())
+        throw yoexception::YoError("FunctionCallingError", "Overloaded function with no specified arguments", code.line, code.column);
+    else if (args.size() != 2)
+        throw yoexception::YoError("FunctionCallingError", "Overloaded function with no specified arguments", args[0].line, args[0].column);
+    if(args[0].getType() != ytype::type(ytype::basicType::integer, ytype::compType::norm) || args[1].getType() != ytype::type(ytype::basicType::integer, ytype::compType::norm))
+        throw yoexception::YoError("FunctionCallingError", "Overloaded function with no specified arguments", args[0].line, args[0].column);
+    auto max = args[1].getIntegerValue().get();
+    auto min = args[0].getIntegerValue().get();
+    std::random_device rd;
+    std::uniform_int_distribution<unsigned> ri(min, max);
+    return ysto::Value(ytype::YInteger(ri(rd)), false, code.line, code.column);
+}
+
+ysto::Value vmcore::native::BuiltInFunctionSet::randdeci(std::vector<ysto::Value> args, ygen::byteCode code) {
+    if(args.empty())
+        throw yoexception::YoError("FunctionCallingError", "Overloaded function with no specified arguments", code.line, code.column);
+    else if (args.size() != 2)
+        throw yoexception::YoError("FunctionCallingError", "Overloaded function with no specified arguments", args[0].line, args[0].column);
+    if(args[0].getType() != ytype::type(ytype::basicType::decimal, ytype::compType::norm) || args[1].getType() != ytype::type(ytype::basicType::decimal, ytype::compType::norm))
+        throw yoexception::YoError("FunctionCallingError", "Overloaded function with no specified arguments", args[0].line, args[0].column);
+    auto max = args[1].getDecimalValue().get();
+    auto min = args[0].getDecimalValue().get();
+    std::random_device rd;
+    std::uniform_real_distribution<float> ri(min, max);
+    return ysto::Value(ytype::YDecimal(ri(rd)), false, code.line, code.column);
+}
+
+ysto::Value vmcore::native::BuiltInFunctionSet::randstr(std::vector<ysto::Value> args, ygen::byteCode code) {
+    if(args.empty())
+        throw yoexception::YoError("FunctionCallingError", "Overloaded function with no specified arguments", code.line, code.column);
+    else if (args.size() != 1)
+        throw yoexception::YoError("FunctionCallingError", "Overloaded function with no specified arguments", args[0].line, args[0].column);
+    if(args[0].getType() != ytype::type(ytype::basicType::integer, ytype::compType::norm))
+        throw yoexception::YoError("FunctionCallingError", "Overloaded function with no specified arguments", args[0].line, args[0].column);
+    auto length = args[0].getIntegerValue().get();
+
+    char tmp;
+    std::string buffer;
+
+    std::random_device rd;
+    std::default_random_engine random(rd());
+
+    for (int i = 0; i < length; i++) {
+        tmp = random() % 36;
+        if (tmp < 10)
+            tmp += '0';
+        else {
+            tmp -= 10;
+            tmp += 'A';
+        }
+        buffer += tmp;
+    }
+    return ysto::Value(ytype::YString(buffer), false, code.line, code.column);
+}
+
+ysto::Value vmcore::native::BuiltInFunctionSet::printobj(std::vector<ysto::Value> args, ygen::byteCode code) {
+
+}
+
+
 //struct
 ysto::Value vmcore::native::BuiltInStructSet::Point() {
     std::vector<ytype::structMemberPair> members = {{"x", ytype::ytypeUnit{ytype::basicType::decimal, ytype::compType::norm}},
@@ -588,26 +649,7 @@ void vmcore::vm::stf(ygen::byteCode code) {
     std::string name = constPool[code.arg1];
     if(name == "typeof") {
         auto value = valueStack.peek().getCompType() == ytype::compType::ref?*valueStack.pop().getRef():valueStack.pop();
-        switch (value.getBasicType()) {
-            case ytype::integer:
-                valueStack.push(ysto::Value(ytype::YString("Integer"), false, code.line, code.column));
-                break;
-            case ytype::boolean:
-                valueStack.push(ysto::Value(ytype::YString("Boolean"), false, code.line, code.column));
-                break;
-            case ytype::decimal:
-                valueStack.push(ysto::Value(ytype::YString("Decimal"), false, code.line, code.column));
-                break;
-            case ytype::string:
-                valueStack.push(ysto::Value(ytype::YString("String"), false, code.line, code.column));
-                break;
-            case ytype::null:
-                valueStack.push(ysto::Value(ytype::YString("Null"), false, code.line, code.column));
-                break;
-            case ytype::object:
-                valueStack.push(ysto::Value(ytype::YString("Object"), false, code.line, code.column));
-                break;
-        }
+        valueStack.push(ysto::Value(ytype::YString(ytype::type2String(value.getType())), false, code.line, code.column));
     }
 }
 void vmcore::vm::lt(ygen::byteCode code) {
@@ -1226,6 +1268,9 @@ void vmcore::vm::call(ygen::byteCode code, std::string arg) {
         else if(fnName == "fwrite") valueStack.push(native.bifSet.fwrite(args, code));
         else if(fnName == "length") valueStack.push(native.bifSet.length(args, code));
         else if(fnName == "substr") valueStack.push(native.bifSet.substr(args, code));
+        else if(fnName == "randint") valueStack.push(native.bifSet.randint(args, code));
+        else if(fnName == "randdeci") valueStack.push(native.bifSet.randdeci(args, code));
+        else if(fnName == "randstr") valueStack.push(native.bifSet.randstr(args, code));
         else if(fnName == "add_const") {
             if(arg == "repl")
                 throw yoexception::YoError("ReflectError", "This function cannot be used in REPL mode", code.line, code.column);

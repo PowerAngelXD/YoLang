@@ -16,12 +16,21 @@ namespace vmcore {
             ysto::Value vmcode(std::vector<ysto::Value> args, ygen::byteCode code);
             ysto::Value add_const(std::vector<ysto::Value> args, ygen::byteCode code);
             ysto::Value length(std::vector<ysto::Value> args, ygen::byteCode code);
+            ysto::Value randint(std::vector<ysto::Value> args, ygen::byteCode code);
+            ysto::Value randdeci(std::vector<ysto::Value> args, ygen::byteCode code);
+            ysto::Value randstr(std::vector<ysto::Value> args, ygen::byteCode code);
+            ysto::Value printobj(std::vector<ysto::Value> args, ygen::byteCode code);
         };
 
         class BuiltInStructSet {
         public:
             ysto::Value Point();
             ysto::Value Application();
+        };
+
+        class NativeClassSet {
+        public:
+            ysto::Value Process();
         };
 
         class BuiltInStructInstanceSet {
