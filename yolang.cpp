@@ -2,6 +2,7 @@
 #include "console/yoshell.h"
 
 int main(int argc, char *argv[]){
+    ysh::vmSetup();
     try{
         if(argc == 1) ysh::runYoShell();
         else{
