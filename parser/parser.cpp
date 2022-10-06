@@ -546,11 +546,11 @@ AST::StmtNode* parser::Parser::parseStmtNode() {
     else if(isDeleteStmt()) node->delstmt = parseDeleteStmtNode();
     else if(isForStmt()) node->forstmt = parseForStmtNode();
     else if(isStructDefStmt()) node->sdefstmt = parseStructDefStmtNode();
-    else if(isSpExprStmt()) node->spexprstmt = parseSpExprStmtNode();
     else if(isBreakStmt()) node->breakstmt = parseBreakStmtNode();
     else if(isFuncDefStmt()) node->fdefstmt = parseFuncDefStmtNode();
     else if(isDeferStmt()) node->deferstmt = parseDeferStmtNode();
     else if(isReturnStmt()) node->retstmt = parseReturnStmtNode();
+    else if(isSpExprStmt()) node->spexprstmt = parseSpExprStmtNode();
     else throw yoexception::YoError("SyntaxError", "Not any statement", tg[offset].line, tg[offset].column);
     return node;
 }
