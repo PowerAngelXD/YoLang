@@ -165,10 +165,10 @@ bool parser::Parser::isCellIdentifier() {
 bool parser::Parser::isAssignmentExpr() {
     if(isIdentifier()){
         int temp = offset; // 存档记位
-        parseIdentifierExprNode(); // 生成identifier，看后面是不是括号
+        parseIdentifierExprNode();
         if(isIndexOp()){
             parseIndexOpNode();
-            if(peek()->content == "=") {
+            if(peek()->content == "="||peek()->content == "+="||peek()->content == "-=") {
                 offset = temp; // 归位
                 return true;
             }
@@ -178,7 +178,7 @@ bool parser::Parser::isAssignmentExpr() {
             }
         }
         else {
-            if(peek()->content == "=") {
+            if(peek()->content == "="||peek()->content == "+="||peek()->content == "-=") {
                 offset = temp; // 归位
                 return true;
             }
