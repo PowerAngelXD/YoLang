@@ -90,8 +90,10 @@ namespace ygen{
         void visitString(yolexer::yoToken* token);
         void visitNull(yolexer::yoToken* token);
         void visitBoolean(yolexer::yoToken* token);
-        void visitIdentifier(AST::IdentifierNode* node);
-        void visitIdentifierText(AST::IdentifierNode* node, bool isref = false);
+        void visitIdentifier(AST::IdentifierExprNode* node);
+        void visitIdentifierExpr(AST::IdentifierExprNode* node);
+        void visitIdentifierExprText(AST::IdentifierExprNode* node, bool isref = false);
+        void visitIdentifierText(AST::IdentifierNode* node);
         void visitSiadExpr(AST::SiadExprNode* node);
         void visitAddOp(AST::AddOpNode* node);
         void visitMulOp(AST::MulOpNode* node);
@@ -131,6 +133,7 @@ namespace ygen{
         void visitReturnStmt(AST::ReturnStmtNode* node);
         AST::StmtNode* visitDeferStmt(AST::DeferStmtNode* node);
         void visit(std::vector<AST::StmtNode*> stmts); // 特殊的visitor，visit的是整个stmts
+        void visitIdentifier(AST::IdentifierNode *node);
     };
 }
 
