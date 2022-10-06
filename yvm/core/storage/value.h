@@ -42,6 +42,7 @@ namespace ysto {
         Value(bool isdyn, int ln, int col); // 初始化null
 
         Value(std::string content); // 用于初始化flag类型的构造函数（flag只用于内部
+        Value(Value* v);
 
         ytype::basicType& getBasicType(); // 获取Value对应的BasicType
         ytype::compType& getCompType(); // 获取Value对应的BasicType
@@ -57,7 +58,7 @@ namespace ysto {
         ytype::YBoolean& getBooleanValue();
         ytype::YString& getStringValue();
         ytype::YNull& getNullValue();
-        Value* getRef();
+        Value* getRef(int index=-1);
 
         std::vector<Value>& getList();
         std::map<std::string, Value>& getStrt();
@@ -69,5 +70,5 @@ namespace ysto {
         Value &operator[](int index);
     };
 
-    void printValue(Value result);
+    void printValue(Value result, std::string mode = "repr");
 }
