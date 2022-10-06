@@ -36,11 +36,11 @@ namespace ysh{
     // 指令定义
     typedef std::pair<std::string, insMethod> ins;
     // Yolang版本号
-    static std::string version = "22.10.144";
+    static std::string version = "22.10.150";
     // 发行版本号
-    static std::string relVersion = "Yolang 1.5.25";
+    static std::string relVersion = "Yolang 1.5.29";
     // 完整版本
-    static std::string completeVersion = "Instable-2022-10-0144";
+    static std::string completeVersion = "Instable-2022-10-0150";
     // vm
     static vmcore::vm yovm;
     // 版本更新说明
