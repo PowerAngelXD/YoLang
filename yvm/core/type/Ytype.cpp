@@ -38,7 +38,12 @@ std::string ytype::compType2String(compType ct) {
     }
 }
 std::string ytype::type2String(ytypeUnit tu) {
-    return basicType2String(tu.bt) + ":" + compType2String(tu.ct);
+    std::string ret = basicType2String(tu.bt);
+    if(tu.ct == ytype::compType::norm || tu.ct == ytype::compType::ref);
+    else if(tu.ct == ytype::compType::list) ret += "[]";
+    else if(tu.ct == ytype::compType::strt) ret += "{=struct}";
+    else if(tu.ct == ytype::compType::llike_strt) ret += "{}";
+    return ret;
 }
 
 ytype::basicType ytype::string2BasicType(std::string s) {
