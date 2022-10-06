@@ -285,10 +285,30 @@ void ygen::ByteCodeGenerator::visitListExpr(AST::ListExprNode* node){
     LST
 }
 void ygen::ByteCodeGenerator::visitAssignmentExpr(AST::AssignmentExprNode* node){
-    visitIdentifierExpr(node->iden);
-    visitExpr(node->expr);
-    ASSIGN
-}//struct A{i:integer} var a=[new A{1}, new A{2}];
+    if(node->equ->content == "=") {
+        visitIdentifierExpr(node->iden);
+        visitExpr(node->expr);
+        ASSIGN
+    }
+    else if(node->equ->content == "+=") {
+        visitIdentifierExpr(node->iden);
+        {
+            visitIdentifierExpr(node->iden);
+            visitExpr(node->expr);
+            ADD(node->equ->line, node->equ->column)
+        }
+        ASSIGN
+    }
+    else if(node->equ->content == "-=") {
+        visitIdentifierExpr(node->iden);
+        {
+            visitIdentifierExpr(node->iden);
+            visitExpr(node->expr);
+            SUB(node->equ->line, node->equ->column)
+        }
+        ASSIGN
+    }
+}
 void ygen::ByteCodeGenerator::visitExpr(AST::WholeExprNode* node){
     if(node->addexpr != nullptr)
         visitAddExpr(node->addexpr);
