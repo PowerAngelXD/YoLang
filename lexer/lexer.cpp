@@ -90,8 +90,6 @@ void yolexer::Lexer::generate(){
             }
             std::string ret;
             tokenGroup.push_back({content, yoTokType::String, line, column});
-            end:
-            ;
         }
         else if(isalpha(input[i]) || input[i] == '_' || input[i] == '$'){
             //是标识符
@@ -140,6 +138,11 @@ void yolexer::Lexer::generate(){
                     tokenGroup.push_back({"++", yoTokType::Symbol, line, column});
                     column++;
                 }
+                else if(input[i + 1] == '='){
+                    i++;
+                    tokenGroup.push_back({"+=", yoTokType::Symbol, line, column});
+                    column++;
+                }
                 else
                     tokenGroup.push_back({"+", yoTokType::Symbol, line, column});
             }
@@ -147,6 +150,11 @@ void yolexer::Lexer::generate(){
                 if(input[i + 1] == '-'){
                     i++;
                     tokenGroup.push_back({"--", yoTokType::Symbol, line, column});
+                    column++;
+                }
+                else if(input[i + 1] == '='){
+                    i++;
+                    tokenGroup.push_back({"-=", yoTokType::Symbol, line, column});
                     column++;
                 }
                 else if(input[i + 1] == '>'){
