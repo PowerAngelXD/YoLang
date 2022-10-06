@@ -911,7 +911,7 @@ void vmcore::vm::create(ygen::byteCode code,  int &current) {
                                             mainQueue[current].arg4, mainQueue[current].line, mainQueue[current].column});
         }
         //
-        space.createValue(name, ysto::Value(ytype::YObject(codes, formalParas, retType), false, code.line, code.column));
+        space.createValue(name, ysto::Value(ytype::YObject(codes, formalParas, retType, name), false, code.line, code.column));
     }
     else if(state == "struct") {
         //struct A{i:integer} struct B{a:A,o:integer} var b=new B{new A{1}, 8};
@@ -1203,7 +1203,6 @@ void vmcore::vm::idenend(ygen::byteCode code) {
     valueStack.push(ysto::Value("flag:identifier_end"));
 }
 void vmcore::vm::call(ygen::byteCode code, std::string arg) {
-    std::string fnName = valueStack.pop().getStringValue().get();
     auto temp = valueStack.pop(); // temp值，用于检测是paraend还是正常的flag
     // 是不是无参函数: true-不是，false-是
     bool isNopara = temp.getBasicType() == ytype::basicType::flag && temp.getStringValue().get() == "flag:para_end";
@@ -1216,6 +1215,9 @@ void vmcore::vm::call(ygen::byteCode code, std::string arg) {
         valueStack.pop();
     }
     std::reverse(args.begin(), args.end());
+
+    auto fnName = valueStack.pop().getRef()->getObjectValue().fnName;
+
     if(std::find(yolexer::bifList.begin(), yolexer::bifList.end(), fnName) != yolexer::bifList.end()) {
         // 是bif，进行bif的判断
         if(fnName == "println") valueStack.push(native.bifSet.println(args, code));
