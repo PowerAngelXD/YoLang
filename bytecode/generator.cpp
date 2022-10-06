@@ -366,6 +366,7 @@ void ygen::ByteCodeGenerator::visitVorcStmt(AST::VorcStmtNode* node) {
 void ygen::ByteCodeGenerator::visitSpExprStmt(AST::SpExprStmtNode* node) {
     if(node->assign != nullptr) visitAssignmentExpr(node->assign);
     else if(node->siad != nullptr) visitSiadExpr(node->siad);
+    else if(node->iden != nullptr) visitIdentifierExpr(node->iden);
     else if(node->typecast != nullptr) visitTypecastExprNode(node->typecast);
 }
 void ygen::ByteCodeGenerator::visitBlockStmt(AST::BlockStmtNode* node) {
