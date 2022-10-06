@@ -14,7 +14,6 @@ int main(int argc, char *argv[]){
                     std::cout<<"Yolang parameter help"<<std::endl;
                     std::cout<<"--version | --v ................. Get the current version of Yolang"<<std::endl;
                     std::cout<<"--help | --h .................... Get help with command line arguments"<<std::endl;
-                    std::cout<<"--gen <file> <target> ........... Generate a Yolang bytecode file named 'Target' according to the file named 'file'"<<std::endl;
                     std::cout<<"--run <file> ...... ............. Run the yolang file named 'file'"<<std::endl;
                 }
             }

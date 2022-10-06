@@ -97,7 +97,6 @@ void ysh::insHelp(std::vector<std::string> paras) {
     std::cout<<"help........................view the help document"<<std::endl;
     std::cout<<"exit........................exit the shell"<<std::endl;
     std::cout<<"run (file)..................run a yolang source file or VM intermediate code file"<<std::endl;
-    std::cout<<"gen (file) (target).........generate a virtual machine file named 'target' from the file named 'file'"<<std::endl;
     std::cout<<"view (opt) (ins) ...........View the content of \"ins\" in the \"opt\" mode (opt refer to: \"ast\", \"file\")"<<std::endl;
     std::cout<<"env (opt)...................operate on virtual machines"<<std::endl;
     std::cout<<"info........................view the information of the Yolang"<<std::endl;
