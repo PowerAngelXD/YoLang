@@ -207,7 +207,7 @@ std::string AST::BlockStmtNode::toString() {
 std::string AST::SpExprStmtNode::toString() {
     if(siad != nullptr) return "SpExprStmtNode: {" + siad->toString() + "}";
     else if(assign != nullptr) return "SpExprStmtNode: {" + assign->toString() + "}";
-
+    else if(iden != nullptr) return "SpExprStmtNode: {" + iden->toString() + "}";
     else if(typecast != nullptr) return "SpExprStmtNode: {" + typecast->toString() + "}";
     else return "null";
 }

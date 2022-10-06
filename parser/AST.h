@@ -5,7 +5,7 @@
  * @brief AST树
  */
 namespace AST{
-    class AddExprNode; class FuncCallNode;
+    class AddExprNode;
     class ListExprNode; class WholeExprNode;
     class StmtNode; class StfOpNode; class TypecastExprNode;
     class CellExprNode; class IdentifierExprNode;
@@ -71,7 +71,6 @@ namespace AST{
         yolexer::yoToken* boolconst = nullptr;
         IdentifierExprNode* iden = nullptr;
         StfOpNode* stf = nullptr;
-        FuncCallNode* fcall = nullptr;
         SiadExprNode* siad = nullptr;
         TypecastExprNode* typecast = nullptr;
         CellExprNode* cellexpr = nullptr;
@@ -288,7 +287,7 @@ namespace AST{
     public:
         SiadExprNode* siad = nullptr;
         AssignmentExprNode* assign = nullptr;
-        FuncCallNode* fcall = nullptr;
+        IdentifierExprNode* iden = nullptr;
         TypecastExprNode* typecast = nullptr;
         yolexer::yoToken* end = nullptr;
 
