@@ -8,30 +8,7 @@ ysto::Value vmcore::native::BuiltInFunctionSet::println(std::vector<ysto::Value>
     else if(args.size() != 1)
         throw yoexception::YoError("FunctionCallingError", "Overloaded function with no specified arguments", args[0].line, args[0].column);
     auto content = args[0];
-    switch (content.getBasicType()){
-        case ytype::integer:
-            std::cout << std::to_string(content.getIntegerValue().get()) << std::endl;
-            break;
-        case ytype::boolean:
-            if (content.getBooleanValue().get()) {
-                std::cout << "true" << std::endl;
-            }else {
-                std::cout << "false" << std::endl;
-            }
-            break;
-        case ytype::decimal:
-            std::cout << std::to_string(content.getDecimalValue().get()) << std::endl;
-            break;
-        case ytype::string:
-            std::cout << content.getStringValue().get() << std::endl;
-            break;
-        case ytype::null:
-            std::cout << "<null>" << std::endl;
-            break;
-        default:
-            throw yoexception::YoError("TypeError", "Invalid Content Type", content.line, content.column);
-            break;
-    }
+    ysto::printValue(content, "out");
     return native::null_value; // 默认返回null
 }
 
@@ -1031,27 +1008,25 @@ void vmcore::vm::idx(ygen::byteCode code) {
     if(idx.getIntegerValue().get() > value.getList().size() - 1)
         throw yoexception::YoError("ListError", "The referenced index is out of range",code.line, code.column);
     if(value.getCompType() == ytype::compType::ref)
-        valueStack.push(ysto::Value(value.getRef()->getList()[idx.getIntegerValue().get()]));
+        valueStack.push(ysto::Value(value.getRef(idx.getIntegerValue().get()), false, code.line, code.column));
     else
         valueStack.push(ysto::Value(value.getList()[idx.getIntegerValue().get()]));
 }
 void vmcore::vm::selfadd(ygen::byteCode code) {
-    auto name = valueStack.pop().getStringValue().get();
+    auto value = valueStack.pop().getRef();
 
-    if(!space.findValue(name))
-        throw yoexception::YoError("NameError", "Unknown identifier: '" + name + "'", code.line, code.column);
-    if(!(space.getValue(name).getBasicType() == ytype::basicType::integer))
+    if(!(value->getBasicType() == ytype::basicType::integer))
         throw yoexception::YoError("TypeError", "This operator does not support this type of operation",code.line, code.column);
 
     if(code.arg1) {
         // 是前置运算
-        space.getValue(name).getIntegerValue() = ytype::YInteger(space.getValue(name).getIntegerValue().get() + 1);
-        valueStack.push(ysto::Value(ytype::YInteger(space.getValue(name).getIntegerValue().get()), false, code.line, code.column));
+        value->getIntegerValue().get() ++;
+        valueStack.push(ysto::Value(ytype::YInteger(value->getIntegerValue().get()), false, code.line, code.column));
     }
     else {
         // 后置运算
-        valueStack.push(ysto::Value(ytype::YInteger(space.getValue(name).getIntegerValue().get()), false, code.line, code.column));
-        space.getValue(name).getIntegerValue() = ytype::YInteger(space.getValue(name).getIntegerValue().get() + 1);
+        valueStack.push(ysto::Value(ytype::YInteger(value->getIntegerValue().get()), false, code.line, code.column));
+        value->getIntegerValue().get() ++;
     }
 }
 void vmcore::vm::selfsub(ygen::byteCode code) {
@@ -1064,25 +1039,19 @@ void vmcore::vm::selfsub(ygen::byteCode code) {
 
     if(code.arg1) {
         // 是前置运算
-        space.getValue(name).getIntegerValue() = ytype::YInteger(space.getValue(name).getIntegerValue().get() - 1);
-        valueStack.push(ysto::Value(ytype::YInteger(space.getValue(name).getIntegerValue().get()), false, code.line, code.column));
+        space.getValue(name).getRef()->getIntegerValue() = ytype::YInteger(space.getValue(name).getRef()->getIntegerValue().get() - 1);
+        valueStack.push(ysto::Value(ytype::YInteger(space.getValue(name).getRef()->getIntegerValue().get()), false, code.line, code.column));
     }
     else {
         // 后置运算
-        valueStack.push(ysto::Value(ytype::YInteger(space.getValue(name).getIntegerValue().get()), false, code.line, code.column));
-        space.getValue(name).getIntegerValue() = ytype::YInteger(space.getValue(name).getIntegerValue().get() - 1);
+        valueStack.push(ysto::Value(ytype::YInteger(space.getValue(name).getRef()->getIntegerValue().get()), false, code.line, code.column));
+        space.getValue(name).getRef()->getIntegerValue() = ytype::YInteger(space.getValue(name).getRef()->getIntegerValue().get() - 1);
     }
 }
 void vmcore::vm::assign(ygen::byteCode code) {
     auto value = valueStack.pop();
     auto sample = valueStack.pop();
-    if(code.arg1) {
-        auto index = valueStack.pop().getIntegerValue().get();
-        if(index > sample.getRef()->getList().size() - 1)
-            throw yoexception::YoError("IndexError", "The referenced index is out of range", code.line, code.column);
-        sample.getRef()->getList()[index] = value;
-    }
-    else *sample.getRef() = value;
+    *sample.getRef() = value;
 
     valueStack.push(value);
 }
