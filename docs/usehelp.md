@@ -259,7 +259,7 @@ println(3);
 1
 ```
 如您所见，defer语句就是将当前的stmt重新push到stmt栈尾的，其原理十分简单
-###### 函数
+##### 函数
 在Yolang中，一般这样定义一个函数，下面看一个定义函数的例子
 ```go
 func null fn(a:integer) {
