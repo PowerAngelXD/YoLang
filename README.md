@@ -14,7 +14,7 @@ This project follows the MIT Open Source [License](LICENSE)
 
 ### How to use
 
-For more information on how to use Yolang and its console, see [HelpDocument](docs/usehelp.md)\
+For more information on how to use Yolang and its console, see [HelpDocument](docs/content.md)\
 ps: Translation work for the Help document will begin, during which time the translated document will continue to use Chinese
 
 ### DownLoad
