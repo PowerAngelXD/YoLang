@@ -1,4 +1,5 @@
 #include "yoshell.h"
+#include <readline/readline.h>
 
 void ysh::vmSetup() {
     yovm.space.createValue("Point", yovm.native.bisSet.Point());
@@ -237,12 +238,13 @@ void ysh::runYoShell() {
     std::cout<<ysh::updateIllustrate<<std::endl;
     std::cout<<" \nWe recommend that you enter \"help\" for help"<<std::endl;
     std::cout<<std::endl;
-    std::string in; // 输入内容
     auto pool = insPool;
 
     while(true) {
-        std::cout<<">>";
-        std::getline(std::cin, in);
+        // 输入内容
+        // Issue #5
+        std::string in = readline(">>");
+
         try{
             if(in == "\n" || in == "\0") throw 0; // 检测到非法字符，跳转到外部
             // command parser
@@ -263,5 +265,7 @@ void ysh::runYoShell() {
         }
         catch(int e) {}
         std::cout<<std::endl;
+
+        // delete &in;
     }
 }
