@@ -94,7 +94,6 @@ namespace ygen{
         void visitBoolean(yolexer::yoToken* token);
         void visitCallOp(AST::CallOpNode* node);
         void visitCellIdentifier(AST::CellIdentifierNode* node);
-        void visitIdentifier(AST::IdentifierExprNode* node);
         void visitIdentifierExpr(AST::IdentifierExprNode* node);
         void visitIdentifierExprText(AST::IdentifierExprNode* node, bool isref = false);
         void visitIdentifierText(AST::IdentifierNode* node);

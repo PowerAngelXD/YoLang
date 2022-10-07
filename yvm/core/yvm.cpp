@@ -25,7 +25,7 @@ ysto::Value vmcore::native::BuiltInFunctionSet::input(std::vector<ysto::Value> a
     }
     std::cout << promptText;
     std::getline(std::cin, resultValue);
-    return ysto::Value(ytype::YString(resultValue), false, code.line, code.column);
+    return {ytype::YString(resultValue), false, code.line, code.column};
 }
 
 ysto::Value vmcore::native::BuiltInFunctionSet::fread(std::vector<ysto::Value> args, ygen::byteCode code) {
@@ -43,7 +43,7 @@ ysto::Value vmcore::native::BuiltInFunctionSet::fread(std::vector<ysto::Value> a
     std::istreambuf_iterator<char> begin(file);
     std::istreambuf_iterator<char> end;
     std::string content(begin, end);
-    return ysto::Value(ytype::YString(content), false, filename.line, filename.column);
+    return {ytype::YString(content), false, filename.line, filename.column};
 }
 
 ysto::Value vmcore::native::BuiltInFunctionSet::fwrite(std::vector<ysto::Value> args, ygen::byteCode code) {
