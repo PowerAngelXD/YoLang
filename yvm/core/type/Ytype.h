@@ -8,8 +8,8 @@
 
 namespace ytype {
     // 对原先的类型系统作出修改
-    enum basicType {integer = 0, boolean, decimal, string, null, object, iden, flag}; // iden类型只是为了标记为标识符所代表的值
-    enum compType {norm = 10, list, strt, llike_strt, ref}; // strt代指struct，llike_strt指类似于列表的结构体表达式
+    enum basicType {integer = 0, boolean, decimal, string, null, object, iden, flag};
+    enum compType {norm = 10, list, strt, llike_strt, ref};
     struct ytypeUnit{
         basicType bt;
         compType ct;
