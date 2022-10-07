@@ -1,4 +1,6 @@
 #include "generator.h"
+
+#include <utility>
 #define SCOPE_BEGIN minCtor(btc::scopestart, node->left->line, node->left->column);
 #define SCOPE_END minCtor(btc::scopeend, node->left->line, node->left->column);
 #define PUSH(value, type, line, column) pushCtor(value, type, 0.0, line, column);
@@ -57,12 +59,26 @@ ygen::btc ygen::string2Code(std::string s) {
 }
 
 
-ygen::ByteCodeGenerator::ByteCodeGenerator(std::vector<AST::StmtNode*> _stmts): stmts(_stmts) {}
+ygen::ByteCodeGenerator::ByteCodeGenerator(std::vector<AST::StmtNode*> _stmts): stmts(std::move(_stmts)) {}
 ygen::ByteCodeGenerator::ByteCodeGenerator(AST::WholeExprNode* _expr): expr(_expr) {}
 std::string ygen::ByteCodeGenerator::removeZero(float content) {
     std::ostringstream oss;
     oss<<content;
     return oss.str();
+}
+int ygen::ByteCodeGenerator::string2Int(const std::string& s) {
+    std::stringstream ss;
+    ss<<s;
+    int ret;
+    ss>>ret;
+    return ret;
+}
+float ygen::ByteCodeGenerator::string2Float(const std::string& s) {
+    std::stringstream ss;
+    ss<<s;
+    float ret;
+    ss>>ret;
+    return ret;
 }
 std::vector<std::string> ygen::ByteCodeGenerator::getConstPool() {
     return constpool;
@@ -72,7 +88,7 @@ std::vector<ygen::byteCode> ygen::ByteCodeGenerator::getCodes() {
 }
 int ygen::ByteCodeGenerator::addPara(std::string para){
     constpool.push_back(para);
-    return constpool.size()-1;
+    return static_cast<int>(constpool.size())-1;
 }
 void ygen::ByteCodeGenerator::minCtor(ygen::btc code, int ln, int col){
     codes.push_back({code, {ytype::basicType::null, ytype::compType::norm}, 0.0, 0.0, 0.0, 0.0, ln, col});
@@ -91,38 +107,38 @@ void ygen::ByteCodeGenerator::visitBoolean(yolexer::yoToken* token){
     if(token->content == "false")
         PUSH(0, ytype::type(ytype::basicType::boolean, ytype::norm), token->line, token->column)
     else if(token->content == "true")
-        PUSH(1, ytype::type(ytype::basicType::boolean, ytype::norm), token->line, token->column);
+        PUSH(1, ytype::type(ytype::basicType::boolean, ytype::norm), token->line, token->column)
 }
 void ygen::ByteCodeGenerator::visitNumber(yolexer::yoToken* token){
     if(token->type == yolexer::yoTokType::Integer)
-        PUSH(atoi(token->content.c_str()), ytype::type(ytype::basicType::integer, ytype::norm), token->line, token->column)
+        PUSH(string2Float(token->content), ytype::type(ytype::basicType::integer, ytype::norm), token->line, token->column)
     else if(token->type == yolexer::yoTokType::Decimal)
-        PUSH(atof(token->content.c_str()), ytype::type(ytype::basicType::decimal, ytype::norm), token->line, token->column)
+        PUSH(string2Float(token->content), ytype::type(ytype::basicType::decimal, ytype::norm), token->line, token->column)
 }
 void ygen::ByteCodeGenerator::buildIntegerNumber(std::string number, int line, int column) {
-    PUSH(atoi(number.c_str()), ytype::type(ytype::basicType::integer, ytype::norm), line, column)
+    PUSH(string2Float(number), ytype::type(ytype::basicType::integer, ytype::norm), line, column)
 }
 void ygen::ByteCodeGenerator::buildDecimalNumber(std::string number, int line, int column) {
-    PUSH(atof(number.c_str()), ytype::type(ytype::basicType::decimal, ytype::norm), line, column)
+    PUSH(string2Float(number), ytype::type(ytype::basicType::decimal, ytype::norm), line, column)
 }
 void ygen::ByteCodeGenerator::visitString(yolexer::yoToken* token) {
-    PUSH(addPara(token->content), ytype::type(ytype::basicType::string, ytype::norm), token->line, token->column);
+    PUSH(static_cast<float>(addPara(token->content)), ytype::type(ytype::basicType::string, ytype::norm), token->line, token->column)
 }
 void ygen::ByteCodeGenerator::visitNull(yolexer::yoToken* token){
-    PUSH(0.0, ytype::type(ytype::basicType::null, ytype::norm), token->line, token->column);
+    PUSH(0.0, ytype::type(ytype::basicType::null, ytype::norm), token->line, token->column)
 }
 void ygen::ByteCodeGenerator::visitCallOp(AST::CallOpNode* node) {
     PARAEND
     if(!node->paras.empty()) {
         // 函数调用有参数，生成参数指令
-        for(int i = 0; i < node->paras.size(); i ++) {
-            visitExpr(node->paras[i]);
+        for(auto & para : node->paras) {
+            visitExpr(para);
         }
     }
     CALL
 }
 void ygen::ByteCodeGenerator::visitCellIdentifier(AST::CellIdentifierNode* node) {
-    PUSH(addPara(node->iden->content), ytype::type(ytype::basicType::iden, ytype::norm), node->iden->line, node->iden->column);
+    PUSH(static_cast<float>(addPara(node->iden->content)), ytype::type(ytype::basicType::iden, ytype::norm), node->iden->line, node->iden->column)
     if(node->call != nullptr) visitCallOp(node->call);
 }
 void ygen::ByteCodeGenerator::visitIdentifier(AST::IdentifierNode *node) {
@@ -142,16 +158,16 @@ void ygen::ByteCodeGenerator::visitIdentifierExpr(AST::IdentifierExprNode* node)
     }
 }
 void ygen::ByteCodeGenerator::visitIdentifierText(AST::IdentifierNode* node) {
-    PUSH(addPara(node->iden->iden->content), ytype::type(ytype::basicType::string, ytype::norm), node->iden->iden->line, node->iden->iden->column)
+    PUSH(static_cast<float>(addPara(node->iden->iden->content)), ytype::type(ytype::basicType::string, ytype::norm), node->iden->iden->line, node->iden->iden->column)
 }
 void ygen::ByteCodeGenerator::visitIdentifierExprText(AST::IdentifierExprNode* node, bool isref){
     std::string text;
     text += node->idens[0]->iden->iden->content;
-    for(int i = 0; i < node->dots.size(); i++) {
+    for(unsigned long long int i = 0; i < node->dots.size(); i++) {
         text += node->dots[i]->content;
-        text += node->idens[i + 1]->iden->iden->content;
+        text += node->idens[static_cast<unsigned long long int>(i + 1)]->iden->iden->content;
     }
-    PUSH(addPara(text), ytype::type(ytype::basicType::string, ytype::norm), node->idens[0]->iden->iden->line, node->idens[0]->iden->iden->column);
+    PUSH(static_cast<float>(addPara(text)), ytype::type(ytype::basicType::string, ytype::norm), node->idens[0]->iden->iden->line, node->idens[0]->iden->iden->column)
 }
 void ygen::ByteCodeGenerator::visitSiadExpr(AST::SiadExprNode* node){
     if(node->isFront){
@@ -220,7 +236,7 @@ void ygen::ByteCodeGenerator::visitIndexOp(AST::IndexOpNode* node){
 }
 void ygen::ByteCodeGenerator::visitStfOp(AST::StfOpNode* node){
     if(node->expr != nullptr) visitExpr(node->expr);
-    STF(addPara(node->name->content));
+    STF(static_cast<float>(addPara(node->name->content)))
 }
 void ygen::ByteCodeGenerator::visitCellExpr(AST::CellExprNode *node) {
     if(node->op->content == "+");
@@ -249,14 +265,14 @@ void ygen::ByteCodeGenerator::visitTypecastExprNode(AST::TypecastExprNode *node)
 }
 void ygen::ByteCodeGenerator::visitMulExpr(AST::MulExprNode* node){
     visitPrimExpr(node->prims[0]);
-    for(int i = 0; i < node->ops.size(); i++) {
-        visitPrimExpr(node->prims[i + 1]);
+    for(unsigned long long int i = 0; i < node->ops.size(); i++) {
+        visitPrimExpr(node->prims[(i + 1)]);
         visitMulOp(node->ops[i]);
     }
 }
 void ygen::ByteCodeGenerator::visitAddExpr(AST::AddExprNode* node){
     visitMulExpr(node->muls[0]);
-    for(int i = 0; i < node->ops.size(); i++) {
+    for(unsigned long long int i = 0; i < node->ops.size(); i++) {
         visitMulExpr(node->muls[i + 1]);
         visitAddOp(node->ops[i]);
     }
@@ -272,7 +288,7 @@ void ygen::ByteCodeGenerator::visitCmpExpr(AST::CmpExprNode* node){
 }
 void ygen::ByteCodeGenerator::visitBoolExpr(AST::BoolExprNode* node){
     visitCmpExpr(node->cmps[0]);
-    for(int i = 0; i < node->ops.size(); i++) {
+    for(unsigned long long int i = 0; i < node->ops.size(); i++) {
         visitCmpExpr(node->cmps[i + 1]);
         visitBoolOp(node->ops[i]);
     }
@@ -328,7 +344,7 @@ void ygen::ByteCodeGenerator::visitStructExpr(AST::StructExprNode *node) {
     PARAEND
     if(!node->elements.empty()) {
         // 函数调用有参数，生成参数指令
-        for(int i = 0; i < node->elements.size(); i ++) {
+        for(unsigned long long int i = 0; i < node->elements.size(); i ++) {
             visitExpr(node->elements[i]);
         }
     }
@@ -345,7 +361,7 @@ void ygen::ByteCodeGenerator::visitNewExpr(AST::NewExprNode* node) {
         if(!node->initlist->elements.empty()) {
             // 函数调用有参数，生成参数指令
             for(int i = 0; i < node->initlist->elements.size(); i ++) {
-                visitExpr(node->initlist->elements[i]);
+                visitExpr(node->initlist->elements[static_cast<unsigned long long int>(i)]);
             }
         }
         visitIdentifierExprText(node->iden);
@@ -363,9 +379,9 @@ void ygen::ByteCodeGenerator::visitStructDefStmt(AST::StructDefineStmtNode *node
     visitString(node->name);
     PARAEND
     if(!node->members.empty()) {
-        for(int i = 0; i < node->members.size(); i++) {
-            visitString(node->members[i]->name);
-            visitString(node->members[i]->type);
+        for(auto & member : node->members) {
+            visitString(member->name);
+            visitString(member->type);
         }
     }
     CREATE(addPara(node->name->content), addPara(node->mark->content), 0, 0)
@@ -380,7 +396,7 @@ void ygen::ByteCodeGenerator::visitVorcStmt(AST::VorcStmtNode* node) {
         CREATE(addPara(def->name->content),
                node->modifier != nullptr ? addPara(node->modifier->content):addPara(node->mark->content),
                def->separate != nullptr ? addPara(def->type->content) : 0.0,
-               def->separate != nullptr ? 1.0 : 0.0);
+               def->separate != nullptr ? 1.0 : 0.0)
     }
 }
 void ygen::ByteCodeGenerator::visitSpExprStmt(AST::SpExprStmtNode* node) {
@@ -406,7 +422,7 @@ void ygen::ByteCodeGenerator::visitWhileStmt(AST::WhileStmtNode* node) {
     SCOPE_END
     JMP(paraHelper::jmpt::reqTrue, paraHelper::jmpt::backScope, node->mark->line, node->mark->column)
 
-    FLAG(paraHelper::flagt::loopEnd, node->mark->line, node->mark->column);
+    FLAG(paraHelper::flagt::loopEnd, node->mark->line, node->mark->column)
 }
 void ygen::ByteCodeGenerator::visitIfStmt(AST::IfStmtNode* node) {
     visitBoolExpr(node->cond);
@@ -426,7 +442,7 @@ void ygen::ByteCodeGenerator::visitElseStmt(AST::ElseStmtNode* node) {
 void ygen::ByteCodeGenerator::visitRepeatStmt(AST::RepeatStmtNode *node) {
     repit ++;
     PUSH(-1, ytype::type(ytype::basicType::integer, ytype::norm), node->mark->line, node->mark->column)
-    CREATE(addPara("_rit" + std::to_string(repit) + "_"), addPara("var"), addPara("integer"), 1.0); // 创建迭代器，初始值设置为1
+    CREATE(addPara("_rit" + std::to_string(repit) + "_"), addPara("var"), addPara("integer"), 1.0) // 创建迭代器，初始值设置为1
 
     PUSH(addPara("_rit" + std::to_string(repit) + "_"), ytype::type(ytype::basicType::iden, ytype::norm), node->mark->line, node->mark->column)
     visitAddExpr(node->times);
@@ -439,7 +455,7 @@ void ygen::ByteCodeGenerator::visitRepeatStmt(AST::RepeatStmtNode *node) {
 
     SCOPE_BEGIN{
         PUSH(addPara("_rit" + std::to_string(repit) + "_"), ytype::type(ytype::basicType::iden, ytype::norm), node->mark->line,
-                   node->mark->column);
+                   node->mark->column)
         SELF_ADD(0.0, node->left->line, node->left->column)
         visit(node->body->stmts);
 
@@ -455,7 +471,7 @@ void ygen::ByteCodeGenerator::visitRepeatStmt(AST::RepeatStmtNode *node) {
     DEL_VAL
     // repit的处理
     DEL(addPara("_rit" + std::to_string(repit) + "_"), 1.0)
-    FLAG(paraHelper::flagt::loopEnd, node->mark->line, node->mark->column);
+    FLAG(paraHelper::flagt::loopEnd, node->mark->line, node->mark->column)
     repit --;
 }
 
@@ -484,7 +500,7 @@ void ygen::ByteCodeGenerator::visitForStmt(AST::ForStmtNode* node) {
     JMP(paraHelper::jmpt::reqTrue, paraHelper::jmpt::backScope, node->mark->line, node->mark->column)
     DEL_VAL
     // 释放局部变量
-    FLAG(paraHelper::flagt::loopEnd, node->mark->line, node->mark->column);
+    FLAG(paraHelper::flagt::loopEnd, node->mark->line, node->mark->column)
     if(node->hasVorc)
         DEL(addPara(node->vorc->defintions[0]->name->content), 1.0)
 }
@@ -499,17 +515,19 @@ void ygen::ByteCodeGenerator::visitBreakStmt(AST::BreakStmtNode* node) {
 }
 
 void ygen::ByteCodeGenerator::visitFuncDefStmt(AST::FuncDefStmtNode* node) {
-    PUSH(addPara(node->rettype->content), ytype::type(ytype::basicType::string, ytype::norm), node->mark->line, node->mark->column); // 将要定义的函数的返回值类型入栈
+    PUSH(addPara(node->rettype->content), ytype::type(ytype::basicType::string, ytype::norm), node->mark->line, node->mark->column) // 将要定义的函数的返回值类型入栈
     PARAEND
     if(node->hasPara) {
         for(int i = 0; i < node->paras.size(); i++) {
-            PUSH(addPara(node->paras[i]->paratype->content), ytype::type(ytype::basicType::string, ytype::norm), node->paras[i]->paratype->line, node->paras[i]->paratype->column);
-            PUSH(addPara(node->paras[i]->paraname->content), ytype::type(ytype::basicType::string, ytype::norm), node->paras[i]->paraname->line, node->paras[i]->paraname->column);
+            PUSH(addPara(node->paras[i]->paratype->content), ytype::type(ytype::basicType::string, ytype::norm),
+                 node->paras[i]->paratype->line, node->paras[i]->paratype->column)
+            PUSH(addPara(node->paras[i]->paraname->content), ytype::type(ytype::basicType::string, ytype::norm),
+                 node->paras[i]->paraname->line, node->paras[i]->paraname->column)
         }
     }
     CREATE(addPara(node->name->content), addPara(node->mark->content), addPara(node->rettype->content), node->hasPara)
     visitBlockStmt(node->body);
-    FLAG(paraHelper::flagt::fnEnd, node->mark->line, node->mark->column);
+    FLAG(paraHelper::flagt::fnEnd, node->mark->line, node->mark->column)
 }
 
 AST::StmtNode* ygen::ByteCodeGenerator::visitDeferStmt(AST::DeferStmtNode *node) {
@@ -518,15 +536,15 @@ AST::StmtNode* ygen::ByteCodeGenerator::visitDeferStmt(AST::DeferStmtNode *node)
 
 void ygen::ByteCodeGenerator::visitReturnStmt(AST::ReturnStmtNode *node) {
     visitExpr(node->expr);
-    JMP(paraHelper::jmpt::unconditional, paraHelper::jmpt::outFn, node->mark->line, node->mark->column);
+    JMP(paraHelper::jmpt::unconditional, paraHelper::jmpt::outFn, node->mark->line, node->mark->column)
 }
 
-void ygen::ByteCodeGenerator::visit(std::vector<AST::StmtNode*> stmts) {
-    for(auto stmt: stmts) {
-        if(stmt->deferstmt != nullptr) stmts.push_back(visitDeferStmt(stmt->deferstmt));
+void ygen::ByteCodeGenerator::visit(std::vector<AST::StmtNode*> _stmts) {
+    for(auto stmt: _stmts) {
+        if(stmt->deferstmt != nullptr) _stmts.push_back(visitDeferStmt(stmt->deferstmt));
     }
 
-    for(auto stmt: stmts){
+    for(auto stmt: _stmts){
         if(stmt->outstmt != nullptr) visitOutStmt(stmt->outstmt);
         else if(stmt->blockstmt != nullptr) visitBlockStmt(stmt->blockstmt);
         else if(stmt->vorcstmt != nullptr) visitVorcStmt(stmt->vorcstmt);

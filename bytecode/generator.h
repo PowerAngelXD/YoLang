@@ -42,15 +42,17 @@ namespace ygen{
 
     class ByteCodeGenerator{
         std::vector<AST::StmtNode*> stmts;
-        AST::WholeExprNode* expr;
+        AST::WholeExprNode* expr{};
         std::vector<std::string> constpool; // 字符（串）池，根据索引取元素(也可以用来存放参数)
         std::vector<byteCode> codes; // 字节码集
         int repit = -1; // 累计repit的计数器，起始值为-1
 
         std::string removeZero(float content); // 功能性函数，去除字符串末尾的0
+        int string2Int(const std::string& s);
+        float string2Float(const std::string& s);
     public:
-        ByteCodeGenerator(std::vector<AST::StmtNode*> _stmts);
-        ByteCodeGenerator(AST::WholeExprNode* _expr);
+        explicit ByteCodeGenerator(std::vector<AST::StmtNode*> _stmts);
+        explicit ByteCodeGenerator(AST::WholeExprNode* _expr);
 
         std::vector<std::string> getConstPool(); // 获取字符（串）池
         std::vector<byteCode> getCodes(); // 获取字节码集
@@ -133,7 +135,7 @@ namespace ygen{
         void visitStructDefStmt(AST::StructDefineStmtNode* node);
         void visitReturnStmt(AST::ReturnStmtNode* node);
         AST::StmtNode* visitDeferStmt(AST::DeferStmtNode* node);
-        void visit(std::vector<AST::StmtNode*> stmts); // 特殊的visitor，visit的是整个stmts
+        void visit(std::vector<AST::StmtNode*> _stmts); // 特殊的visitor，visit的是整个stmts
         void visitIdentifier(AST::IdentifierNode *node);
     };
 }
