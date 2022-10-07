@@ -1,5 +1,4 @@
 #include "yoshell.h"
-#include <readline/readline.h>
 
 void ysh::vmSetup() {
     yovm.space.createValue("Point", yovm.native.bisSet.Point());
@@ -242,9 +241,9 @@ void ysh::runYoShell() {
 
     while(true) {
         // 输入内容
-        // Issue #5
-        std::string in = readline(">>");
-
+        std::string in;
+        std::cout<<">> ";
+        std::getline(std::cin, in);
         try{
             if(in == "\n" || in == "\0") throw 0; // 检测到非法字符，跳转到外部
             // command parser
