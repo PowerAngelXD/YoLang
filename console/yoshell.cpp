@@ -96,7 +96,7 @@ std::string ysh::tools::formatAst(std::string aststr) {
 }
 
 // SHELL
-void ysh::insHelp(std::vector<std::string> paras) {
+void ysh::insHelp([[maybe_unused]] std::vector<std::string> paras) {
     std::cout<<"Yo-Console Helper"<<std::endl;
     std::cout<<"help........................view the help document"<<std::endl;
     std::cout<<"exit........................exit the shell"<<std::endl;
@@ -105,10 +105,10 @@ void ysh::insHelp(std::vector<std::string> paras) {
     std::cout<<"env (opt)...................operate on virtual machines"<<std::endl;
     std::cout<<"info........................view the information of the Yolang"<<std::endl;
 }
-void ysh::insExit(std::vector<std::string> paras) {
+void ysh::insExit([[maybe_unused]] std::vector<std::string> paras) {
     exit(0);
 }
-void ysh::insInfo(std::vector<std::string> paras) {
+void ysh::insInfo([[maybe_unused]] std::vector<std::string> paras) {
     std::cout<<"Yolang develop complete version: " << ysh::completeVersion << std::endl;
     std::cout<<"Yolang develop version: " << ysh::version << std::endl;
     std::cout<<"Yolang version: " << ysh::relVersion << std::endl;
@@ -248,7 +248,7 @@ void ysh::runYoShell() {
             // command parser
             auto tempField = tools::split(in, ' ')[0];
             bool flag = false;
-            for(int i = 0; i < ysh::insPool.size(); i++){
+            for(unsigned long long int i = 0; i < ysh::insPool.size(); i++){
                 if(tempField == ysh::insPool[i].first) {
                     auto paras = tools::split(in, ' '); // 创建参数列表
                     paras.erase(paras.begin()); // 删除第一个元素，因为他是命令解析符

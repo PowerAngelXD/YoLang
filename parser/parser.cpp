@@ -3,11 +3,11 @@
 // FUNCTIONALITY
 parser::Parser::Parser(std::vector<yolexer::yoToken> _tg): tg(_tg), offset(0) {}
 yolexer::yoToken* parser::Parser::peek(int _offset){
-    return new yolexer::yoToken(tg[offset + _offset]);
+    return new yolexer::yoToken(tg[static_cast<unsigned long long int>(offset + _offset)]);
 }
 
 yolexer::yoToken* parser::Parser::token(){
-    return new yolexer::yoToken(tg[offset++]);
+    return new yolexer::yoToken(tg[static_cast<unsigned long long int>(offset++)]);
 }
 
 // CHECKER

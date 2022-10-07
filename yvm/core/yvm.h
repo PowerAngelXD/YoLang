@@ -7,19 +7,19 @@ namespace vmcore {
 
         class BuiltInFunctionSet {
         public:
-            ysto::Value println(std::vector<ysto::Value> args, ygen::byteCode code);
-            ysto::Value input(std::vector<ysto::Value> args, ygen::byteCode code);
-            ysto::Value fread(std::vector<ysto::Value> args, ygen::byteCode code);
-            ysto::Value fwrite(std::vector<ysto::Value> args,ygen::byteCode code);
-            ysto::Value substr(std::vector<ysto::Value> args, ygen::byteCode code);
-            ysto::Value ref(std::vector<ysto::Value> args, ygen::byteCode code);
-            ysto::Value vmcode(std::vector<ysto::Value> args, ygen::byteCode code);
-            ysto::Value add_const(std::vector<ysto::Value> args, ygen::byteCode code);
-            ysto::Value length(std::vector<ysto::Value> args, ygen::byteCode code);
-            ysto::Value randint(std::vector<ysto::Value> args, ygen::byteCode code);
-            ysto::Value rand_deci(std::vector<ysto::Value> args, ygen::byteCode code);
-            ysto::Value randstr(std::vector<ysto::Value> args, ygen::byteCode code);
-            ysto::Value split(std::vector<ysto::Value> args, ygen::byteCode code);
+            static ysto::Value println(std::vector<ysto::Value> args, ygen::byteCode code);
+            static ysto::Value input(std::vector<ysto::Value> args, ygen::byteCode code);
+            static ysto::Value fread(std::vector<ysto::Value> args, ygen::byteCode code);
+            static ysto::Value fwrite(std::vector<ysto::Value> args,ygen::byteCode code);
+            static ysto::Value substr(std::vector<ysto::Value> args, ygen::byteCode code);
+            static ysto::Value ref(std::vector<ysto::Value> args, ygen::byteCode code);
+            static ysto::Value vmcode(std::vector<ysto::Value> args, ygen::byteCode code);
+            static ysto::Value add_const(std::vector<ysto::Value> args, ygen::byteCode code);
+            static ysto::Value length(std::vector<ysto::Value> args, ygen::byteCode code);
+            static ysto::Value randint(std::vector<ysto::Value> args, ygen::byteCode code);
+            static ysto::Value rand_deci(std::vector<ysto::Value> args, ygen::byteCode code);
+            static ysto::Value randstr(std::vector<ysto::Value> args, ygen::byteCode code);
+            static ysto::Value split(std::vector<ysto::Value> args, ygen::byteCode code);
         };
 
         class BuiltInStructSet {

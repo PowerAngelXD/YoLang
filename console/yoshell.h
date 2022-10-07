@@ -54,9 +54,9 @@ namespace ysh{
             "6, Added '+=', '-=' operator";
     // 指令池
     // 指令方法命名规范：insXXX（XXX为指令名称，首字母大写）
-    void insHelp(INSPARAS);
-    void insInfo(INSPARAS);
-    void insExit(INSPARAS);
+    void insHelp([[maybe_unused]] INSPARAS);
+    void insInfo([[maybe_unused]] INSPARAS);
+    void insExit([[maybe_unused]] INSPARAS);
     void insRun(INSPARAS);
     void insEnv(INSPARAS);
     void insView(INSPARAS);
