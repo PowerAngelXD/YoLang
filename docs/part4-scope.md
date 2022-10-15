@@ -21,8 +21,8 @@
 下面，我们将讲一下Yolang中的作用域\
 在Yolang中，作用域即每一个Scope，一般地，当有n个Scope（n>=2）且这些Scope都层层嵌套，我们把最外层的那个Scope成为根Scope（根scope没有父scope）；而在这个过程中，除根scope外所有嵌套的Scope，那个在外部的Scope成为被包含的Scope（这个“被包含的Scope”的数量不定，可以是1，也可以是多个）的父Scope，被包含在内的则成为子scope。如您所见，global就是一个根Scope；也是所有Scope的父Scope。如下示意图可以很好的阐述上面的内容：
 ![](img/scope_relation.png)
-如上图，global是scope-1，scope-2的根scope，也可以说是scope-1，scope-2的父scope，但是scope-1是global的子scope，scope-2则是scope-1的唯一子scope，也就是说，存在如下关系：
-```
-scope-2 ⊊ scope-1 ⊊ global
-```
-由上面的关系，我们可以推断：在global中的Value就必定在其所有子scope中，同样，如果存在scope-1，scope-2，满足关系`scope-2 ⊊ scope-1`，则存在于scope-1中的Value也必定存在于scope-2；这意味着在子scope使用所有父scope（一个子scope不一定只有一个父scope，但是一个根scope是没有父scope的！）中存在的内容是合法正确的
+如上图，global是scope-1，scope-2的根scope，也可以说是scope-1，scope-2的父scope，但是scope-1是global的子scope，scope-2则是scope-1的唯一子scope，也就是说，存在如下关系（因为书写的规范性，scope-1的“-”符不写上）：
+$$
+scope2 \subsetneq scope1 \subsetneq scope
+$$
+由上面的关系，我们可以推断：在global中的Value就必定在其所有子scope中，同样，如果存在scope-1，scope-2，满足关系 $scope2 ⊊ scope1$ ，则存在于scope-1中的Value也必定存在于scope-2；这意味着在子scope使用所有父scope（一个子scope不一定只有一个父scope，但是一个根scope是没有父scope的！）中存在的内容是合法正确的
