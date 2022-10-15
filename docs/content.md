@@ -7,4 +7,5 @@
 [2, 变量与常量](part2-variable-constant.md)\
 [3, 动态类型和静态类型](part3-dynamic-static.md)\
 [4, 作用域](part4-scope.md)\
-[5, 语句与表达式](patt5-stc-expr.md)
+[5, 语句与表达式](part5-stc-expr.md)\
+[6, 条件控制](part6-cond-control.md)
