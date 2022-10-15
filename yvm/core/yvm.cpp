@@ -20,7 +20,7 @@ ysto::Value vmcore::native::BuiltInFunctionSet::input(std::vector<ysto::Value> a
     else {
         auto prompt = args[0];
         if (prompt.getBasicType() == ytype::basicType::string){
-            promptText = prompt.getStringValue().get();
+            promptText = prompt.getCompType() == ytype::compType::ref?prompt.getRef()->getStringValue().get():prompt.getStringValue().get();
         }
     }
     std::cout << promptText;
@@ -37,9 +37,7 @@ ysto::Value vmcore::native::BuiltInFunctionSet::fread(std::vector<ysto::Value> a
         throw yoexception::YoError("TypeError", "Invalid FileName Type", filename.line, filename.column);
     }
 
-    std::ifstream file(filename.getStringValue().get());
-    // 编码操作
-    //
+    std::ifstream file(filename.getCompType() == ytype::compType::ref?filename.getRef()->getStringValue().get():filename.getStringValue().get());
     std::istreambuf_iterator<char> begin(file);
     std::istreambuf_iterator<char> end;
     std::string content(begin, end);
@@ -53,9 +51,9 @@ ysto::Value vmcore::native::BuiltInFunctionSet::fwrite(std::vector<ysto::Value> 
         args[1].getBasicType() != ytype::basicType::string &&
         args[2].getBasicType() != ytype::basicType::string)
         throw yoexception::YoError("TypeError", "The parameter type filled in the corresponding function does not match the definition", args[0].line, args[0].column);
-    std::string path = args[0].getStringValue().get();
-    std::string content = args[1].getStringValue().get();
-    std::string mode = args[2].getStringValue().get();
+    std::string path = args[0].getCompType() == ytype::compType::ref?args[0].getRef()->getStringValue().get():args[0].getStringValue().get();
+    std::string content = args[1].getCompType() == ytype::compType::ref?args[1].getRef()->getStringValue().get():args[1].getStringValue().get();
+    std::string mode = args[2].getCompType() == ytype::compType::ref?args[2].getRef()->getStringValue().get():args[2].getStringValue().get();
     /* mode是文件打开方式，分为以下几个方式
      * append：追加在已存在的文件后面，如果不存在则报错
      * new：创建一个文件，当已经有同名文件存在时报错
@@ -94,14 +92,14 @@ ysto::Value vmcore::native::BuiltInFunctionSet::length(std::vector<ysto::Value> 
         throw yoexception::YoError("FunctionCallingError", "Overloaded function with no specified arguments", code.line, code.column);
     else if (args.size() != 1)
         throw yoexception::YoError("FunctionCallingError", "Overloaded function with no specified arguments", args[0].line, args[0].column);
-    else if(args[0].getType() != (ytype::ytypeUnit){ytype::basicType::string, ytype::compType::norm} && args[0].getCompType() != ytype::compType::list)
+    else if(args[0].getType().bt != ytype::basicType::string && args[0].getCompType() != ytype::compType::list)
         throw yoexception::YoError("FunctionCallingError", "Overloaded function with no specified arguments", args[0].line, args[0].column);
 
     auto value = args[0];
     if(value.getCompType() == ytype::compType::list)
-        return {ytype::YInteger(value.getList().size()), false, code.line, code.column};
+        return {ytype::YInteger(value.getCompType() == ytype::compType::ref?value.getRef()->getList().size():value.getList().size()), false, code.line, code.column};
     else if(value.getBasicType() == ytype::basicType::string)
-        return {ytype::YInteger(value.getStringValue().get().size()), false, code.line, code.column};
+        return {ytype::YInteger(value.getCompType() == ytype::compType::ref?value.getRef()->getStringValue().get().size():value.getStringValue().get().size()), false, code.line, code.column};
 }
 
 ysto::Value vmcore::native::BuiltInFunctionSet::add_const(std::vector<ysto::Value> args, ygen::byteCode code) {
@@ -109,10 +107,10 @@ ysto::Value vmcore::native::BuiltInFunctionSet::add_const(std::vector<ysto::Valu
         throw yoexception::YoError("FunctionCallingError", "Overloaded function with no specified arguments", code.line, code.column);
     else if (args.size() != 1)
         throw yoexception::YoError("FunctionCallingError", "Overloaded function with no specified arguments", args[0].line, args[0].column);
-    else if(args[0].getType() != (ytype::ytypeUnit){ytype::basicType::string, ytype::compType::norm})
+    else if(args[0].getType().bt != ytype::basicType::string)
         throw yoexception::YoError("FunctionCallingError", "Overloaded function with no specified arguments", args[0].line, args[0].column);
 
-    return {"flag:return_const:" + args[0].getStringValue().get()};
+    return {"flag:return_const:" + (args[0].getCompType() == ytype::compType::ref?args[0].getRef()->getStringValue().get():args[0].getStringValue().get())};
 }
 
 ysto::Value vmcore::native::BuiltInFunctionSet::vmcode(std::vector<ysto::Value> args, ygen::byteCode code) {
@@ -120,10 +118,10 @@ ysto::Value vmcore::native::BuiltInFunctionSet::vmcode(std::vector<ysto::Value> 
         throw yoexception::YoError("FunctionCallingError", "Overloaded function with no specified arguments", code.line, code.column);
     else if (args.size() != 1)
         throw yoexception::YoError("FunctionCallingError", "Overloaded function with no specified arguments", args[0].line, args[0].column);
-    else if(args[0].getType() != (ytype::ytypeUnit){ytype::basicType::string, ytype::compType::norm})
+    else if(args[0].getType().bt != ytype::basicType::string)
         throw yoexception::YoError("FunctionCallingError", "Overloaded function with no specified arguments", args[0].line, args[0].column);
 
-    return {"flag:return_code:" + args[0].getStringValue().get()};
+    return {"flag:return_code:" + (args[0].getCompType() == ytype::compType::ref?args[0].getRef()->getStringValue().get():args[0].getStringValue().get())};
 }
 
 ysto::Value vmcore::native::BuiltInFunctionSet::ref(std::vector<ysto::Value> args, ygen::byteCode code) {
@@ -133,10 +131,10 @@ ysto::Value vmcore::native::BuiltInFunctionSet::ref(std::vector<ysto::Value> arg
         throw yoexception::YoError("FunctionCallingError", "Overloaded function with no specified arguments", args[0].line, args[0].column);
     auto name = args[0];
 
-    if(name.getType() != (ytype::ytypeUnit){ytype::basicType::string, ytype::compType::norm})
+    if(name.getType().bt != ytype::basicType::string)
         throw yoexception::YoError("FunctionCallingError", "Overloaded function with no specified arguments", args[0].line, args[0].column);
 
-    return {"flag:return_ref:" + name.getStringValue().get()};
+    return {"flag:return_ref:" + (args[0].getCompType() == ytype::compType::ref?args[0].getRef()->getStringValue().get():args[0].getStringValue().get())};
 }
 
 ysto::Value vmcore::native::BuiltInFunctionSet::substr(std::vector<ysto::Value> args, ygen::byteCode code){
@@ -145,9 +143,9 @@ ysto::Value vmcore::native::BuiltInFunctionSet::substr(std::vector<ysto::Value> 
     else if (args.size() != 3)
         throw yoexception::YoError("FunctionCallingError", "Overloaded function with no specified arguments", args[0].line, args[0].column);
 
-    auto string = args[0];
-    auto start = args[1];
-    auto end = args[2];
+    auto string = args[0].getCompType() == ytype::compType::ref?*args[0].getRef():args[0];
+    auto start = args[1].getCompType() == ytype::compType::ref?*args[1].getRef():args[1];
+    auto end = args[2].getCompType() == ytype::compType::ref?*args[2].getRef():args[2];
     if (string.getBasicType() != ytype::basicType::string){
         throw yoexception::YoError("TypeError", "Invalid String Argument Type", string.line, string.column);
     }
@@ -166,10 +164,10 @@ ysto::Value vmcore::native::BuiltInFunctionSet::randint(std::vector<ysto::Value>
         throw yoexception::YoError("FunctionCallingError", "Overloaded function with no specified arguments", code.line, code.column);
     else if (args.size() != 2)
         throw yoexception::YoError("FunctionCallingError", "Overloaded function with no specified arguments", args[0].line, args[0].column);
-    if(args[0].getType() != ytype::type(ytype::basicType::integer, ytype::compType::norm) || args[1].getType() != ytype::type(ytype::basicType::integer, ytype::compType::norm))
+    if(args[0].getType().bt != ytype::basicType::integer || args[1].getType().bt != ytype::basicType::integer)
         throw yoexception::YoError("FunctionCallingError", "Overloaded function with no specified arguments", args[0].line, args[0].column);
-    auto max = args[1].getIntegerValue().get();
-    auto min = args[0].getIntegerValue().get();
+    auto max = args[1].getCompType() == ytype::compType::ref?args[1].getRef()->getIntegerValue().get():args[1].getIntegerValue().get();
+    auto min = args[0].getCompType() == ytype::compType::ref?args[0].getRef()->getIntegerValue().get():args[0].getIntegerValue().get();
     std::random_device rd;
     std::uniform_int_distribution<unsigned> ri(min, max);
     return {ytype::YInteger(ri(rd)), false, code.line, code.column};
@@ -180,10 +178,10 @@ ysto::Value vmcore::native::BuiltInFunctionSet::rand_deci(std::vector<ysto::Valu
         throw yoexception::YoError("FunctionCallingError", "Overloaded function with no specified arguments", code.line, code.column);
     else if (args.size() != 2)
         throw yoexception::YoError("FunctionCallingError", "Overloaded function with no specified arguments", args[0].line, args[0].column);
-    if(args[0].getType() != ytype::type(ytype::basicType::decimal, ytype::compType::norm) || args[1].getType() != ytype::type(ytype::basicType::decimal, ytype::compType::norm))
+    if(args[0].getType().bt != ytype::basicType::decimal || args[1].getType().bt != ytype::basicType::decimal)
         throw yoexception::YoError("FunctionCallingError", "Overloaded function with no specified arguments", args[0].line, args[0].column);
-    auto max = args[1].getDecimalValue().get();
-    auto min = args[0].getDecimalValue().get();
+    auto max = args[1].getCompType() == ytype::compType::ref?args[1].getRef()->getIntegerValue().get():args[1].getDecimalValue().get();
+    auto min = args[0].getCompType() == ytype::compType::ref?args[0].getRef()->getIntegerValue().get():args[0].getDecimalValue().get();
     std::random_device rd;
     std::uniform_real_distribution<float> ri(min, max);
     return {ytype::YDecimal(ri(rd)), false, code.line, code.column};
@@ -194,9 +192,9 @@ ysto::Value vmcore::native::BuiltInFunctionSet::randstr(std::vector<ysto::Value>
         throw yoexception::YoError("FunctionCallingError", "Overloaded function with no specified arguments", code.line, code.column);
     else if (args.size() != 1)
         throw yoexception::YoError("FunctionCallingError", "Overloaded function with no specified arguments", args[0].line, args[0].column);
-    if(args[0].getType() != ytype::type(ytype::basicType::integer, ytype::compType::norm))
+    if(args[0].getType().bt != ytype::basicType::integer)
         throw yoexception::YoError("FunctionCallingError", "Overloaded function with no specified arguments", args[0].line, args[0].column);
-    auto length = args[0].getIntegerValue().get();
+    auto length = args[0].getCompType() == ytype::compType::ref?args[0].getRef()->getIntegerValue().get():args[0].getIntegerValue().get();
 
     char tmp;
     std::string buffer;
@@ -222,16 +220,18 @@ ysto::Value vmcore::native::BuiltInFunctionSet::split(std::vector<ysto::Value> a
         throw yoexception::YoError("FunctionCallingError", "Overloaded function with no specified arguments", code.line, code.column);
     else if (args.size() != 2)
         throw yoexception::YoError("FunctionCallingError", "Overloaded function with no specified arguments", args[0].line, args[0].column);
-    if(args[0].getType() != ytype::type(ytype::basicType::string, ytype::compType::norm) || args[1].getType() != ytype::type(ytype::basicType::string, ytype::compType::norm))
+    if(args[0].getType().bt != ytype::basicType::string || args[1].getType().bt != ytype::basicType::string)
         throw yoexception::YoError("FunctionCallingError", "Overloaded function with no specified arguments", args[0].line, args[0].column);
 
     std::vector<ysto::Value> ret;
     int i = 0;
-    while(i < args[0].getStringValue().get().size()) {
+    auto source = args[0].getCompType() == ytype::compType::ref?args[0].getRef()->getStringValue().get():args[0].getStringValue().get();
+    auto sp = args[1].getCompType() == ytype::compType::ref?args[1].getRef()->getStringValue().get():args[1].getStringValue().get();
+    while(i < source.size()) {
         std::string content;
-        for(; i < args[0].getStringValue().get().size(); i ++) {
-            if(args[0].getStringValue().get()[i] == args[1].getStringValue().get()[0]) {i++; break;}
-            content.push_back(args[0].getStringValue().get()[i]);
+        for(; i < source.size(); i ++) {
+            if(source[i] == sp[0]) {i++; break;}
+            content.push_back(source[i]);
         }
         ret.emplace_back(ytype::YString(content), false, code.line, code.column);
     }
@@ -978,7 +978,7 @@ void vmcore::vm::create(ygen::byteCode code,  int &current) {
         //struct A{i:integer} struct B{a:A,o:integer} var b=new B{new A{1}, 8};
         std::vector<ytype::structMemberPair> members;
         while(valueStack.peek().getBasicType() != ytype::basicType::flag && valueStack.peek().getStringValue().get() != "flag:para_end") {
-            ytype::ytypeUnit type;
+            ytype::ytypeUnit type{};
             // type
             if(std::find(yolexer::typeList.begin(), yolexer::typeList.end(), valueStack.peek().getStringValue().get()) != yolexer::typeList.end()) {
                 type = ytype::string2Type(valueStack.pop().getStringValue().get());
@@ -1076,7 +1076,7 @@ void vmcore::vm::idx(ygen::byteCode code) {
 void vmcore::vm::selfadd(ygen::byteCode code) {
     auto value = valueStack.pop().getRef();
 
-    if(!(value->getBasicType() == ytype::basicType::integer))
+    if(value->getBasicType() != ytype::basicType::integer)
         throw yoexception::YoError("TypeError", "This operator does not support this type of operation",code.line, code.column);
 
     if(code.arg1) {
@@ -1095,7 +1095,7 @@ void vmcore::vm::selfsub(ygen::byteCode code) {
 
     if(!space.findValue(name))
         throw yoexception::YoError("NameError", "Unknown identifier: '" + name + "'", code.line, code.column);
-    if(!(space.getValue(name).getBasicType() == ytype::basicType::integer))
+    if(space.getValue(name).getBasicType() != ytype::basicType::integer)
         throw yoexception::YoError("TypeError", "This operator does not support this type of operation",code.line, code.column);
 
     if(code.arg1) {
@@ -1281,15 +1281,18 @@ void vmcore::vm::call(ygen::byteCode code, std::string arg) {
     auto temp = valueStack.pop(); // temp值，用于检测是paraend还是正常的flag
     // 是不是无参函数: true-不是，false-是
     bool isNopara = temp.getBasicType() == ytype::basicType::flag && temp.getStringValue().get() == "flag:para_end";
+    std::vector<ysto::Value> templ;
     std::vector<ysto::Value> args;
     if(!isNopara) {
-        args.push_back(temp);
+        templ.push_back(temp);
         while(valueStack.peek().getBasicType() != ytype::basicType::flag && temp.getStringValue().get() != "flag:para_end") {
-            args.push_back(valueStack.pop());
+            templ.push_back(valueStack.pop());
         }
         valueStack.pop();
+        for(int i = templ.size()-1; i >= 0; i--) {
+            args.push_back(templ[i]);
+        }
     }
-    std::reverse(args.begin(), args.end());
 
     auto fnName = valueStack.pop().getRef()->getObjectValue().fnName;
 
