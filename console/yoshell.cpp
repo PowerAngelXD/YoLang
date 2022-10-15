@@ -232,7 +232,12 @@ void ysh::insEnv(std::vector<std::string> paras) {
 
 void ysh::runYoShell() {
     // 输出欢迎页面
-    std::cout<<"Yolang "<<ysh::completeVersion<<"("<<ysh::version<<")\n"<<"Release Version: " << ysh::relVersion <<"\ngcc version 11.3.0"<<std::endl;
+    std::cout<<"Yolang "<<ysh::completeVersion<<"("<<ysh::version<<")\n"<<"Release Version: " << ysh::relVersion ;
+#ifdef __GNUC__
+    std::cout<< "\nCompiled by gcc (author's version = 12.2.0)"<<std::endl;
+#elif _MSC_VER
+    std::cout<< "\nCompiled by MSVC"<<std::endl;
+#endif
     std::cout<<std::endl;
     std::cout<<ysh::updateIllustrate<<std::endl;
     std::cout<<" \nWe recommend that you enter \"help\" for help"<<std::endl;
