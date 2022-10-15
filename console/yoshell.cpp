@@ -243,7 +243,7 @@ void ysh::runYoShell() {
     std::cout<<" \nWe recommend that you enter \"help\" for help"<<std::endl;
     std::cout<<std::endl;
     auto pool = insPool;
-
+    bool isRepl = false;
     while(true) {
         // 输入内容
         std::string in;
@@ -262,9 +262,10 @@ void ysh::runYoShell() {
                     flag = true;
                 }
             }
-            if(!flag) insEVAL({in});
+            if(!flag) {insEVAL({in}); isRepl = true;}
         }
         catch(yoexception::YoError e) {
+            if(!isRepl) ysh::vmClear();
             std::cout<<e.what();
         }
         catch(int e) {}
