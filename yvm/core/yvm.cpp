@@ -171,8 +171,8 @@ ysto::Value vmcore::native::BuiltInFunctionSet::randint(std::vector<ysto::Value>
         throw yoexception::YoError("FunctionCallingError", "Overloaded function with no specified arguments", args[0].line, args[0].column);
     if(args[0].getType().bt != ytype::basicType::integer || args[1].getType().bt != ytype::basicType::integer)
         throw yoexception::YoError("FunctionCallingError", "Overloaded function with no specified arguments", args[0].line, args[0].column);
-    auto max = args[1].getCompType() == ytype::compType::ref?args[1].getRef()->getIntegerValue().get():args[1].getIntegerValue().get();
-    auto min = args[0].getCompType() == ytype::compType::ref?args[0].getRef()->getIntegerValue().get():args[0].getIntegerValue().get();
+    auto max = gwv(args[1]).getIntegerValue().get();
+    auto min = gwv(args[0]).getIntegerValue().get();
     std::random_device rd;
     std::uniform_int_distribution<unsigned> ri(min, max);
     return {ytype::YInteger(ri(rd)), false, code.line, code.column};
@@ -185,8 +185,8 @@ ysto::Value vmcore::native::BuiltInFunctionSet::rand_deci(std::vector<ysto::Valu
         throw yoexception::YoError("FunctionCallingError", "Overloaded function with no specified arguments", args[0].line, args[0].column);
     if(args[0].getType().bt != ytype::basicType::decimal || args[1].getType().bt != ytype::basicType::decimal)
         throw yoexception::YoError("FunctionCallingError", "Overloaded function with no specified arguments", args[0].line, args[0].column);
-    auto max = args[1].getCompType() == ytype::compType::ref?args[1].getRef()->getIntegerValue().get():args[1].getDecimalValue().get();
-    auto min = args[0].getCompType() == ytype::compType::ref?args[0].getRef()->getIntegerValue().get():args[0].getDecimalValue().get();
+    auto max = gwv(args[1]).getDecimalValue().get();
+    auto min = gwv(args[0]).getDecimalValue().get();
     std::random_device rd;
     std::uniform_real_distribution<float> ri(min, max);
     return {ytype::YDecimal(ri(rd)), false, code.line, code.column};
@@ -199,7 +199,7 @@ ysto::Value vmcore::native::BuiltInFunctionSet::randstr(std::vector<ysto::Value>
         throw yoexception::YoError("FunctionCallingError", "Overloaded function with no specified arguments", args[0].line, args[0].column);
     if(args[0].getType().bt != ytype::basicType::integer)
         throw yoexception::YoError("FunctionCallingError", "Overloaded function with no specified arguments", args[0].line, args[0].column);
-    auto length = args[0].getCompType() == ytype::compType::ref?args[0].getRef()->getIntegerValue().get():args[0].getIntegerValue().get();
+    auto length = gwv(args[0]).getIntegerValue().get();
 
     char tmp;
     std::string buffer;
@@ -230,8 +230,8 @@ ysto::Value vmcore::native::BuiltInFunctionSet::split(std::vector<ysto::Value> a
 
     std::vector<ysto::Value> ret;
     int i = 0;
-    auto source = args[0].getCompType() == ytype::compType::ref?args[0].getRef()->getStringValue().get():args[0].getStringValue().get();
-    auto sp = args[1].getCompType() == ytype::compType::ref?args[1].getRef()->getStringValue().get():args[1].getStringValue().get();
+    auto source = gwv(args[0]).getStringValue().get();
+    auto sp = gwv(args[1]).getStringValue().get();
     while(i < source.size()) {
         std::string content;
         for(; i < source.size(); i ++) {
@@ -478,8 +478,8 @@ void vmcore::vm::tcast(ygen::byteCode code) {
     }
 }
 void vmcore::vm::add(ygen::byteCode code) {
-    auto right = valueStack.peek().getCompType() == ytype::compType::ref?*valueStack.pop().getRef():valueStack.pop();
-    auto left = valueStack.peek().getCompType() == ytype::compType::ref?*valueStack.pop().getRef():valueStack.pop();
+    auto right = gwv(valueStack.pop());
+    auto left = gwv(valueStack.pop());
     switch (left.getBasicType()) {
         case ytype::basicType::integer: {
             switch (right.getBasicType()) {
@@ -523,8 +523,8 @@ void vmcore::vm::add(ygen::byteCode code) {
     }
 }
 void vmcore::vm::sub(ygen::byteCode code) {
-    auto right = valueStack.peek().getCompType() == ytype::compType::ref?*valueStack.pop().getRef():valueStack.pop();
-    auto left = valueStack.peek().getCompType() == ytype::compType::ref?*valueStack.pop().getRef():valueStack.pop();
+    auto right = gwv(valueStack.pop());
+    auto left = gwv(valueStack.pop());
     switch (left.getBasicType()) {
         case ytype::basicType::integer: {
             switch (right.getBasicType()) {
@@ -558,8 +558,8 @@ void vmcore::vm::sub(ygen::byteCode code) {
     }
 }
 void vmcore::vm::mul(ygen::byteCode code) {
-    auto right = valueStack.peek().getCompType() == ytype::compType::ref?*valueStack.pop().getRef():valueStack.pop();
-    auto left = valueStack.peek().getCompType() == ytype::compType::ref?*valueStack.pop().getRef():valueStack.pop();
+    auto right = gwv(valueStack.pop());
+    auto left = gwv(valueStack.pop());
     switch (left.getBasicType()) {
         case ytype::basicType::integer: {
             switch (right.getBasicType()) {
@@ -615,8 +615,8 @@ void vmcore::vm::mul(ygen::byteCode code) {
     }
 }
 void vmcore::vm::div(ygen::byteCode code) {
-    auto right = valueStack.peek().getCompType() == ytype::compType::ref?*valueStack.pop().getRef():valueStack.pop();
-    auto left = valueStack.peek().getCompType() == ytype::compType::ref?*valueStack.pop().getRef():valueStack.pop();
+    auto right = gwv(valueStack.pop());
+    auto left = gwv(valueStack.pop());
     switch (left.getBasicType()) {
         case ytype::basicType::integer: {
             switch (right.getBasicType()) {
@@ -659,8 +659,8 @@ void vmcore::vm::div(ygen::byteCode code) {
     }
 }
 void vmcore::vm::mod(ygen::byteCode code) {
-    auto right = valueStack.peek().getCompType() == ytype::compType::ref?*valueStack.pop().getRef():valueStack.pop();
-    auto left = valueStack.peek().getCompType() == ytype::compType::ref?*valueStack.pop().getRef():valueStack.pop();
+    auto right = gwv(valueStack.pop());
+    auto left = gwv(valueStack.pop());
     if(left.getBasicType() == ytype::basicType::integer) {
         if(right.getBasicType() == ytype::basicType::integer) {
             valueStack.push(ysto::Value(ytype::YInteger(left.getIntegerValue().get() % right.getIntegerValue().get()), false, code.line, code.column));
@@ -672,13 +672,13 @@ void vmcore::vm::mod(ygen::byteCode code) {
 void vmcore::vm::stf(ygen::byteCode code) {
     std::string name = constPool[code.arg1];
     if(name == "typeof") {
-        auto value = valueStack.peek().getCompType() == ytype::compType::ref?*valueStack.pop().getRef():valueStack.pop();
+        auto value = gwv(valueStack.pop());
         valueStack.push(ysto::Value(ytype::YString(ytype::type2String(value.getType())), false, code.line, code.column));
     }
 }
 void vmcore::vm::lt(ygen::byteCode code) {
-    auto right = valueStack.peek().getCompType() == ytype::compType::ref?*valueStack.pop().getRef():valueStack.pop();
-    auto left = valueStack.peek().getCompType() == ytype::compType::ref?*valueStack.pop().getRef():valueStack.pop();
+    auto right = gwv(valueStack.pop());
+    auto left = gwv(valueStack.pop());
     switch (left.getBasicType()) {
         case ytype::basicType::integer: {
             switch (right.getBasicType()) {
@@ -712,8 +712,8 @@ void vmcore::vm::lt(ygen::byteCode code) {
     }
 }
 void vmcore::vm::gt(ygen::byteCode code) {
-    auto right = valueStack.peek().getCompType() == ytype::compType::ref?*valueStack.pop().getRef():valueStack.pop();
-    auto left = valueStack.peek().getCompType() == ytype::compType::ref?*valueStack.pop().getRef():valueStack.pop();
+    auto right = gwv(valueStack.pop());
+    auto left = gwv(valueStack.pop());
     switch (left.getBasicType()) {
         case ytype::basicType::integer: {
             switch (right.getBasicType()) {
@@ -747,8 +747,8 @@ void vmcore::vm::gt(ygen::byteCode code) {
     }
 }
 void vmcore::vm::ltet(ygen::byteCode code) {
-    auto right = valueStack.peek().getCompType() == ytype::compType::ref?*valueStack.pop().getRef():valueStack.pop();
-    auto left = valueStack.peek().getCompType() == ytype::compType::ref?*valueStack.pop().getRef():valueStack.pop();
+    auto right = gwv(valueStack.pop());
+    auto left = gwv(valueStack.pop());
     switch (left.getBasicType()) {
         case ytype::basicType::integer: {
             switch (right.getBasicType()) {
@@ -782,8 +782,8 @@ void vmcore::vm::ltet(ygen::byteCode code) {
     }
 }
 void vmcore::vm::gtet(ygen::byteCode code) {
-    auto right = valueStack.peek().getCompType() == ytype::compType::ref?*valueStack.pop().getRef():valueStack.pop();
-    auto left = valueStack.peek().getCompType() == ytype::compType::ref?*valueStack.pop().getRef():valueStack.pop();
+    auto right = gwv(valueStack.pop());
+    auto left = gwv(valueStack.pop());
     switch (left.getBasicType()) {
         case ytype::basicType::integer: {
             switch (right.getBasicType()) {
@@ -817,28 +817,28 @@ void vmcore::vm::gtet(ygen::byteCode code) {
     }
 }
 void vmcore::vm::no(ygen::byteCode code) {
-    auto value = valueStack.peek().getCompType() == ytype::compType::ref?*valueStack.pop().getRef():valueStack.pop();
+    auto value = gwv(valueStack.pop());
     if(value.getBasicType() == ytype::basicType::boolean)
         valueStack.push(ysto::Value(ytype::YBoolean(!value.getBooleanValue().get()), false, code.line, code.column));
     else throw yoexception::YoError("TypeError", "This operator does not support this type of operation",code.line, code.column);
 }
 void vmcore::vm::logicAnd(ygen::byteCode code) {
-    auto left =valueStack.peek().getCompType() == ytype::compType::ref?*valueStack.pop().getRef():valueStack.pop();
-    auto right = valueStack.peek().getCompType() == ytype::compType::ref?*valueStack.pop().getRef():valueStack.pop();
+    auto left =gwv(valueStack.pop());
+    auto right = gwv(valueStack.pop());
     if(left.getBasicType() == ytype::basicType::boolean && right.getBasicType() == ytype::basicType::boolean)
         valueStack.push(ysto::Value(ytype::YBoolean(left.getBooleanValue().get() && right.getBooleanValue().get()), false, code.line, code.column));
     else throw yoexception::YoError("TypeError", "This operator does not support this type of operation",code.line, code.column);
 }
 void vmcore::vm::logicOr(ygen::byteCode code) {
-    auto left = valueStack.peek().getCompType() == ytype::compType::ref?*valueStack.pop().getRef():valueStack.pop();
-    auto right = valueStack.peek().getCompType() == ytype::compType::ref?*valueStack.pop().getRef():valueStack.pop();
+    auto left = gwv(valueStack.pop());
+    auto right = gwv(valueStack.pop());
     if(left.getBasicType() == ytype::basicType::boolean && right.getBasicType() == ytype::basicType::boolean)
         valueStack.push(ysto::Value(ytype::YBoolean(left.getBooleanValue().get() || right.getBooleanValue().get()), false, code.line, code.column));
     else throw yoexception::YoError("TypeError", "This operator does not support this type of operation",code.line, code.column);
 }
 void vmcore::vm::equ(ygen::byteCode code) {
-    auto right = valueStack.peek().getCompType() == ytype::compType::ref?*valueStack.pop().getRef():valueStack.pop();
-    auto left = valueStack.peek().getCompType() == ytype::compType::ref?*valueStack.pop().getRef():valueStack.pop();
+    auto right = gwv(valueStack.pop());
+    auto left = gwv(valueStack.pop());
     switch (left.getBasicType()) {
         case ytype::basicType::integer: {
             switch (right.getBasicType()) {
@@ -882,8 +882,8 @@ void vmcore::vm::equ(ygen::byteCode code) {
     }
 }
 void vmcore::vm::noequ(ygen::byteCode code) {
-    auto right = valueStack.peek().getCompType() == ytype::compType::ref?*valueStack.pop().getRef():valueStack.pop();
-    auto left = valueStack.peek().getCompType() == ytype::compType::ref?*valueStack.pop().getRef():valueStack.pop();
+    auto right = gwv(valueStack.pop());
+    auto left = gwv(valueStack.pop());
     switch (left.getBasicType()) {
         case ytype::basicType::integer: {
             switch (right.getBasicType()) {
