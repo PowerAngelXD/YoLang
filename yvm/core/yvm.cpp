@@ -99,9 +99,9 @@ ysto::Value vmcore::native::BuiltInFunctionSet::length(std::vector<ysto::Value> 
 
     auto value = args[0];
     if(value.getCompType() == ytype::compType::list)
-        return ysto::Value(ytype::YInteger(value.getList().size()), false, code.line, code.column);
+        return {ytype::YInteger(value.getList().size()), false, code.line, code.column};
     else if(value.getBasicType() == ytype::basicType::string)
-        return ysto::Value(ytype::YInteger(value.getStringValue().get().size()), false, code.line, code.column);
+        return {ytype::YInteger(value.getStringValue().get().size()), false, code.line, code.column};
 }
 
 ysto::Value vmcore::native::BuiltInFunctionSet::add_const(std::vector<ysto::Value> args, ygen::byteCode code) {
@@ -112,7 +112,7 @@ ysto::Value vmcore::native::BuiltInFunctionSet::add_const(std::vector<ysto::Valu
     else if(args[0].getType() != (ytype::ytypeUnit){ytype::basicType::string, ytype::compType::norm})
         throw yoexception::YoError("FunctionCallingError", "Overloaded function with no specified arguments", args[0].line, args[0].column);
 
-    return ysto::Value("flag:return_const:" + args[0].getStringValue().get());
+    return {"flag:return_const:" + args[0].getStringValue().get()};
 }
 
 ysto::Value vmcore::native::BuiltInFunctionSet::vmcode(std::vector<ysto::Value> args, ygen::byteCode code) {
@@ -123,7 +123,7 @@ ysto::Value vmcore::native::BuiltInFunctionSet::vmcode(std::vector<ysto::Value> 
     else if(args[0].getType() != (ytype::ytypeUnit){ytype::basicType::string, ytype::compType::norm})
         throw yoexception::YoError("FunctionCallingError", "Overloaded function with no specified arguments", args[0].line, args[0].column);
 
-    return ysto::Value("flag:return_code:" + args[0].getStringValue().get());
+    return {"flag:return_code:" + args[0].getStringValue().get()};
 }
 
 ysto::Value vmcore::native::BuiltInFunctionSet::ref(std::vector<ysto::Value> args, ygen::byteCode code) {
@@ -136,7 +136,7 @@ ysto::Value vmcore::native::BuiltInFunctionSet::ref(std::vector<ysto::Value> arg
     if(name.getType() != (ytype::ytypeUnit){ytype::basicType::string, ytype::compType::norm})
         throw yoexception::YoError("FunctionCallingError", "Overloaded function with no specified arguments", args[0].line, args[0].column);
 
-    return ysto::Value("flag:return_ref:" + name.getStringValue().get());
+    return {"flag:return_ref:" + name.getStringValue().get()};
 }
 
 ysto::Value vmcore::native::BuiltInFunctionSet::substr(std::vector<ysto::Value> args, ygen::byteCode code){
@@ -158,7 +158,7 @@ ysto::Value vmcore::native::BuiltInFunctionSet::substr(std::vector<ysto::Value> 
         throw yoexception::YoError("TypeError", "Invalid End Argument Type", end.line, end.column);
     }
     std::string result = string.getStringValue().get().substr(start.getIntegerValue().get(),end.getIntegerValue().get());
-    return ysto::Value(ytype::YString(result), false, string.line, string.column);
+    return {ytype::YString(result), false, string.line, string.column};
 }
 
 ysto::Value vmcore::native::BuiltInFunctionSet::randint(std::vector<ysto::Value> args, ygen::byteCode code) {
@@ -172,7 +172,7 @@ ysto::Value vmcore::native::BuiltInFunctionSet::randint(std::vector<ysto::Value>
     auto min = args[0].getIntegerValue().get();
     std::random_device rd;
     std::uniform_int_distribution<unsigned> ri(min, max);
-    return ysto::Value(ytype::YInteger(ri(rd)), false, code.line, code.column);
+    return {ytype::YInteger(ri(rd)), false, code.line, code.column};
 }
 
 ysto::Value vmcore::native::BuiltInFunctionSet::rand_deci(std::vector<ysto::Value> args, ygen::byteCode code) {
@@ -186,7 +186,7 @@ ysto::Value vmcore::native::BuiltInFunctionSet::rand_deci(std::vector<ysto::Valu
     auto min = args[0].getDecimalValue().get();
     std::random_device rd;
     std::uniform_real_distribution<float> ri(min, max);
-    return ysto::Value(ytype::YDecimal(ri(rd)), false, code.line, code.column);
+    return {ytype::YDecimal(ri(rd)), false, code.line, code.column};
 }
 
 ysto::Value vmcore::native::BuiltInFunctionSet::randstr(std::vector<ysto::Value> args, ygen::byteCode code) {
@@ -214,7 +214,7 @@ ysto::Value vmcore::native::BuiltInFunctionSet::randstr(std::vector<ysto::Value>
         }
         buffer += tmp;
     }
-    return ysto::Value(ytype::YString(buffer), false, code.line, code.column);
+    return {ytype::YString(buffer), false, code.line, code.column};
 }
 
 ysto::Value vmcore::native::BuiltInFunctionSet::split(std::vector<ysto::Value> args, ygen::byteCode code) {
@@ -233,10 +233,10 @@ ysto::Value vmcore::native::BuiltInFunctionSet::split(std::vector<ysto::Value> a
             if(args[0].getStringValue().get()[i] == args[1].getStringValue().get()[0]) {i++; break;}
             content.push_back(args[0].getStringValue().get()[i]);
         }
-        ret.push_back(ysto::Value(ytype::YString(content), false, code.line, code.column));
+        ret.emplace_back(ytype::YString(content), false, code.line, code.column);
     }
 
-    return ysto::Value(ret, false,  code.line, code.column, false);
+    return {ret, false,  code.line, code.column, false};
 }
 
 
@@ -244,14 +244,14 @@ ysto::Value vmcore::native::BuiltInFunctionSet::split(std::vector<ysto::Value> a
 ysto::Value vmcore::native::BuiltInStructSet::Point() {
     std::vector<ytype::structMemberPair> members = {{"x", ytype::ytypeUnit{ytype::basicType::decimal, ytype::compType::norm}},
                                                     {"y", ytype::ytypeUnit{ytype::basicType::decimal, ytype::compType::norm}}};
-    return ysto::Value(ytype::YObject(members), true, false, 0, 0);
+    return {ytype::YObject(members), true, false, 0, 0};
 }
 
 ysto::Value vmcore::native::BuiltInStructSet::Application() {
     std::vector<ytype::structMemberPair> members = {{"author", ytype::ytypeUnit{ytype::basicType::string, ytype::compType::norm}},
                                                     {"date", ytype::ytypeUnit{ytype::basicType::string, ytype::compType::norm}},
                                                     {"version", ytype::ytypeUnit{ytype::basicType::string, ytype::compType::norm}}};
-    return ysto::Value(ytype::YObject(members), true, false, 0, 0);
+    return {ytype::YObject(members), true, false, 0, 0};
 }
 
 //struct instance
@@ -259,7 +259,7 @@ ysto::Value vmcore::native::BuiltInStructInstanceSet::appFromApplication() {
     std::map<std::string, ysto::Value> strt = {std::pair<std::string, ysto::Value>("author", ysto::Value(ytype::YString("PowerAngelXD"), true, false, 0, 0)),
                                                std::pair<std::string, ysto::Value>("date", ysto::Value(ytype::YString("2022-10-5"), true, false, 0, 0)),
                                                std::pair<std::string, ysto::Value>("version", ysto::Value(ytype::YString("Yolang 1.5.0"), true, false, 0, 0))};
-    return ysto::Value(strt, true, 0, 0);
+    return {strt, true, 0, 0};
 }
 //
 
@@ -1128,7 +1128,7 @@ void vmcore::vm::del_val() {
 int vmcore::vm::jmp(ygen::byteCode code, std::vector<ygen::byteCode>& queue, int current) {
     switch ((int)code.arg1) {
         case ygen::paraHelper::jmpt::reqTrue: {
-            if(valueStack.pop().getBooleanValue().get() == true) {
+            if(valueStack.pop().getBooleanValue().get()) {
                 switch ((int)code.arg2) {
                     case ygen::paraHelper::jmpt::outScope: {
                         int flag = 0;
@@ -1163,7 +1163,7 @@ int vmcore::vm::jmp(ygen::byteCode code, std::vector<ygen::byteCode>& queue, int
             break;
         }
         case ygen::paraHelper::jmpt::reqFalse: {
-            if(valueStack.pop().getBooleanValue().get() == false) {
+            if(!valueStack.pop().getBooleanValue().get()) {
                 switch ((int)code.arg2) {
                     case ygen::paraHelper::jmpt::outScope: {
                         int flag = 0;
@@ -1211,12 +1211,26 @@ int vmcore::vm::jmp(ygen::byteCode code, std::vector<ygen::byteCode>& queue, int
                 }
                 case ygen::paraHelper::jmpt::outLoop: {
                     int flag = 1;
-                    while(queue[current].arg1 != ygen::paraHelper::flagt::loopEnd) {
-                        current ++;
-                        if(queue[current].code == ygen::btc::scopestart) flag ++;
-                        else if(queue[current].code == ygen::btc::scopeend) flag --;
-                        else ;
+                    bool start = false;
+                    while(queue[current].arg1 != ygen::paraHelper::flagt::loopEnd || flag != 0) {
+                        current --;
+                        if(start && (queue[current].code == ygen::btc::scopestart||ygen::btc::scopeend)) {
+                            if(queue[current].code == ygen::btc::scopestart) flag --;
+                            else if(queue[current].code == ygen::btc::scopeend) flag ++;
+                        }
+                        else start = true;
                     }
+                    flag = 0;
+                    start = false;
+                    while(flag != 0 || !start) {
+                        start = true;
+                        current++;
+                        if (queue[current].code == ygen::btc::scopestart) flag++;
+                        else if (queue[current].code == ygen::btc::scopeend) flag--;
+                        else;
+                    }
+
+                    valueStack.push(ysto::Value(ytype::YBoolean(false), true, code.line, code.column));
                     break;
                 }
                 case ygen::paraHelper::jmpt::backScope: {

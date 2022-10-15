@@ -414,6 +414,7 @@ void ygen::ByteCodeGenerator::visitWhileStmt(AST::WhileStmtNode* node) {
     visitBoolExpr(node->cond);
     JMP(paraHelper::jmpt::reqFalse, paraHelper::jmpt::outScope, node->mark->line, node->mark->column)
     DEL_VAL
+    FLAG(paraHelper::flagt::loopEnd, node->mark->line, node->mark->column)
     SCOPE_BEGIN{
         visit(node->body->stmts);
         // 下面的指令用于检测表达式是否还成立，成立则jmp到下一个循环，否则向前偏移
@@ -421,8 +422,6 @@ void ygen::ByteCodeGenerator::visitWhileStmt(AST::WhileStmtNode* node) {
     }
     SCOPE_END
     JMP(paraHelper::jmpt::reqTrue, paraHelper::jmpt::backScope, node->mark->line, node->mark->column)
-
-    FLAG(paraHelper::flagt::loopEnd, node->mark->line, node->mark->column)
 }
 void ygen::ByteCodeGenerator::visitIfStmt(AST::IfStmtNode* node) {
     visitBoolExpr(node->cond);
@@ -453,6 +452,7 @@ void ygen::ByteCodeGenerator::visitRepeatStmt(AST::RepeatStmtNode *node) {
     JMP(paraHelper::jmpt::reqTrue, paraHelper::jmpt::outScope, node->mark->line, node->mark->column)
     DEL_VAL
 
+    FLAG(paraHelper::flagt::loopEnd, node->mark->line, node->mark->column)
     SCOPE_BEGIN{
         PUSH(addPara("_rit" + std::to_string(repit) + "_"), ytype::type(ytype::basicType::iden, ytype::norm), node->mark->line,
                    node->mark->column)
@@ -471,7 +471,6 @@ void ygen::ByteCodeGenerator::visitRepeatStmt(AST::RepeatStmtNode *node) {
     DEL_VAL
     // repit的处理
     DEL(addPara("_rit" + std::to_string(repit) + "_"), 1.0)
-    FLAG(paraHelper::flagt::loopEnd, node->mark->line, node->mark->column)
     repit --;
 }
 
@@ -485,6 +484,8 @@ void ygen::ByteCodeGenerator::visitForStmt(AST::ForStmtNode* node) {
         PUSH(1.0, ytype::type(ytype::basicType::boolean, ytype::norm), node->mark->line, node->mark->column)
     JMP(paraHelper::jmpt::reqTrue, paraHelper::jmpt::outScope, node->mark->line, node->mark->column)
     DEL_VAL
+
+    FLAG(paraHelper::flagt::loopEnd, node->mark->line, node->mark->column)
     SCOPE_BEGIN{
         visit(node->body->stmts);
         if (node->assign != nullptr)

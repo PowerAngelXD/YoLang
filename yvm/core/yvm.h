@@ -24,8 +24,8 @@ namespace vmcore {
 
         class BuiltInStructSet {
         public:
-            ysto::Value Point();
-            ysto::Value Application();
+            static ysto::Value Point();
+            static ysto::Value Application();
         };
 
         class NativeClassSet {
@@ -37,7 +37,7 @@ namespace vmcore {
 
         class BuiltInStructInstanceSet {
         public:
-            ysto::Value appFromApplication();
+            static ysto::Value appFromApplication();
         };
 
         struct navtiveSet {
