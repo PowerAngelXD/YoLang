@@ -16,7 +16,8 @@ namespace yolexer{
             "while", "for", "for_each", "return", "func",
             "string", "integer", "decimal", "boolean", "delete",
             "string[]", "integer[]", "decimal[]", "boolean[]",
-            "as", "dynamic", "static", "null", "nameof", "new"
+            "as", "dynamic", "static", "null", "nameof", "new",
+            "pack"
     };
     enum yoTokType{Integer, Decimal, Identifier, KeyWord, String, Symbol, Eof};
 
