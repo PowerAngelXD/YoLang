@@ -103,6 +103,12 @@ ytype::YObject::YObject(std::vector<byteCode> cs, std::vector<std::pair<ytype::y
     kind = objectKind::function;
 }
 
+ytype::YObject::YObject(std::vector<structMemberPair> members, std::vector<ytypeUnit> initl) {
+    memberPairs = members;
+    initList = initl;
+    kind = objectKind::typable;
+}
+
 ytype::YObject::YObject(std::vector<structMemberPair> members) {
     kind = objectKind::structable;
     memberPairs = members;
