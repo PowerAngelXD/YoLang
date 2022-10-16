@@ -44,7 +44,8 @@ namespace ytype {
 
     public:
         std::string fnName; // only "function"
-        std::vector<structMemberPair> memberPairs; // only "structable"
+        std::vector<structMemberPair> memberPairs; // only "structable" or "typable"
+        std::vector<ytypeUnit> initList; // only "typable"
         std::vector<std::pair<ytype::ytypeUnit, std::string>> args; // 参数类型:参数名 only "function"
         ytype::ytypeUnit retType; // 返回类型
         std::vector<byteCode> codes; // 储存的代码片段（包含scopestart scopeend） only "function"
@@ -53,7 +54,8 @@ namespace ytype {
         YObject()=default;
         // 构造一个函数Object的方法
         YObject(std::vector<byteCode> cs, std::vector<std::pair<ytype::ytypeUnit, std::string>> as, ytype::ytypeUnit rety, std::string name);
-        YObject(std::vector<structMemberPair> members);
+        YObject(std::vector<structMemberPair> members); // 构造struct
+        YObject(std::vector<structMemberPair> members, std::vector<ytypeUnit> initl); // 构造typable
 
         objectKind getKind();
 
