@@ -247,16 +247,29 @@ ysto::Value vmcore::native::BuiltInFunctionSet::split(std::vector<ysto::Value> a
 
 //struct
 ysto::Value vmcore::native::BuiltInStructSet::Point() {
-    std::vector<ytype::structMemberPair> members = {{"x", ytype::ytypeUnit{ytype::basicType::decimal, ytype::compType::norm}},
-                                                    {"y", ytype::ytypeUnit{ytype::basicType::decimal, ytype::compType::norm}}};
+    std::vector<ytype::structMemberPair> members = {
+            {"x", ytype::ytypeUnit{ytype::basicType::decimal, ytype::compType::norm}},
+            {"y", ytype::ytypeUnit{ytype::basicType::decimal, ytype::compType::norm}}
+    };
     return {ytype::YObject(members), true, false, 0, 0};
 }
 
 ysto::Value vmcore::native::BuiltInStructSet::Application() {
-    std::vector<ytype::structMemberPair> members = {{"author", ytype::ytypeUnit{ytype::basicType::string, ytype::compType::norm}},
-                                                    {"date", ytype::ytypeUnit{ytype::basicType::string, ytype::compType::norm}},
-                                                    {"version", ytype::ytypeUnit{ytype::basicType::string, ytype::compType::norm}}};
+    std::vector<ytype::structMemberPair> members = {
+            {"author", ytype::ytypeUnit{ytype::basicType::string, ytype::compType::norm}},
+            {"date", ytype::ytypeUnit{ytype::basicType::string, ytype::compType::norm}},
+            {"version", ytype::ytypeUnit{ytype::basicType::string, ytype::compType::norm}}
+    };
     return {ytype::YObject(members), true, false, 0, 0};
+}
+
+//class
+ysto::Value vmcore::native::NativeClassSet::Process() {
+    std::vector<ytype::structMemberPair> members = {
+            {"proc_name", ytype::ytypeUnit{ytype::basicType::string, ytype::compType::norm}},
+            {"run", ytype::ytypeUnit{ytype::basicType::object, ytype::compType::norm}}
+    };
+
 }
 
 //struct instance
