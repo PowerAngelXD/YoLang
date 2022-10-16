@@ -303,6 +303,14 @@ namespace AST{
         std::string toString();
     };
 
+    class PackDefineStmtNode {
+    public:
+        yolexer::yoToken* mark = nullptr;
+        BlockStmtNode* body = nullptr;
+
+        std::string toString();
+    };
+
     class IfStmtNode {
     public:
         yolexer::yoToken* mark = nullptr;
