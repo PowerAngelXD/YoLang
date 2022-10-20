@@ -325,3 +325,7 @@ std::string AST::IdentifierNode::toString() {
 std::string AST::CellIdentifierNode::toString() {
     return "CellIdentifierNode: {" + iden->toString() + ", " + call->toString() + "}";
 }
+
+std::string AST::PackDefineStmtNode::toString() {
+    return "PackDefineStmtNode: {" + body->toString() + "}";
+}
