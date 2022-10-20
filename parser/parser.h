@@ -1,6 +1,13 @@
 #include "AST.h"
 
 namespace parser{
+    // stmt的符号
+    enum stmtSym {
+        outStmt, spStmt, vorcStmt, blockStmt, whileStmt, ifStmt, elifStmt, elseStmt, forStmt, repeatStmt, deleteStmt, breakStmt, funcdefStmt,
+        returnStmt, structdefStmt, packdefStmt, wholeStmt
+    };
+    // wholeStmt做标识，代表所有的stmt
+
     class Parser{
         std::vector<yolexer::yoToken> tg;
         int offset = 0; //偏移量，用来确定当前到哪个token了
@@ -18,7 +25,7 @@ namespace parser{
         bool isStmt(); bool isOutStmt(); bool isVorcStmt(); bool isSpExprStmt(); bool isBlockStmt();
         bool isWhileStmt(); bool isIfStmt(); bool isElifStmt(); bool isElseStmt(); bool isForStmt();
         bool isRepeatStmt(); bool isDeleteStmt(); bool isBreakStmt(); bool isFuncDefStmt(); bool isDeferStmt();
-        bool isReturnStmt(); bool isStructDefStmt();
+        bool isReturnStmt(); bool isStructDefStmt(); bool isPackDefStmt();
         // 生成区: parseXXX ---> 生成XXXNode
         AST::SiadExprNode* parseSiadExprNode();
         AST::CellExprNode* parseCellExprNode();
@@ -46,6 +53,7 @@ namespace parser{
 
         AST::OutStmtNode* parseOutStmtNode();
         AST::VorcStmtNode* parseVorcStmtNode(bool asStmt=true);
+        AST::PackDefineStmtNode* parsePackDefineStmtNode();
         AST::SpExprStmtNode* parseSpExprStmtNode();
         AST::BlockStmtNode* parseBlockStmtNode();
         AST::WhileStmtNode* parseWhileStmtNode();
