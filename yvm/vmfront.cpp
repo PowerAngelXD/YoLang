@@ -1,16 +1,93 @@
 #include "vmfront.h"
 
-void yvm::start(yvm::yshBase yshObj) {
-    yshObj.yshStart();
-    try {
-        while(true) yshObj.yshUpdate();
+std::vector<std::string> yvm::tools::split(std::string str, char sp) {
+    std::vector<std::string> ret;
+    int i = 0;
+    while(i < str.size()) {
+        std::string content;
+        for(; i < str.size(); i ++) {
+            if(str[i] == sp) {i++; break;}
+            content.push_back(str[i]);
+        }
+        ret.push_back(content);
     }
-    catch(yoexception::YoError e){
-        yshObj.catchYoError(e);
+    return ret;
+}
+bool yvm::tools::compareFileType(std::string name, std::string type) {
+    std::size_t index = ((std::string)name).find(type, ((std::string)name).size() - ((std::string)type).size());
+    return !(index == std::string::npos);
+}
+std::string yvm::tools::stmtsToString(std::vector<AST::StmtNode*> stmts) {
+    std::string ret = "Stmts: { [";
+    for(auto stmt: stmts){
+        ret += stmt->toString();
+        ret += ", ";
+    }
+    ret += "] }";
+    return ret;
+}
+std::string yvm::tools::mulStr(std::string str, int times) {
+    std::string result;
+    for(int i = 0; i < times; i++) {
+        result += str;
+    }
+    return result;
+}
+std::string yvm::tools::formatAst(std::string aststr) {
+    /* Exaple:
+     * node: {
+     *      node1: {
+     *          node2: {
+     *              token: XXXXX
+     *          }
+     *      }
+     * }
+     * */
+    std::string result;
+    int bigparac = 0; // 大括号出现的计数器
+    for(int i = 0; i < aststr.size(); i ++) {
+        char ch = aststr[i];
+        if(ch == '{') {
+            result += ch;
+            bigparac ++;
+            result += "\n" + mulStr(" ", 4 * bigparac);
+        }
+        else if(ch == '}') {
+            bigparac --;
+            result += "\n" + mulStr(" ", 4 * bigparac);
+            result += ch;
+        }
+        if(ch == '[') {
+            result += ch;
+            bigparac ++;
+            result += "\n" + mulStr(" ", 4 * bigparac);
+        }
+        else if(ch == ']') {
+            bigparac --;
+            result += "\n" + mulStr(" ", 4 * bigparac);
+            result += ch;
+        }
+        else result += ch;
+    }
+    return result;
+}
+
+//
+void yvm::start(yshBase* yshObj) {
+    yshObj->yshStart();
+    try {
+        while(true) {
+            try {
+                yshObj->yshUpdate();
+            }
+            catch(yoexception::YoError e){
+                yshObj->catchYoError(e);
+            }
+        }
     }
     catch(yoexception::YshStopFlag flag){}
     catch(...){}
-    yshObj.yshEnd();
+    yshObj->yshEnd();
 }
 
 //
@@ -55,6 +132,10 @@ yvm::vmfront &yvm::vmfront::runVM(std::string arg) {
     return *this;
 }
 
+vmcore::vm yvm::vmfront::getVM() {
+    return vm;
+}
+
 //
 
 std::vector<yolexer::yoToken> yvm::yshBase::makeTokenGroup(std::string text) {
@@ -62,3 +143,23 @@ std::vector<yolexer::yoToken> yvm::yshBase::makeTokenGroup(std::string text) {
     lex.generate();
     return lex.getTokenGroup();
 }
+
+void yvm::yshBase::yshStart() {}
+
+void yvm::yshBase::yshUpdate() {}
+
+void yvm::yshBase::yshEnd() {}
+
+void yvm::yshBase::catchYoError(yoexception::YoError ye) {}
+
+yvm::yshBase::yshBase() {}
+
+//
+
+void yvm::InsSet::repl(yvm::ins_method_para para, yshBase* ysh) {}
+
+void yvm::InsSet::help(yvm::ins_method_para para, yshBase* ysh) {}
+
+void yvm::InsSet::info(yvm::ins_method_para para, yshBase* ysh) {}
+
+void yvm::InsSet::exit(yvm::ins_method_para para, yshBase* ysh) {}
