@@ -6,7 +6,8 @@ By generating intermediate code from Yolang source code and submitting it to YOV
 
 ### Build
 
-This project is built by CMake, please make sure that you have a development environment ready on your device before development, about the construction is not described in depth here, you can learn how to build a project with CMake through the search engine
+This project is built by CMake, please make sure that you have a development environment ready on your device before development, about the construction is not described in depth here, you can learn how to build a project with CMake through the search engine\
+> **However, please note that when compiling this project, please relax the quality control, otherwise the compilation will fail (issue6 is trying to solve the problem, and is expected to be completely repaired in several future versions)**
 
 ### License
 
