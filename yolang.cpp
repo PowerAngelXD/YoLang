@@ -1,15 +1,15 @@
 #include <iostream>
-#include "console/yoshell.h"
+#include "offical_ysh/ysh.h"
 
 int main(int argc, char *argv[]){
-    ysh::vmSetup();
+    ysh_offical::YolangShellOffical ysh;
     try{
-        if(argc == 1) ysh::runYoShell();
+        if(argc == 1) yvm::start(&ysh);
         else{
             if(argc > 1 && argc <= 2) {
                 std::string arg1 = std::string(argv[1]);
                 if(arg1 == "--version" || arg1 == "-v") {
-                    std::cout<<"Yolang version: " << ysh::completeVersion << "(" << ysh::version << ")" << " rel:" << ysh::relVersion << std::endl;
+
                 }
                 else if(arg1 == "--help" || arg1 == "-h") {
                     std::cout<<"Yolang parameter help"<<std::endl;
@@ -23,7 +23,7 @@ int main(int argc, char *argv[]){
                 std::string arg2 = std::string(argv[2]);
                 // std::cout<<arg2<<std::endl;
                 if(arg1 == "--run") {
-                    ysh::insRun({arg2});
+
                 }
             }
         }
