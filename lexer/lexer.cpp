@@ -176,9 +176,16 @@ void yolexer::Lexer::generate(){
             }
             else if(input[i] == '<'){
                 if(input[i + 1] == '='){
-                    i++;
-                    tokenGroup.push_back({"<=", yoTokType::Symbol, line, column});
-                    column++;
+                    if(input[i + 2] == '>') {
+                        i+=2;
+                        tokenGroup.push_back({"<=>", yoTokType::Symbol, line, column});
+                        column++;
+                    }
+                    else {
+                        i++;
+                        tokenGroup.push_back({"<=", yoTokType::Symbol, line, column});
+                        column++;
+                    }
                 }
                 else 
                     tokenGroup.push_back({"<", yoTokType::Symbol, line, column});
