@@ -124,7 +124,7 @@ bool parser::Parser::isMulOp() {
 }
 bool parser::Parser::isCmpOp() {
     return peek()->content == "==" || peek()->content == "!=" || peek()->content == ">=" || peek()->content == "<="
-            || peek()->content == "<" || peek()->content == ">" || peek()->content == "!";
+            || peek()->content == "<" || peek()->content == ">" || peek()->content == "!" || peek()->content == "<=>";
 }
 bool parser::Parser::isBoolOp() {
     return peek()->content == "||" || peek()->content == "&&";
@@ -145,7 +145,7 @@ bool parser::Parser::isTypecastExpr() {
     if(isIdentifier()) {
         int temp = offset;
         parseIdentifierExprNode();
-        if(peek()->content == "as") {
+        if(isAsOp()) {
             offset = temp;
             return true;
         }
