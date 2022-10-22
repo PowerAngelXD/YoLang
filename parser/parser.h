@@ -12,6 +12,7 @@ namespace parser{
         std::vector<yolexer::yoToken> tg;
         int offset = 0; //偏移量，用来确定当前到哪个token了
     public:
+        Parser()=default;
         Parser(std::vector<yolexer::yoToken> _tg);
         yolexer::yoToken* peek(int _offset = 0); // 获取当前tokenGroup的token，不偏移
         yolexer::yoToken* token(); // 获取昂前tokenGroup的token，然后偏移

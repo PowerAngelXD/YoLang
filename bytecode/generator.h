@@ -51,6 +51,7 @@ namespace ygen{
         int string2Int(const std::string& s);
         float string2Float(const std::string& s);
     public:
+        ByteCodeGenerator()=default;
         explicit ByteCodeGenerator(std::vector<AST::StmtNode*> _stmts);
         explicit ByteCodeGenerator(AST::WholeExprNode* _expr);
 
