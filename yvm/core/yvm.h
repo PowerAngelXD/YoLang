@@ -83,6 +83,7 @@ namespace vmcore {
         void gt(ygen::byteCode code);
         void ltet(ygen::byteCode code);
         void gtet(ygen::byteCode code);
+        void tequ(ygen::byteCode code);
         void no(ygen::byteCode code);
         void logicAnd(ygen::byteCode code);
         void logicOr(ygen::byteCode code);

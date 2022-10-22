@@ -341,6 +341,7 @@ void vmcore::vm::run(int queue_id, std::string arg) {
             case ygen::ltet: ltet(code); break;
             case ygen::gt: gt(code); break;
             case ygen::gtet: gtet(code); break;
+            case ygen::type_equ: tequ(code); break;
             case ygen::equ: equ(code); break;
             case ygen::noequ: noequ(code); break;
             case ygen::stf: stf(code); break;
@@ -828,6 +829,11 @@ void vmcore::vm::gtet(ygen::byteCode code) {
         }
         default: throw yoexception::YoError("TypeError", "This operator does not support this type of operation",code.line, code.column); break;
     }
+}
+void vmcore::vm::tequ(ygen::byteCode code) {
+    auto right = gwv(valueStack.pop());
+    auto left = gwv(valueStack.pop());
+    valueStack.push(ysto::Value(ytype::YBoolean(left.getType() == right.getType()), false, code.line, code.column));
 }
 void vmcore::vm::no(ygen::byteCode code) {
     auto value = gwv(valueStack.pop());
