@@ -20,6 +20,7 @@
 #define LT(line, column) normalCtor(btc::lt, 0, 0, line, column);
 #define LTET(line, column) normalCtor(btc::ltet, 0, 0, line, column);
 #define EQU(line, column) normalCtor(btc::equ, 0, 0, line, column);
+#define TYPE_EQU(line, column) normalCtor(btc::type_equ, 0, 0, line, column);
 #define NOEQU(line, column) normalCtor(btc::noequ, 0, 0, line, column);
 #define LOGIC_AND normalCtor(btc::logicand, 0, 0, node->op->line, node->op->column);
 #define LOGIC_OR normalCtor(btc::logicor, 0, 0, node->op->line, node->op->column);
@@ -221,6 +222,8 @@ void ygen::ByteCodeGenerator::visitCmpOp(AST::CmpOpNode* node){
         EQU(node->op->line, node->op->column)
     else if(node->op->content == "!=")
         NOEQU(node->op->line, node->op->column)
+    else if(node->op->content == "<=>")
+        TYPE_EQU(node->op->line, node->op->column)
     else if(node->op->content == "!")
         NO
 }

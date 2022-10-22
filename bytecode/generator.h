@@ -12,7 +12,7 @@ namespace ygen{
         // 栈操作类
         push = 0, gto, jmp,
         // 运算类
-        tcast, _new, cast, selfadd, selfsub, add, sub, div, mul, tmo, idx, lst, logicand, logicor, no, lt, ltet, gt, gtet, equ, noequ, gmem, stf,
+        tcast, _new, cast, selfadd, selfsub, add, sub, div, mul, tmo, idx, lst, logicand, logicor, no, lt, ltet, gt, gtet, equ, noequ, gmem, stf, type_equ,
         // 标志类
         listend, paraend, scopestart, scopeend, idenend, flag,
         // 功能类
