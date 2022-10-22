@@ -3,6 +3,7 @@
 
 int main(int argc, char *argv[]){
     ysh_offical::YolangShellOffical ysh;
+    ysh.front.setupVM();
     try{
         if(argc == 1) yvm::start(&ysh);
         else{
@@ -21,9 +22,25 @@ int main(int argc, char *argv[]){
             else if(argc > 2 && argc <= 3) {
                 std::string arg1 = std::string(argv[1]);
                 std::string arg2 = std::string(argv[2]);
-                // std::cout<<arg2<<std::endl;
                 if(arg1 == "--run") {
+                    auto name = arg2;
+                    if(yvm::tools::compareFileType(name, ".yo")){
+                        std::ifstream file(name);
+                        std::istreambuf_iterator<char> begin(file);
+                        std::istreambuf_iterator<char> end;
+                        std::string str(begin, end);
 
+
+                        auto tg = ysh.makeTokenGroup(str);
+                        ysh.yparser = parser::Parser(tg);
+                        auto stmts = ysh.yparser.parse();
+                        ygen::ByteCodeGenerator bcg;
+                        bcg.visit(stmts);
+                        ysh.front.resetVM(bcg.getCodes(), bcg.getConstPool());
+                        ysh.front.setupVM().runVM("program").clearVM().setupVM();
+                    }
+                    else
+                        throw yoexception::YoError("FileError", "Not any file that can be run", -1, -1);
                 }
             }
         }
