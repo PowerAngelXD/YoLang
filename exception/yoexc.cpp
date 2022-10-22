@@ -12,3 +12,9 @@ yoexception::YoError::YoError(std::string title, std::string content, int line, 
 std::string yoexception::YoError::what() {
     return message;
 }
+
+//
+
+std::string yoexception::YshStopFlag::what() {
+    return message;
+}
