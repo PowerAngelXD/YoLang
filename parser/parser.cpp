@@ -241,9 +241,13 @@ bool parser::Parser::isReturnStmt() {
 bool parser::Parser::isStructDefStmt() {
     return peek()->content == "struct";
 }
+bool parser::Parser::isPackDefStmt() {
+    return peek()->content == "pack";
+}
 bool parser::Parser::isStmt() {
     return isOutStmt() || isVorcStmt() || isSpExprStmt() || isBlockStmt() || isWhileStmt() || isIfStmt() || isElifStmt() || isElseStmt() ||
-            isRepeatStmt() || isDeleteStmt() || isForStmt() || isBreakStmt() || isFuncDefStmt() || isDeferStmt() || isReturnStmt() || isStructDefStmt();
+            isRepeatStmt() || isDeleteStmt() || isForStmt() || isBreakStmt() || isFuncDefStmt() || isDeferStmt() || isReturnStmt() || isStructDefStmt() ||
+            isPackDefStmt();
 }
 
 // EXPR
@@ -574,6 +578,12 @@ AST::OutStmtNode* parser::Parser::parseOutStmtNode(){
     if(peek()->content == ";") node->end = token();
     else throw yoexception::YoError("SyntaxError", "Expect ';'", tg[offset].line, tg[offset].column);
     return node;
+}
+
+AST::PackDefineStmtNode* parser::Parser::parsePackDefineStmtNode() {
+    AST::PackDefineStmtNode* node = new AST::PackDefineStmtNode;
+    node->mark = token();
+
 }
 
 AST::VorcStmtNode* parser::Parser::parseVorcStmtNode(bool asStmt){
