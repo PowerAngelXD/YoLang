@@ -33,12 +33,10 @@ ysto::Value::Value(std::string content) {
     stringValue = ytype::YString(content);
     type = {ytype::basicType::flag, ytype::compType::norm};
 }
-ysto::Value::Value(ysto::Value* v) {
-    isConstant = v->getRef()->isConstant;
-    isDynamic = v->getRef()->isDynamic;
-    type = v->getRef()->type;
-    line = v->line, column = v->column;
-    refValue = v;
+ysto::Value::Value(ysto::Value* v): type(ytype::type(v->type.bt, ytype::compType::ref)) {
+    this->refValue = v;
+    this->line = v->line;
+    this->column = v->column;
 }
 ytype::basicType& ysto::Value::getBasicType() {
     return type.bt;
