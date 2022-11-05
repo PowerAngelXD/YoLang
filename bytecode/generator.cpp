@@ -327,6 +327,24 @@ void ygen::ByteCodeGenerator::visitAssignmentExpr(AST::AssignmentExprNode* node)
         }
         ASSIGN
     }
+    else if(node->equ->content == "*=") {
+        visitIdentifierExpr(node->iden);
+        {
+            visitIdentifierExpr(node->iden);
+            visitExpr(node->expr);
+            MUL(node->equ->line, node->equ->column)
+        }
+        ASSIGN
+    }
+    else if(node->equ->content == "/=") {
+        visitIdentifierExpr(node->iden);
+        {
+            visitIdentifierExpr(node->iden);
+            visitExpr(node->expr);
+            DIV(node->equ->line, node->equ->column)
+        }
+        ASSIGN
+    }
 }
 void ygen::ByteCodeGenerator::visitExpr(AST::WholeExprNode* node){
     if(node->addexpr != nullptr)

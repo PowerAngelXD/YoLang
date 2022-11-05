@@ -168,7 +168,7 @@ bool parser::Parser::isAssignmentExpr() {
         parseIdentifierExprNode();
         if(isIndexOp()){
             parseIndexOpNode();
-            if(peek()->content == "="||peek()->content == "+="||peek()->content == "-=") {
+            if(peek()->content == "="||peek()->content == "+="||peek()->content == "-="||peek()->content == "/="||peek()->content == "*=") {
                 offset = temp; // 归位
                 return true;
             }
@@ -178,7 +178,7 @@ bool parser::Parser::isAssignmentExpr() {
             }
         }
         else {
-            if(peek()->content == "="||peek()->content == "+="||peek()->content == "-=") {
+            if(peek()->content == "="||peek()->content == "+="||peek()->content == "-="||peek()->content == "/="||peek()->content == "*=") {
                 offset = temp; // 归位
                 return true;
             }
