@@ -48,6 +48,14 @@ void yolexer::Lexer::generate(){
         else column ++;
 
         if(input[i] == ' ' || input[i] == '\t' || input[i] == '\n');
+        else if(input[i] == '/' && input[i + 1] == '/') {
+            while(input[i] != '\n') {
+                i++;
+                column++;
+            }
+            line++;
+            i++;
+        }
         else if(isdigit(input[i])){
             //是数字
             std::string content;
@@ -231,9 +239,25 @@ void yolexer::Lexer::generate(){
                 else
                     tokenGroup.push_back({":", yoTokType::Symbol, line, column});
             }
+            else if(input[i] == '*') {
+                if(input[i + 1] == '=') {
+                    i++;
+                    tokenGroup.push_back({"*=", yoTokType::Symbol, line, column});
+                    column++;
+                }
+                else
+                    tokenGroup.push_back({"*", yoTokType::Symbol, line, column});
+            }
+            else if(input[i] == '/') {
+                if(input[i + 1] == '=') {
+                    i++;
+                    tokenGroup.push_back({"/=", yoTokType::Symbol, line, column});
+                    column++;
+                }
+                else
+                    tokenGroup.push_back({"/", yoTokType::Symbol, line, column});
+            }
             else if(input[i] == '%') tokenGroup.push_back({"%", yoTokType::Symbol, line, column});
-            else if(input[i] == '/') tokenGroup.push_back({"/", yoTokType::Symbol, line, column});
-            else if(input[i] == '*') tokenGroup.push_back({"*", yoTokType::Symbol, line, column});
             else if(input[i] == '.') tokenGroup.push_back({".", yoTokType::Symbol, line, column});
             else if(input[i] == ',') tokenGroup.push_back({",", yoTokType::Symbol, line, column});
             else if(input[i] == '(') tokenGroup.push_back({"(", yoTokType::Symbol, line, column});
