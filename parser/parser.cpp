@@ -197,7 +197,7 @@ bool parser::Parser::isOutStmt() {
     return peek()->content == "out";
 }
 bool parser::Parser::isVorcStmt() {
-    return peek()->content == "var" || peek()->content == "const" || peek()->content == "dynamic" || peek()->content == "static";
+    return peek()->content == "var" || peek()->content == "const" || peek()->content == "dynamic" || peek()->content == "static" || peek()->content == "ref";
 }
 bool parser::Parser::isBlockStmt() {
     return peek()->content == "{";
@@ -592,6 +592,10 @@ AST::VorcStmtNode* parser::Parser::parseVorcStmtNode(bool asStmt){
         node->modifier = token();
         if(peek()->content == "const")
             throw yoexception::YoError("SyntaxError", "Constants cannot use modifier: '" + node->modifier->content + "'", tg[offset].line, tg[offset].column);
+        node->mark = token();
+    }
+    else if(peek()->content == "ref") {
+        node->modifier = token();
         node->mark = token();
     }
     else node->mark = token();
