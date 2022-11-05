@@ -3,8 +3,9 @@
 ysto::Value vmcore::gwv(ysto::Value value) {
     if(value.getRef() == nullptr) return value;
     else {
-        if(value.getRef()->getRef() != nullptr) return value.getRef()->getRef();
-        else return value.getRef();
+        auto temp = value.getRef();
+        if(value.getRef()->getRef() != nullptr) return *temp->getRef();
+        else return *temp;
     }
 }
 ysto::Value vmcore::gwvRef(ysto::Value value) {
@@ -1051,7 +1052,9 @@ void vmcore::vm::create(ygen::byteCode code,  int &current) {
         else if(state == "ref") {
             if(value.getCompType() != ytype::compType::ref)
                 throw yoexception::YoError("TypeError", "Cannot initialize a temporary value on a reference", code.line, code.column);
-            space.createValue(name, ysto::Value(value.getRef()));
+            auto v = ysto::Value(value.getRef());
+            v.isConstant = value.getRef()->isConst();
+            space.createValue(name, v);
         }
         else if(value.getCompType() == ytype::compType::llike_strt) {
             space.createValue(name, ysto::Value(value.getList(),
@@ -1064,30 +1067,31 @@ void vmcore::vm::create(ygen::byteCode code,  int &current) {
                                                 code.line, code.column));
         }
         else {
+            auto val = gwv(value);
             switch (value.getBasicType()) {
                 case ytype::integer:
-                    space.createValue(name, ysto::Value(ytype::YInteger(value.getIntegerValue().get()),
+                    space.createValue(name, ysto::Value(ytype::YInteger(val.getIntegerValue().get()),
                                                         !(state == "var" || state == "dynamic" || state == "static"),
                                                         state == "dynamic",
                                                         code.line,
                                                         code.column));
                     break;
                 case ytype::boolean:
-                    space.createValue(name, ysto::Value(ytype::YBoolean(value.getBooleanValue().get()),
+                    space.createValue(name, ysto::Value(ytype::YBoolean(val.getBooleanValue().get()),
                                                         !(state == "var" || state == "dynamic" || state == "static"),
                                                         state == "dynamic",
                                                         code.line,
                                                         code.column));
                     break;
                 case ytype::decimal:
-                    space.createValue(name, ysto::Value(ytype::YDecimal(value.getDecimalValue().get()),
+                    space.createValue(name, ysto::Value(ytype::YDecimal(val.getDecimalValue().get()),
                                                         !(state == "var" || state == "dynamic" || state == "static"),
                                                         state == "dynamic",
                                                         code.line,
                                                         code.column));
                     break;
                 case ytype::string:
-                    space.createValue(name, ysto::Value(ytype::YString(value.getStringValue().get()),
+                    space.createValue(name, ysto::Value(ytype::YString(val.getStringValue().get()),
                                                         !(state == "var" || state == "dynamic" || state == "static"),
                                                         state == "dynamic",
                                                         code.line,
