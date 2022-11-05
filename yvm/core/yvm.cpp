@@ -8,13 +8,6 @@ ysto::Value vmcore::gwv(ysto::Value value) {
         else return *temp;
     }
 }
-ysto::Value vmcore::gwvRef(ysto::Value value) {
-    if(value.getRef() == nullptr) return value;
-    else {
-        if(value.getRef()->getRef() != nullptr) return value.getRef()->getRef();
-        else return value.getRef();
-    }
-}
 
 // native
 //bif

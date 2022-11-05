@@ -3,7 +3,6 @@
 
 namespace vmcore {
     ysto::Value gwv(ysto::Value value); // 获取总体值
-    ysto::Value gwvRef(ysto::Value value); // 获取总体值
 
     namespace native {
         static ysto::Value null_value(0, 0);
