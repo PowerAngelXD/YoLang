@@ -19,7 +19,7 @@ void ysh_offical::YolangShellOffical::yshUpdate() {
     std::cout<<">> ";
     std::getline(std::cin, text);
 
-    if(text=="\0"||text=="\n") throw yoexception::YshStopFlag(); // 停止运行
+    if(text=="\0"||text=="\n") throw yoexception::YoError("InputError","Please do not enter invalid characters",1,1);
     auto tempField = yvm::tools::split(text, ' ')[0];
 
     auto para = yvm::tools::split(text, ' ');
