@@ -49,7 +49,8 @@ void yolexer::Lexer::generate(){
 
         if(input[i] == ' ' || input[i] == '\t' || input[i] == '\n');
         else if(input[i] == '/' && input[i + 1] == '/') {
-            while(input[i] != '\n') {
+            // 注释判断
+            while(input[i] != '\n' && input[i] != '\0') {
                 i++;
                 column++;
             }
@@ -118,10 +119,6 @@ void yolexer::Lexer::generate(){
             }
             else
                 tokenGroup.push_back({content, yoTokType::Identifier, line, column});
-        }
-        else if(input[i] == '#'){
-            while(input[i] != '\n' && input[i] != '\0')
-                    i++;column++;
         }
         else {
             //是各种符号
