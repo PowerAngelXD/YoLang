@@ -1,7 +1,18 @@
 #include "yvm.h"
 
 ysto::Value vmcore::gwv(ysto::Value value) {
-    return value.getCompType()==ytype::compType::ref?*value.getRef():value;
+    if(value.getRef() == nullptr) return value;
+    else {
+        if(value.getRef()->getRef() != nullptr) return value.getRef()->getRef();
+        else return value.getRef();
+    }
+}
+ysto::Value vmcore::gwvRef(ysto::Value value) {
+    if(value.getRef() == nullptr) return value;
+    else {
+        if(value.getRef()->getRef() != nullptr) return value.getRef()->getRef();
+        else return value.getRef();
+    }
 }
 
 // native
@@ -1037,6 +1048,11 @@ void vmcore::vm::create(ygen::byteCode code,  int &current) {
                                                 !(state == "var" || state == "dynamic" || state == "static"),
                                                 state == "dynamic", code.line, code.column, false));
         }
+        else if(state == "ref") {
+            if(value.getCompType() != ytype::compType::ref)
+                throw yoexception::YoError("TypeError", "Cannot initialize a temporary value on a reference", code.line, code.column);
+            space.createValue(name, ysto::Value(value.getRef()));
+        }
         else if(value.getCompType() == ytype::compType::llike_strt) {
             space.createValue(name, ysto::Value(value.getList(),
                                                 !(state == "var" || state == "dynamic" || state == "static"),
@@ -1134,9 +1150,11 @@ void vmcore::vm::selfsub(ygen::byteCode code) {
     }
 }
 void vmcore::vm::assign(ygen::byteCode code) {
-    auto value = valueStack.pop();
+    auto value = gwv(valueStack.pop());
     auto sample = valueStack.pop();
-    *sample.getRef() = value;
+    if(sample.getRef()->getRef() != nullptr)
+        *sample.getRef()->getRef() = value;
+    else *sample.getRef() = value;
 
     valueStack.push(value);
 }
