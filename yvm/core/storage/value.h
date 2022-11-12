@@ -15,6 +15,7 @@ namespace ysto {
         std::map<std::string, Value> newedStruct;
 
         ytype::ytypeUnit type;
+        std::string valueRefName;
     public:
         typedef std::pair<std::string, Value> element;
         bool isConstant = false;
@@ -64,6 +65,8 @@ namespace ysto {
 
         bool hasKey(std::string key);
         Value* getMap(std::string key);
+        void refName(std::string name);
+        std::string getName();
 
         void operator=(Value value);
         Value &operator[](int index);

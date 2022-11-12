@@ -158,6 +158,14 @@ ysto::Value *ysto::Value::getRef(int index) {
         return &refValue->list[index];
 }
 
+void ysto::Value::refName(std::string name) {
+    this->valueRefName = name;
+}
+
+std::string ysto::Value::getName() {
+    return valueRefName;
+}
+
 //print
 void ysto::printValue(Value result, std::string mode) {
     if(result.getCompType() == ytype::compType::ref) {
