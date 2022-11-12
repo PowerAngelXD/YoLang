@@ -77,7 +77,7 @@ void ysh_offical::YolangShellInsSet::help(yvm::ins_method_para para, YolangShell
                             "\ninfo                          View information about Yolang and YoShell"
                             "\nrun [file_name(with '.yo')]   Run a Yolang-File"
                             "\nexit                          Exit the program"
-                            "Tip: When the content you enter is not any of the above commands, YoShell will switch to REPL mode to parse the content you enter (according to Yolang syntax)";
+                            "\n\nTip: When the content you enter is not any of the above commands, YoShell will switch to REPL mode to parse the content you enter (according to Yolang syntax)";
     std::cout<<help_text<<std::endl;
 }
 
