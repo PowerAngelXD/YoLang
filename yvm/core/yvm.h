@@ -71,6 +71,7 @@ namespace vmcore {
         // 指令对应的函数实现
         void _new(ygen::byteCode code);
         void gmem(ygen::byteCode code);
+        void point_to(ygen::byteCode code);
         void flag(ygen::byteCode code);
         void tcast(ygen::byteCode code);
         void add(ygen::byteCode code);

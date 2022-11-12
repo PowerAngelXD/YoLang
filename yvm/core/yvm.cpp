@@ -323,6 +323,7 @@ void vmcore::vm::run(int queue_id, std::string arg) {
     for(int i = 0; i < queue.size(); i ++) {
         auto& code  = queue[i];
         switch (code.code) {
+            case ygen::point_to: point_to(code); break;
             case ygen::gmem: gmem(code); break;
             case ygen::_new: _new(code); break;
             case ygen::tcast: tcast(code); break;
@@ -1097,6 +1098,30 @@ void vmcore::vm::create(ygen::byteCode code,  int &current) {
             }
         }
     }
+    space.getValue(name).refName(name);
+}
+void vmcore::vm::assign(ygen::byteCode code) {
+    auto value = gwv(valueStack.pop());
+    auto sample = valueStack.pop();
+    if(sample.getRef()->getRef() != nullptr)
+        *sample.getRef()->getRef() = value;
+    else *sample.getRef() = value;
+
+    valueStack.push(value);
+}
+void vmcore::vm::point_to(ygen::byteCode code) {
+    auto refto = valueStack.pop();
+    auto sample = valueStack.pop();
+    if(refto.getRef() == nullptr)
+        throw yoexception::YoError("RefError", "Cannot reference a non identifier", code.line, code.column);
+
+    auto name = sample.getRef()->getName();
+    space.deleteValue(name);
+    auto v = ysto::Value(refto.getRef());
+    v.isConstant = refto.getRef()->isConst();
+    space.createValue(name, v);
+
+    valueStack.push(native::null_value);
 }
 void vmcore::vm::idx(ygen::byteCode code) {
     auto idx = valueStack.pop();
@@ -1145,15 +1170,6 @@ void vmcore::vm::selfsub(ygen::byteCode code) {
         valueStack.push(ysto::Value(ytype::YInteger(space.getValue(name).getRef()->getIntegerValue().get()), false, code.line, code.column));
         space.getValue(name).getRef()->getIntegerValue() = ytype::YInteger(space.getValue(name).getRef()->getIntegerValue().get() - 1);
     }
-}
-void vmcore::vm::assign(ygen::byteCode code) {
-    auto value = gwv(valueStack.pop());
-    auto sample = valueStack.pop();
-    if(sample.getRef()->getRef() != nullptr)
-        *sample.getRef()->getRef() = value;
-    else *sample.getRef() = value;
-
-    valueStack.push(value);
 }
 void vmcore::vm::scopestart(ygen::byteCode code) {
     space.createScope("vm_created_scope", code.line, code.column);
