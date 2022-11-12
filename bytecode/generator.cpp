@@ -29,6 +29,7 @@
 #define OUT normalCtor(btc::out, 0, 0, node->mark->line, node->mark->column);
 #define CREATE(name, type, basicType, vsign) completeCtor(btc::create, name, type, basicType, vsign, node->mark->line, node->mark->column);
 #define ASSIGN normalCtor(btc::assign, 0.0, 0.0, node->equ->line, node->equ->column);
+#define POINT_TO normalCtor(btc::point_to, 0.0, 0.0, node->equ->line, node->equ->column);
 #define DEL(name, type) normalCtor(btc::del, name, type, node->mark->line, node->mark->column);
 #define LISTEND minCtor(btc::listend, node->right->line, node->right->column);
 #define PARAEND minCtor(btc::paraend, node->right->line, node->left->column);
@@ -55,7 +56,7 @@ ygen::btc ygen::string2Code(std::string s) {
     else if(s=="logicand") code=btc::logicand;else if(s=="stf") code=btc::stf;else if(s=="del") code=btc::del;
     else if(s=="logicor") code=btc::logicor;else if(s=="listend") code=btc::listend;else if(s=="call") code=btc::call;
     else if(s=="no") code=btc::no;else if(s=="paraend") code=btc::paraend;else if(s=="del_val") code=btc::del_val;
-    else if(s=="new") code=btc::_new;
+    else if(s=="new") code=btc::_new;else if(s=="type_equ") code=btc::type_equ; else if(s=="poinnt_to")code=btc::point_to;
     return code;
 }
 
@@ -344,6 +345,11 @@ void ygen::ByteCodeGenerator::visitAssignmentExpr(AST::AssignmentExprNode* node)
             DIV(node->equ->line, node->equ->column)
         }
         ASSIGN
+    }
+    else if(node->equ->content == "=>") {
+        visitIdentifierExpr(node->iden);
+        visitExpr(node->expr);
+        POINT_TO
     }
 }
 void ygen::ByteCodeGenerator::visitExpr(AST::WholeExprNode* node){
