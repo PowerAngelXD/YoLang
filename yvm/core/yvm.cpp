@@ -1044,10 +1044,12 @@ void vmcore::vm::create(ygen::byteCode code,  int &current) {
                                                 state == "dynamic", code.line, code.column, false));
         }
         else if(state == "ref") {
+            auto isconst = valueStack.pop().getBooleanValue().get();
             if(value.getCompType() != ytype::compType::ref)
                 throw yoexception::YoError("TypeError", "Cannot initialize a temporary value on a reference", code.line, code.column);
             auto v = ysto::Value(value.getRef());
             v.isConstant = value.getRef()->isConst();
+            v.isConstant = isconst;
             space.createValue(name, v);
         }
         else if(value.getCompType() == ytype::compType::llike_strt) {
@@ -1114,6 +1116,8 @@ void vmcore::vm::point_to(ygen::byteCode code) {
     auto sample = valueStack.pop();
     if(refto.getRef() == nullptr)
         throw yoexception::YoError("RefError", "Cannot reference a non identifier", code.line, code.column);
+    if(!sample.isConst())
+        throw yoexception::YoError("RefError", "You cannot make a constant reference re reference an identifier", code.line, code.column);
 
     auto name = sample.getRef()->getName();
     space.deleteValue(name);
