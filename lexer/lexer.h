@@ -11,7 +11,7 @@ namespace yolexer{
             {"integer", "decimal", "char", "string", "boolean", "string[]", "decimal[]", "char[]", "integer[]", "boolean[]", "null"};
     static std::vector<std::string> bifList =
             {"print", "println", "input", "fread", "vmcode", "add_const", "substr", "system", "fwrite", "ref", "length", "randint", "rand_deci", "randstr", "split"};
-    static std::vector<std::string> yoKeyWords = {
+    static std::vector<std::string> yoKeyWords = { // all 26 keywords
             "var", "typeof", "const", "out", "repeat",
             "while", "for", "for_each", "return", "func",
             "string", "integer", "decimal", "boolean", "delete",
