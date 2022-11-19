@@ -903,5 +903,5 @@ AST::FuncDefStmtNode* parser::Parser::parseFuncDefStmtNode() {
         else throw yoexception::YoError("SyntaxError", "It is not an identifier", tg[offset].line, tg[offset].column);
     }
     else throw yoexception::YoError("SyntaxError", "It is not a valid type name", tg[offset].line, tg[offset].column);
-    return nullptr
+    return nullptr;
 }

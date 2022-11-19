@@ -420,8 +420,6 @@ void ygen::ByteCodeGenerator::visitVorcStmt(AST::VorcStmtNode* node) {
             PUSH(0.0, ytype::type(def->type == nullptr?ytype::basicType::null:ytype::string2BasicType(def->type->content), ytype::norm), node->mark->line, node->mark->column)
         else
             visitExpr(def->expr);
-        if(node->modifier!=nullptr && node->modifier->content == "ref")
-            PUSH(node->mark->content == "const", ytype::type(ytype::basicType::boolean, ytype::norm), node->mark->line, node->mark->column)
         CREATE(addPara(def->name->content),
                node->modifier != nullptr ? addPara(node->modifier->content):addPara(node->mark->content),
                def->separate != nullptr ? addPara(def->type->content) : 0.0,
