@@ -12,9 +12,7 @@ int main(int argc, char *argv[]){
         else{
             if(argc > 1 && argc <= 2) {
                 std::string arg1 = std::string(argv[1]);
-                if(arg1 == "--version" || arg1 == "-v") {
-
-                }
+                if(arg1 == "--version" || arg1 == "-v");
                 else if(arg1 == "--help" || arg1 == "-h") {
                     cout<<"Yolang parameter help"<<endl;
                     cout<<"--version\t-v ................. Get the current version of Yolang"<<endl;
@@ -32,7 +30,6 @@ int main(int argc, char *argv[]){
                         std::istreambuf_iterator<char> begin(file);
                         std::istreambuf_iterator<char> end;
                         std::string str(begin, end);
-
 
                         auto tg = ysh.makeTokenGroup(str);
                         ysh.yparser = parser::Parser(tg);
