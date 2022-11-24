@@ -1,6 +1,9 @@
 #include <iostream>
 #include "offical_ysh/ysh.h"
 
+using std::cout;
+using std::endl;
+
 int main(int argc, char *argv[]){
     ysh_offical::YolangShellOffical ysh;
     ysh.front.setupVM();
@@ -13,10 +16,10 @@ int main(int argc, char *argv[]){
 
                 }
                 else if(arg1 == "--help" || arg1 == "-h") {
-                    std::cout<<"Yolang parameter help"<<std::endl;
-                    std::cout<<"--version | -v ................. Get the current version of Yolang"<<std::endl;
-                    std::cout<<"--help | -h .................... Get help with command line arguments"<<std::endl;
-                    std::cout<<"--run <file> ................... Run the yolang file named 'file'"<<std::endl;
+                    cout<<"Yolang parameter help"<<endl;
+                    cout<<"--version\t-v ................. Get the current version of Yolang"<<endl;
+                    cout<<"--help   \t-h ................. Get help with command line arguments"<<endl;
+                    cout<<"--run <file>  ................. Run the yolang file named 'file'"<<endl;
                 }
             }
             else if(argc > 2 && argc <= 3) {
@@ -46,6 +49,6 @@ int main(int argc, char *argv[]){
         }
     }
     catch(yoexception::YoError e){
-        std::cout<<e.what()<<std::endl;
+        cout<<e.what()<<endl;
     }
 }
