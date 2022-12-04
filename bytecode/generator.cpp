@@ -346,11 +346,7 @@ void ygen::ByteCodeGenerator::visitAssignmentExpr(AST::AssignmentExprNode* node)
         }
         ASSIGN
     }
-    else if(node->equ->content == "=>") {
-        visitIdentifierExpr(node->iden);
-        visitExpr(node->expr);
-        POINT_TO
-    }
+    
 }
 void ygen::ByteCodeGenerator::visitExpr(AST::WholeExprNode* node){
     if(node->addexpr != nullptr)

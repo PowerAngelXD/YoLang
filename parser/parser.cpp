@@ -596,7 +596,8 @@ AST::VorcStmtNode* parser::Parser::parseVorcStmtNode(bool asStmt){
     }
     else if(peek()->content == "ref") {
         node->modifier = token();
-        node->mark = token();
+        if (peek()->content == "var"||"const" )
+            throw yoexception::YoError("SyntaxError", "'ref' cannot behind 'var' or 'const'", tg[offset].line, tg[offset].column);
     }
     else node->mark = token();
 

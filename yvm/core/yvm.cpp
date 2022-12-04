@@ -1028,6 +1028,14 @@ void vmcore::vm::create(ygen::byteCode code,  int &current) {
         std::reverse(members.begin(), members.end()); // 因为栈的原因，逆序
         space.createValue(name, ysto::Value(ytype::YObject(members), true, false, code.line, code.column));
     }
+    else if(state == "ref") {
+        auto value = valueStack.pop();
+        if(value.getCompType() != ytype::compType::ref)
+            throw yoexception::YoError("TypeError", "Cannot initialize a temporary value on a reference", code.line, code.column);
+        auto v = ysto::Value(value.getRef());
+        v.isConstant = false; // 暂且在默认情况下为可变引用
+        space.createValue(name, v);
+        }
     else{
         auto value = valueStack.pop();
         if(code.arg4 == 1) {
@@ -1042,13 +1050,6 @@ void vmcore::vm::create(ygen::byteCode code,  int &current) {
             space.createValue(name, ysto::Value(value.getList(),
                                                 !(state == "var" || state == "dynamic" || state == "static"),
                                                 state == "dynamic", code.line, code.column, false));
-        }
-        else if(state == "ref") {
-            if(value.getCompType() != ytype::compType::ref)
-                throw yoexception::YoError("TypeError", "Cannot initialize a temporary value on a reference", code.line, code.column);
-            auto v = ysto::Value(value.getRef());
-            v.isConstant = false; // 暂且在默认情况下为可变引用
-            space.createValue(name, v);
         }
         else if(value.getCompType() == ytype::compType::llike_strt) {
             space.createValue(name, ysto::Value(value.getList(),
