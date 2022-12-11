@@ -1507,5 +1507,12 @@ void vmcore::vm::_new(ygen::byteCode code) {
 void vmcore::vm::gmem(ygen::byteCode code) {
     auto ref = valueStack.pop().getStringValue().get();
     auto sample = valueStack.pop();
-    valueStack.push(ysto::Value(sample.getRef()->getMap(ref), false, code.line, code.column));
+    // 内置成员判断
+    if (sample.getRef()->getBasicType() == ytype::basicType::string) {
+        if (ref == "len") {
+            valueStack.push(ysto::Value(ytype::YInteger(sample.getRef()->getStringValue().get().size()), false, code.line, code.column));
+        }
+    }
+    //
+    else valueStack.push(ysto::Value(sample.getRef()->getMap(ref), false, code.line, code.column));
 }
