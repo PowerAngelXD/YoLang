@@ -601,7 +601,7 @@ AST::LetStmtNode* parser::Parser::parseLetStmtNode(bool asStmt){
     else throw yoexception::YoError("SyntaxError", "Expect an identifier", tg[offset].line, tg[offset].column);
     if(peek()->content == ":"){
         defintion->separate = token();
-        if(peek()->type == yolexer::KeyWord) defintion->type = token();
+        if(peek()->type == yolexer::KeyWord || peek()->type == yolexer::Identifier) defintion->type = token();
         else throw yoexception::YoError("SyntaxError", "Expect type specifier ", tg[offset].line, tg[offset].column);
         if(peek()->content == "=") {
             defintion->equ = token();

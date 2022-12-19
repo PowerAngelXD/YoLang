@@ -1,0 +1,54 @@
+name: Compile & Upload
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+env:
+  # Customize the CMake build type here (Release, Debug, RelWithDebInfo, etc.)
+  BUILD_TYPE: Release
+
+jobs:
+  build-linux:
+    runs-on: ubuntu-22.04
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Configure CMake
+        run: cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}}
+
+      - name: Build
+        run: cd ${{github.workspace}}/build ; make -j32
+
+      - name: Remove useless files
+        run: cd ${{github.workspace}}/build ; rm -rf CMakeFiles Testing
+
+      - name: Upload a Build Artifact
+        uses: actions/upload-artifact@v3.1.0
+        with:
+          name: yolang-linux-build
+          path: ${{github.workspace}}/build
+
+  build-windows:
+    runs-on: windows-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Configure CMake
+        run: cmake -B ${{github.workspace}}/build -G "MinGW Makefiles" -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}}
+
+      - name: Build
+        run: cd ${{github.workspace}}/build ; make -j32
+
+      - name: Remove useless files
+        run: dir ${{github.workspace}}/build | where {$_. name -notlike '*.exe*'} | Remove-Item -Recurse -force
+
+      - name: Upload a Build Artifact
+        uses: actions/upload-artifact@v3.1.0
+        with:
+          name: yolang-windows-build
+          path: ${{github.workspace}}/build

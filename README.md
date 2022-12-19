@@ -1,29 +1,35 @@
-# YoLang
+# Yo Programming Language (Yolang)
+![https://badgen.net/badge/icon/windows?icon=windows&label](https://badgen.net/badge/icon/windows?icon=windows&label)
+![https://badgen.net/badge/icon/git?icon=git&label](https://badgen.net/badge/icon/git?icon=git&label)
+![https://badgen.net/badge/icon/github?icon=github&label](https://badgen.net/badge/icon/github?icon=github&label)
 
-![yopic.png](yopic.png)
-Yolang is a lightweight, easy-to-use interpreted programming language <br>
-By generating intermediate code from Yolang source code and submitting it to YOVM for operation, the new version of YOVM has a clearer code architecture and improved efficiency on the basis of the original version
+## Introduction
+Yo Programming Language is an interpretive language based on Eytion PlusPlus  
+Now, Yolang will be better than before
 
-### Build
+## Todos
+- [ ] Improvements to existing syntax
+- [ ] Operational improvements
 
-This project is built by CMake, please make sure that you have a development environment ready on your device before development, about the construction is not described in depth here, you can learn how to build a project with CMake through the search engine
-> **However, please note that when compiling this project, please relax the quality control, otherwise the compilation will fail (issue6 is trying to solve the problem, and is expected to be completely repaired in several future versions)**
+## License
+This project uses MIT license  
+You can view the license of this project through the following this [link](LICENSE)
 
-### License
+## How to USE?
+Yolang is divided into two types: Build and Release  
 
-This project follows the MIT Open Source [License](LICENSE)
+**Release** version You need to select a version by yourself through the "Release" on the right side of the project, where you can obtain the entire software package (except for the executable file)  
 
-### How to use
+**Build** is the result automatically compiled through Action (only executable files).  
+The result may be unstable or even have serious vulnerabilities.  
+Please use it with caution; 
+Of course, in most cases you can use the Build version to try something new.  
+After you obtain the files of Build version, you need to replace the executable files in the original software package of Yolang (named "yolang", and the suffix depends on the system)
 
-For more information on how to use Yolang and its console, see [HelpDocument](docs/content.md)\
-ps: Translation work for the Help document will begin, during which time the translated document will continue to use Chinese
-
-### DownLoad
-
-If you want to get the Yolang interpreter's application package, find Release on the right side of this repository page and get the version thereof as needed\
-In Yolang, there are two version numbers: development version and release version
-
-### Acknowledgement
-
-Developed with Clion ![clion.png](clion.png) <br>
-Thanks to JetBrain for the great IDE ![jb.png](jb.png)
+## Contributors
+### [**PowerAngelXD**](https://github.com/PowerAngelXD)  
+**Initiator of the project**  
+### [**FZZKill**](https://github.com/FZZkill)  
+**The most active people who help improve the project**
+### [**This-is-XiaoDeng**](https://github.com/This-is-XiaoDeng) 
+**Help the Release version of this project compile the Linux version**
