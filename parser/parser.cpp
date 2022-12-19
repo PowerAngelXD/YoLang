@@ -196,8 +196,8 @@ bool parser::Parser::isExpr() {
 bool parser::Parser::isOutStmt() {
     return peek()->content == "out";
 }
-bool parser::Parser::isVorcStmt() {
-    return peek()->content == "var" || peek()->content == "const" || peek()->content == "dynamic" || peek()->content == "static" || peek()->content == "ref";
+bool parser::Parser::isLetStmt() {
+    return peek()->content == "let" || peek()->content == "const" || peek()->content == "dynamic" || peek()->content == "static";
 }
 bool parser::Parser::isBlockStmt() {
     return peek()->content == "{";
@@ -245,9 +245,9 @@ bool parser::Parser::isPackDefStmt() {
     return peek()->content == "pack";
 }
 bool parser::Parser::isStmt() {
-    return isOutStmt() || isVorcStmt() || isSpExprStmt() || isBlockStmt() || isWhileStmt() || isIfStmt() || isElifStmt() || isElseStmt() ||
-            isRepeatStmt() || isDeleteStmt() || isForStmt() || isBreakStmt() || isFuncDefStmt() || isDeferStmt() || isReturnStmt() || isStructDefStmt() ||
-            isPackDefStmt();
+    return isOutStmt() || isLetStmt() || isSpExprStmt() || isBlockStmt() || isWhileStmt() || isIfStmt() || isElifStmt() || isElseStmt() ||
+           isRepeatStmt() || isDeleteStmt() || isForStmt() || isBreakStmt() || isFuncDefStmt() || isDeferStmt() || isReturnStmt() || isStructDefStmt() ||
+           isPackDefStmt();
 }
 
 // EXPR
@@ -541,7 +541,7 @@ AST::StmtNode* parser::Parser::parseStmtNode() {
     AST::StmtNode* node = new AST::StmtNode;
     if(isOutStmt()) node->outstmt = parseOutStmtNode();
     else if(isBlockStmt()) node->blockstmt = parseBlockStmtNode();
-    else if(isVorcStmt()) node->vorcstmt = parseVorcStmtNode();
+    else if(isLetStmt()) node->vorcstmt = parseLetStmtNode();
     else if(isWhileStmt()) node->whilestmt = parseWhileStmtNode();
     else if(isIfStmt()) node->ifstmt = parseIfStmtNode();
     else if(isElifStmt()) node->elifstmt = parseElifStmtNode();
@@ -586,22 +586,17 @@ AST::PackDefineStmtNode* parser::Parser::parsePackDefineStmtNode() {
 
 }
 
-AST::VorcStmtNode* parser::Parser::parseVorcStmtNode(bool asStmt){
-    AST::VorcStmtNode* node = new AST::VorcStmtNode;
+AST::LetStmtNode* parser::Parser::parseLetStmtNode(bool asStmt){
+    AST::LetStmtNode* node = new AST::LetStmtNode;
     if(peek()->content == "dynamic" || peek()->content == "static") {
         node->modifier = token();
-        if(peek()->content == "const")
-            throw yoexception::YoError("SyntaxError", "Constants cannot use modifier: '" + node->modifier->content + "'", tg[offset].line, tg[offset].column);
-        node->mark = token();
     }
-    else if(peek()->content == "ref") {
-        node->modifier = token();
-        if (peek()->content == "var"||"const" )
-            throw yoexception::YoError("SyntaxError", "'ref' cannot behind 'var' or 'const'", tg[offset].line, tg[offset].column);
-    }
-    else node->mark = token();
 
-    AST::VorcStmtNode::defineBlock* defintion = new AST::VorcStmtNode::defineBlock;
+    if (peek()->content != "let" && peek()->content != "const")
+        throw yoexception::YoError("SyntaxError", "Expect keyword: 'let' or 'const'", tg[offset].line, tg[offset].column);
+    node->mark = token();
+
+    AST::LetStmtNode::defineBlock* defintion = new AST::LetStmtNode::defineBlock;
     if(isIdentifier()) defintion->name = token();
     else throw yoexception::YoError("SyntaxError", "Expect an identifier", tg[offset].line, tg[offset].column);
     if(peek()->content == ":"){
@@ -631,7 +626,7 @@ AST::VorcStmtNode* parser::Parser::parseVorcStmtNode(bool asStmt){
         if(peek()->content != ",") break;
         node->dots.push_back(token());
 
-        AST::VorcStmtNode::defineBlock* def = new AST::VorcStmtNode::defineBlock;
+        AST::LetStmtNode::defineBlock* def = new AST::LetStmtNode::defineBlock;
         if(isIdentifier()) def->name = token();
         else throw yoexception::YoError("SyntaxError", "Expect an identifier", tg[offset].line, tg[offset].column);
         if(peek()->content == ":"){
@@ -659,7 +654,9 @@ AST::VorcStmtNode* parser::Parser::parseVorcStmtNode(bool asStmt){
         node->defintions.push_back(def);
     }
 
-    if(peek()->content == ";" && asStmt) node->end = token();
+    if(peek()->content == ";" && asStmt) {
+        node->end = token();
+    }
     else {
         if(asStmt)
             throw yoexception::YoError("SyntaxError", "Expect ';'", tg[offset].line, tg[offset].column);
@@ -747,8 +744,8 @@ AST::ForStmtNode* parser::Parser::parseForStmtNode() {
     node->mark = token();
     if(peek()->content == "(") node->left = token();
     else throw yoexception::YoError("SyntaxError", "Expect '('", tg[offset].line, tg[offset].column);
-    if(isVorcStmt()) {
-        node->vorc = parseVorcStmtNode(false);
+    if(isLetStmt()) {
+        node->vorc = parseLetStmtNode(false);
         node->hasVorc = true;
     }
     if(peek()->content == ";") node->sep1 = token();

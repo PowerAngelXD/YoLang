@@ -1028,14 +1028,68 @@ void vmcore::vm::create(ygen::byteCode code,  int &current) {
         std::reverse(members.begin(), members.end()); // 因为栈的原因，逆序
         space.createValue(name, ysto::Value(ytype::YObject(members), true, false, code.line, code.column));
     }
-    else if(state == "ref") {
+    else if (state == "const") {
         auto value = valueStack.pop();
-        if(value.getCompType() != ytype::compType::ref)
-            throw yoexception::YoError("TypeError", "Cannot initialize a temporary value on a reference", code.line, code.column);
-        auto v = ysto::Value(value.getRef());
-        v.isConstant = false; // 暂且在默认情况下为可变引用
-        space.createValue(name, v);
+        if(code.arg4 == 1) {
+            // 强制类型声明
+            std::string type = constPool[code.arg3];
+            if(ytype::string2Type(type) == value.getType()) ;
+            else throw yoexception::YoError("TypeError", "The expected type does not match the type given by the actual expression", code.line, code.column);
         }
+
+        if(value.isListValue()) {
+            space.createValue(name, ysto::Value(value.getList(),
+                                                    true,
+                                                    false, code.line, code.column, false));
+        }
+        else if(value.getCompType() == ytype::compType::llike_strt) {
+            space.createValue(name, ysto::Value(value.getList(),
+                                                true,
+                                                code.line, code.column, true));
+        }
+        else if(value.getCompType() == ytype::compType::strt) {
+            space.createValue(name, ysto::Value(value.getStrt(),
+                                                true,
+                                                code.line, code.column));
+        }
+        else {
+            auto val = gwv(value);
+            switch (value.getBasicType()) {
+                case ytype::integer:
+                    space.createValue(name, ysto::Value(ytype::YInteger(val.getIntegerValue().get()),
+                                                        true,
+                                                        false,
+                                                        code.line,
+                                                        code.column));
+                    break;
+                case ytype::boolean:
+                    space.createValue(name, ysto::Value(ytype::YBoolean(val.getBooleanValue().get()),
+                                                        true,
+                                                        false,
+                                                        code.line,
+                                                        code.column));
+                    break;
+                case ytype::decimal:
+                    space.createValue(name, ysto::Value(ytype::YDecimal(val.getDecimalValue().get()),
+                                                        true,
+                                                        false,
+                                                        code.line,
+                                                        code.column));
+                    break;
+                case ytype::string:
+                    space.createValue(name, ysto::Value(ytype::YString(val.getStringValue().get()),
+                                                        true,
+                                                        false,
+                                                        code.line,
+                                                        code.column));
+                    break;
+                case ytype::null:
+                    space.createValue(name, ysto::Value(false, code.line, code.column));
+                    break;
+
+            }
+        }
+    }
     else{
         auto value = valueStack.pop();
         if(code.arg4 == 1) {
@@ -1044,21 +1098,20 @@ void vmcore::vm::create(ygen::byteCode code,  int &current) {
             if(ytype::string2Type(type) == value.getType()) ;
             else throw yoexception::YoError("TypeError", "The expected type does not match the type given by the actual expression", code.line, code.column);
         }
-        else ;
 
         if(value.isListValue()) {
             space.createValue(name, ysto::Value(value.getList(),
-                                                !(state == "var" || state == "dynamic" || state == "static"),
+                                                false,
                                                 state == "dynamic", code.line, code.column, false));
         }
         else if(value.getCompType() == ytype::compType::llike_strt) {
             space.createValue(name, ysto::Value(value.getList(),
-                                                !(state == "var" || state == "dynamic" || state == "static"),
+                                                false,
                                                 code.line, code.column, true));
         }
         else if(value.getCompType() == ytype::compType::strt) {
             space.createValue(name, ysto::Value(value.getStrt(),
-                                                !(state == "var" || state == "dynamic" || state == "static"),
+                                                false,
                                                 code.line, code.column));
         }
         else {
@@ -1066,28 +1119,28 @@ void vmcore::vm::create(ygen::byteCode code,  int &current) {
             switch (value.getBasicType()) {
                 case ytype::integer:
                     space.createValue(name, ysto::Value(ytype::YInteger(val.getIntegerValue().get()),
-                                                        !(state == "var" || state == "dynamic" || state == "static"),
+                                                        false,
                                                         state == "dynamic",
                                                         code.line,
                                                         code.column));
                     break;
                 case ytype::boolean:
                     space.createValue(name, ysto::Value(ytype::YBoolean(val.getBooleanValue().get()),
-                                                        !(state == "var" || state == "dynamic" || state == "static"),
+                                                        false,
                                                         state == "dynamic",
                                                         code.line,
                                                         code.column));
                     break;
                 case ytype::decimal:
                     space.createValue(name, ysto::Value(ytype::YDecimal(val.getDecimalValue().get()),
-                                                        !(state == "var" || state == "dynamic" || state == "static"),
+                                                        false,
                                                         state == "dynamic",
                                                         code.line,
                                                         code.column));
                     break;
                 case ytype::string:
                     space.createValue(name, ysto::Value(ytype::YString(val.getStringValue().get()),
-                                                        !(state == "var" || state == "dynamic" || state == "static"),
+                                                        false,
                                                         state == "dynamic",
                                                         code.line,
                                                         code.column));
