@@ -52,6 +52,7 @@ ytype::basicType ytype::string2BasicType(std::string s) {
     else if(s=="boolean") return basicType::boolean;
     else if(s=="string") return basicType::string;
     else if(s=="null") return basicType::null;
+    else return basicType::object;
 }
 ytype::compType ytype::string2CompType(std::string s) {
     if(s=="norm") return compType::norm;
