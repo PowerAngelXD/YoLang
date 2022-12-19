@@ -180,12 +180,12 @@ std::string AST::OutStmtNode::toString() {
     return "OutStmtNode: {" + mark->toString() + ", " + expr->toString() + "}";
 }
 
-std::string AST::VorcStmtNode::defineBlock::toString() {
+std::string AST::LetStmtNode::defineBlock::toString() {
     return "DefineBlock: {" + name->toString() + ", " + (type != nullptr?type->toString():"") + ", " + expr->toString() + "}";
 }
 
-std::string AST::VorcStmtNode::toString() {
-    std::string ret = "VorcStmtNode: {" +(modifier == nullptr?"":modifier->toString()) + mark->toString() + ", [";
+std::string AST::LetStmtNode::toString() {
+    std::string ret = "LetStmtNode: {" +(modifier == nullptr?"":modifier->toString()) + mark->toString() + ", [";
     ret += defintions[0]->toString();
     for(int i = 0; i < dots.size(); i ++) {
         ret + ", ";

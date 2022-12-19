@@ -260,7 +260,7 @@ namespace AST{
         std::string toString();
     };
 
-    class VorcStmtNode{
+    class LetStmtNode{
     public:
         struct defineBlock {
             yolexer::yoToken* name = nullptr;
@@ -273,7 +273,7 @@ namespace AST{
         };
 
         yolexer::yoToken* modifier = nullptr;
-        yolexer::yoToken* mark = nullptr;
+        yolexer::yoToken* mark = nullptr;    // only let
 
         std::vector<defineBlock*> defintions;
         std::vector<yolexer::yoToken*> dots;
@@ -380,7 +380,7 @@ namespace AST{
 
         yolexer::yoToken* mark = nullptr;
         yolexer::yoToken* left = nullptr;
-        VorcStmtNode* vorc = nullptr;
+        LetStmtNode* vorc = nullptr;
         yolexer::yoToken* sep1 = nullptr;
         BoolExprNode* cond = nullptr;
         yolexer::yoToken* sep2 = nullptr;
@@ -444,7 +444,7 @@ namespace AST{
     public:
         OutStmtNode* outstmt = nullptr;
         BreakStmtNode* breakstmt = nullptr;
-        VorcStmtNode* vorcstmt = nullptr;
+        LetStmtNode* vorcstmt = nullptr;
         BlockStmtNode* blockstmt = nullptr;
         SpExprStmtNode* spexprstmt = nullptr;
         IfStmtNode* ifstmt = nullptr;
