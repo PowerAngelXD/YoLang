@@ -409,11 +409,20 @@ void ygen::ByteCodeGenerator::visitStructDefStmt(AST::StructDefineStmtNode *node
     }
     CREATE(addPara(node->name->content), addPara(node->mark->content), 0, 0)
 }
-void ygen::ByteCodeGenerator::visitVorcStmt(AST::VorcStmtNode* node) {
+void ygen::ByteCodeGenerator::visitLetStmt(AST::LetStmtNode* node) {
     for(int i = 0; i < node->defintions.size(); i++) {
         auto def = node->defintions[i];
-        if (def->expr == nullptr)
-            PUSH(0.0, ytype::type(def->type == nullptr?ytype::basicType::null:ytype::string2BasicType(def->type->content), ytype::norm), node->mark->line, node->mark->column)
+        if (def->expr == nullptr) {
+            if (def->type == nullptr) {
+                throw yoexception::YoError("SyntaxError", "At least one type qualifier is required", node->mark->line, node->mark->column);
+            }
+            PUSH(
+                    0.0,
+                    ytype::type(ytype::string2BasicType(def->type->content), ytype::norm),
+                    node->mark->line,
+                    node->mark->column
+            )
+        }
         else
             visitExpr(def->expr);
         CREATE(addPara(def->name->content),
@@ -499,7 +508,7 @@ void ygen::ByteCodeGenerator::visitRepeatStmt(AST::RepeatStmtNode *node) {
 
 void ygen::ByteCodeGenerator::visitForStmt(AST::ForStmtNode* node) {
     if (node->hasVorc)
-        visitVorcStmt(node->vorc);
+        visitLetStmt(node->vorc);
 
     if (node->hasCond)
         visitBoolExpr(node->cond);
@@ -571,7 +580,7 @@ void ygen::ByteCodeGenerator::visit(std::vector<AST::StmtNode*> _stmts) {
     for(auto stmt: _stmts){
         if(stmt->outstmt != nullptr) visitOutStmt(stmt->outstmt);
         else if(stmt->blockstmt != nullptr) visitBlockStmt(stmt->blockstmt);
-        else if(stmt->vorcstmt != nullptr) visitVorcStmt(stmt->vorcstmt);
+        else if(stmt->vorcstmt != nullptr) visitLetStmt(stmt->vorcstmt);
         else if(stmt->spexprstmt != nullptr) visitSpExprStmt(stmt->spexprstmt);
         else if(stmt->whilestmt != nullptr) visitWhileStmt(stmt->whilestmt);
         else if(stmt->ifstmt != nullptr) visitIfStmt(stmt->ifstmt);

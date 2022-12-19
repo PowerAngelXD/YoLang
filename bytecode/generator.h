@@ -34,9 +34,9 @@ namespace ygen{
      */
     struct byteCode{
         btc code;
-        ytype::ytypeUnit type;
+        ytype::ytypeUnit type {};
         float arg1=0.0, arg2=0.0, arg3=0.0, arg4=0.0;
-        int line, column;
+        int line {}, column {};
     };
 
     btc string2Code(std::string s);
@@ -121,7 +121,7 @@ namespace ygen{
         void visitExpr(AST::WholeExprNode* node); // 特殊的visitor，visit的是整个Expr
 
         void visitOutStmt(AST::OutStmtNode* node);
-        void visitVorcStmt(AST::VorcStmtNode* node);
+        void visitLetStmt(AST::LetStmtNode* node);
         void visitSpExprStmt(AST::SpExprStmtNode* node);
         void visitBlockStmt(AST::BlockStmtNode* node);
         void visitWhileStmt(AST::WhileStmtNode* node);
