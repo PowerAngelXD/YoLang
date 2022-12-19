@@ -34,9 +34,9 @@ namespace yvm{
     class vmfront {
         vmcore::vm vm; // vm实例
     public:
-        std::string compeleteVersion = "Release-2022-11-0160";
-        std::string version = "22.11.160";
-        std::string releaseVersion = "Yolang 1.5.4";
+        std::string compeleteVersion = "Release-2022-11-0169";
+        std::string version = "22.11.169";
+        std::string releaseVersion = "Yolang 1.5.9";
 
         vmfront() = default;
 
