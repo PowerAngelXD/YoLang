@@ -971,8 +971,8 @@ void vmcore::vm::out(ygen::byteCode code) {
     ysto::printValue(result);
 }
 void vmcore::vm::create(ygen::byteCode code,  int &current) {
-    std::string name = constPool[code.arg1];
-    std::string state = constPool[code.arg2]; // 初始化的类型，变量还是常量；或者是Dynamic还是Static
+    std::string name = constPool[static_cast<size_t>(code.arg1)];
+    std::string state = constPool[static_cast<size_t>(code.arg2)]; // 初始化的类型，变量还是常量；或者是Dynamic还是Static
 
     // 如果重命名则报错
     if(space.findValue(name))
@@ -984,7 +984,7 @@ void vmcore::vm::create(ygen::byteCode code,  int &current) {
         while(valueStack.peek().getBasicType() != ytype::basicType::flag && valueStack.peek().getStringValue().get() != "flag:para_end") {
             std::string argName = valueStack.pop().getStringValue().get();
             std::string argType = valueStack.pop().getStringValue().get();
-            formalParas.push_back(std::pair<ytype::ytypeUnit, std::string>(ytype::string2Type(argType),argName));
+            formalParas.emplace_back(ytype::string2Type(argType),argName);
         }
         std::reverse(formalParas.begin(), formalParas.end());
         valueStack.pop();

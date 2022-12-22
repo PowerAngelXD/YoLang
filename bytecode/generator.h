@@ -120,7 +120,6 @@ namespace ygen{
         void visitNewExpr(AST::NewExprNode* node);
         void visitExpr(AST::WholeExprNode* node); // 特殊的visitor，visit的是整个Expr
 
-        void visitOutStmt(AST::OutStmtNode* node);
         void visitLetStmt(AST::LetStmtNode* node);
         void visitSpExprStmt(AST::SpExprStmtNode* node);
         void visitBlockStmt(AST::BlockStmtNode* node);

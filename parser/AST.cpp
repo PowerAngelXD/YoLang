@@ -176,9 +176,6 @@ std::string AST::TypecastExprNode::toString() {
 
 // STMT
 
-std::string AST::OutStmtNode::toString() {
-    return "OutStmtNode: {" + mark->toString() + ", " + expr->toString() + "}";
-}
 
 std::string AST::LetStmtNode::defineBlock::toString() {
     return "DefineBlock: {" + name->toString() + ", " + (type != nullptr?type->toString():"") + ", " + expr->toString() + "}";
@@ -271,8 +268,7 @@ std::string AST::AsOpNode::toString() {
 }
 
 std::string AST::StmtNode::toString() {
-    if(outstmt != nullptr) return "StmtNode: {" + outstmt->toString() + "}";
-    else if(vorcstmt != nullptr) return "StmtNode: {" + vorcstmt->toString() + "}";
+    if(vorcstmt != nullptr) return "StmtNode: {" + vorcstmt->toString() + "}";
     else if(blockstmt != nullptr) return "StmtNode: {" + blockstmt->toString() + "}";
     else if(spexprstmt != nullptr) return "StmtNode: {" + spexprstmt->toString() + "}";
     else if(whilestmt != nullptr) return "StmtNode: {" + whilestmt->toString() + "}";

@@ -23,7 +23,7 @@ namespace parser{
         bool isAddOp(); bool isMulOp(); bool isCmpOp(); bool isBoolOp(); bool isIndexOp(); bool isStfOp(); bool isCallOp();
         bool isAsOp(); bool isListExpr(); bool isAssignmentExpr(); bool isTypecastExpr(); bool isCellIdentifier(); bool isExpr();
 
-        bool isStmt(); bool isOutStmt(); bool isLetStmt(); bool isSpExprStmt(); bool isBlockStmt();
+        bool isStmt(); bool isLetStmt(); bool isSpExprStmt(); bool isBlockStmt();
         bool isWhileStmt(); bool isIfStmt(); bool isElifStmt(); bool isElseStmt(); bool isForStmt();
         bool isRepeatStmt(); bool isDeleteStmt(); bool isBreakStmt(); bool isFuncDefStmt(); bool isDeferStmt();
         bool isReturnStmt(); bool isStructDefStmt(); bool isPackDefStmt();
@@ -52,7 +52,6 @@ namespace parser{
         AST::TypecastExprNode* parseTypecastExprNode();
         AST::AssignmentExprNode* parseAssignmentExprNode();
 
-        AST::OutStmtNode* parseOutStmtNode();
         AST::LetStmtNode* parseLetStmtNode(bool asStmt=true);
         AST::PackDefineStmtNode* parsePackDefineStmtNode();
         AST::SpExprStmtNode* parseSpExprStmtNode();

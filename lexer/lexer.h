@@ -12,7 +12,7 @@ namespace yolexer{
     static std::vector<std::string> bifList =
             {"print", "println", "input", "fread", "vmcode", "add_const", "substr", "system", "fwrite", "ref", "length", "randint", "rand_deci", "randstr", "split"};
     static std::vector<std::string> yoKeyWords = {
-            "const", "let", "typeof", "out", "repeat",
+            "const", "let", "typeof", "repeat",
             "while", "for", "for_each", "return", "func",
             "string", "integer", "decimal", "boolean", "delete",
             "string[]", "integer[]", "decimal[]", "boolean[]",

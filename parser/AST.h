@@ -232,15 +232,6 @@ namespace AST{
     };
 
     // STMT
-    class OutStmtNode{
-    public:
-        yolexer::yoToken* mark = nullptr; // mark为语句的标识
-        WholeExprNode* expr = nullptr;
-        yolexer::yoToken* end = nullptr; // end为语句末尾符，也就是;
-
-        std::string toString();
-    };
-
     class StructDefineStmtNode{
     public:
         struct memberPair {
@@ -442,7 +433,6 @@ namespace AST{
 
     class StmtNode{
     public:
-        OutStmtNode* outstmt = nullptr;
         BreakStmtNode* breakstmt = nullptr;
         LetStmtNode* vorcstmt = nullptr;
         BlockStmtNode* blockstmt = nullptr;

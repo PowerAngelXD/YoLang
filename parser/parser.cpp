@@ -193,9 +193,6 @@ bool parser::Parser::isAssignmentExpr() {
 bool parser::Parser::isExpr() {
     return isListExpr() || isAddExpr() || isBoolExpr() || isAssignmentExpr() || isNewExpr() || isStructExpr();
 }
-bool parser::Parser::isOutStmt() {
-    return peek()->content == "out";
-}
 bool parser::Parser::isLetStmt() {
     return peek()->content == "let" || peek()->content == "const" || peek()->content == "dynamic" || peek()->content == "static";
 }
@@ -245,7 +242,7 @@ bool parser::Parser::isPackDefStmt() {
     return peek()->content == "pack";
 }
 bool parser::Parser::isStmt() {
-    return isOutStmt() || isLetStmt() || isSpExprStmt() || isBlockStmt() || isWhileStmt() || isIfStmt() || isElifStmt() || isElseStmt() ||
+    return isLetStmt() || isSpExprStmt() || isBlockStmt() || isWhileStmt() || isIfStmt() || isElifStmt() || isElseStmt() ||
            isRepeatStmt() || isDeleteStmt() || isForStmt() || isBreakStmt() || isFuncDefStmt() || isDeferStmt() || isReturnStmt() || isStructDefStmt() ||
            isPackDefStmt();
 }
@@ -539,8 +536,7 @@ AST::WholeExprNode* parser::Parser::parseExpr(){
 
 AST::StmtNode* parser::Parser::parseStmtNode() {
     AST::StmtNode* node = new AST::StmtNode;
-    if(isOutStmt()) node->outstmt = parseOutStmtNode();
-    else if(isBlockStmt()) node->blockstmt = parseBlockStmtNode();
+    if(isBlockStmt()) node->blockstmt = parseBlockStmtNode();
     else if(isLetStmt()) node->vorcstmt = parseLetStmtNode();
     else if(isWhileStmt()) node->whilestmt = parseWhileStmtNode();
     else if(isIfStmt()) node->ifstmt = parseIfStmtNode();
@@ -568,17 +564,9 @@ std::vector<AST::StmtNode*> parser::Parser::parse(){
     }
     if(stmts.empty())
         throw yoexception::YoError("SyntaxError", "Not any statement", tg[offset].line, tg[offset].column);
-    return stmts;}
-
-AST::OutStmtNode* parser::Parser::parseOutStmtNode(){
-    AST::OutStmtNode* node = new AST::OutStmtNode;
-    node->mark = token();
-    if(isExpr()) node->expr = parseExpr();
-    else throw yoexception::YoError("SyntaxError", "An expression is required here", tg[offset].line, tg[offset].column);
-    if(peek()->content == ";") node->end = token();
-    else throw yoexception::YoError("SyntaxError", "Expect ';'", tg[offset].line, tg[offset].column);
-    return node;
+    return stmts;
 }
+
 
 AST::PackDefineStmtNode* parser::Parser::parsePackDefineStmtNode() {
     AST::PackDefineStmtNode* node = new AST::PackDefineStmtNode;
@@ -859,7 +847,7 @@ AST::StructDefineStmtNode* parser::Parser::parseStructDefStmtNode() {
 AST::FuncDefStmtNode* parser::Parser::parseFuncDefStmtNode() {
     AST::FuncDefStmtNode* node = new AST::FuncDefStmtNode;
     node->mark = token();
-    if(std::find(yolexer::typeList.begin(), yolexer::typeList.end(), peek()->content) != yolexer::typeList.end()) {
+    if(peek()->type == yolexer::yoTokType::Identifier || peek()->type == yolexer::yoTokType::KeyWord) {
         // 是typename，继续生成
         node->rettype = token();
         if(peek()->type == yolexer::yoTokType::Identifier) {

@@ -394,10 +394,6 @@ void ygen::ByteCodeGenerator::visitNewExpr(AST::NewExprNode* node) {
 
 // STMT
 
-void ygen::ByteCodeGenerator::visitOutStmt(AST::OutStmtNode* node) {
-    visitExpr(node->expr);
-    OUT
-}
 void ygen::ByteCodeGenerator::visitStructDefStmt(AST::StructDefineStmtNode *node) {
     visitString(node->name);
     PARAEND
@@ -578,8 +574,7 @@ void ygen::ByteCodeGenerator::visit(std::vector<AST::StmtNode*> _stmts) {
     }
 
     for(auto stmt: _stmts){
-        if(stmt->outstmt != nullptr) visitOutStmt(stmt->outstmt);
-        else if(stmt->blockstmt != nullptr) visitBlockStmt(stmt->blockstmt);
+        if(stmt->blockstmt != nullptr) visitBlockStmt(stmt->blockstmt);
         else if(stmt->vorcstmt != nullptr) visitLetStmt(stmt->vorcstmt);
         else if(stmt->spexprstmt != nullptr) visitSpExprStmt(stmt->spexprstmt);
         else if(stmt->whilestmt != nullptr) visitWhileStmt(stmt->whilestmt);
