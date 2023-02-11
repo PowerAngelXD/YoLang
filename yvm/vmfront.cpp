@@ -102,7 +102,7 @@ yvm::vmfront &yvm::vmfront::clearVM() {
     return *this;
 }
 
-yvm::vmfront &yvm::vmfront::resetVM(std::vector<ygen::byteCode> codes, std::vector<std::string> consts) {
+yvm::vmfront &yvm::vmfront::resetVM(std::vector<byteCode> codes, std::vector<std::string> consts) {
     vm.load(consts, codes);
     return *this;
 }

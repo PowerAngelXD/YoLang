@@ -6,20 +6,9 @@
 #include <cstring>
 #include "../yvm/core/type/Ytype.h"
 
-namespace ygen{
-    // ByteCode 集合
-    enum btc{
-        // 栈操作类
-        push = 0, gto, jmp,
-        // 运算类
-        tcast, _new, cast, selfadd, selfsub, add, sub, div, mul, tmo, idx, lst, logicand, logicor, no, lt, ltet, gt, gtet, equ, noequ, gmem, stf, type_equ,
-        point_to,
-        // 标志类
-        listend, paraend, scopestart, scopeend, idenend, flag,
-        // 功能类
-        out, create, assign, del, call, del_val
-    };
+using namespace ytype;
 
+namespace ygen{
     // ByteCode的参数帮助，可以快捷的写一些参数。内部均为枚举，以XXXXHelper的形式存在
     namespace paraHelper{
         // reqXXX代表jmp指令需要的条件以供跳转
@@ -29,19 +18,9 @@ namespace ygen{
         enum flagt{ loopEnd = 200, fnEnd, strtExpr};
     }
 
-    /**
-     * @brief 描述VM每一个code的结构体
-     */
-    struct byteCode{
-        btc code;
-        ytype::ytypeUnit type {};
-        float arg1=0.0, arg2=0.0, arg3=0.0, arg4=0.0;
-        int line {}, column {};
-    };
-
     btc string2Code(std::string s);
 
-    class ByteCodeGenerator{
+    class byteCodeGenerator{
         std::vector<AST::StmtNode*> stmts;
         AST::WholeExprNode* expr{};
         std::vector<std::string> constpool; // 字符（串）池，根据索引取元素(也可以用来存放参数)
@@ -52,9 +31,9 @@ namespace ygen{
         int string2Int(const std::string& s);
         float string2Float(const std::string& s);
     public:
-        ByteCodeGenerator()=default;
-        explicit ByteCodeGenerator(std::vector<AST::StmtNode*> _stmts);
-        explicit ByteCodeGenerator(AST::WholeExprNode* _expr);
+        byteCodeGenerator()=default;
+        explicit byteCodeGenerator(std::vector<AST::StmtNode*> _stmts);
+        explicit byteCodeGenerator(AST::WholeExprNode* _expr);
 
         std::vector<std::string> getConstPool(); // 获取字符（串）池
         std::vector<byteCode> getCodes(); // 获取字节码集

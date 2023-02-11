@@ -7,6 +7,19 @@
 #include <vector>
 
 namespace ytype {
+    // ByteCode 集合
+    enum btc{
+        // 栈操作类
+        push = 0, gto, jmp,
+        // 运算类
+        tcast, _new, cast, selfadd, selfsub, add, sub, div, mul, tmo, idx, lst, logicand, logicor, no, lt, ltet, gt, gtet, equ, noequ, gmem, stf, type_equ,
+        point_to,
+        // 标志类
+        listend, paraend, scopestart, scopeend, idenend, set_flag,
+        // 功能类
+        out, create, assign, del, call, del_val
+    };
+
     // 对原先的类型系统作出修改
     enum basicType {integer = 0, boolean, decimal, string, null, object, iden, flag};
     enum compType {norm = 10, list, strt, llike_strt, ref};
@@ -33,7 +46,7 @@ namespace ytype {
      * @brief 描述VM每一个code的结构体
      */
     struct byteCode{
-        int code;
+        btc code;
         ytypeUnit type;
         float arg1=0.0, arg2=0.0, arg3=0.0, arg4=0.0;
         int line, column;

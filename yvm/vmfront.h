@@ -44,7 +44,7 @@ namespace yvm{
         vmfront& clearVM(); // clearVM只会把vm中的globalspace内的所有内容清空
         vmfront& runVM(std::string arg);
         vmfront& setupVM();
-        vmfront& resetVM(std::vector<ygen::byteCode> codes, std::vector<std::string> consts); // reset只会把vm中的codes和constPool覆写一遍
+        vmfront& resetVM(std::vector<byteCode> codes, std::vector<std::string> consts); // reset只会把vm中的codes和constPool覆写一遍
         vmcore::vm getVM();
     };
 
