@@ -39,6 +39,44 @@ namespace ytype {
         int line, column;
     };
 
+    struct YStruct {
+        std::string ident;
+        std::vector<structMemberPair> pairs;
+        std::vector<ytypeUnit> initList;
+
+        YStruct(std::string id, std::vector<ytypeUnit> init);
+    };
+
+    typedef std::vector<std::pair<ytype::ytypeUnit, std::string>> FunctionParas;
+    struct YFunction {
+        std::string ident;
+        FunctionParas args; // 参数类型:参数名 only "function"
+        ytype::ytypeUnit retType; // 返回类型
+        std::vector<byteCode> codes; // 储存的代码片段（包含scopestart scopeend） only "function"
+
+        YFunction(std::string id, FunctionParas paras, ytype::ytypeUnit retType, std::vector<byteCode> codes);
+    };
+
+    struct YImplement {
+        std::string ident;
+        std::vector<YFunction> methods;
+
+        YImplement(std::string id, std::vector<YFunction> ms);
+    };
+
+    // 更完善的结构体，指有了至少一个implement
+    struct YCompStruct {
+        std::string ident;
+        YStruct stru;
+        YImplement mainImpl; // 主impl，是对struct的独有方法实现
+        std::vector<YImplement> impls; // 其他impl，是从其它virtual impl上实现的
+
+        YCompStruct(std::string id, YStruct stru, YImplement mImpl);
+        void addImpl(YImplement impl);
+        bool findImpl(std::string id);
+        YImplement getImpl(std::string id);
+    };
+
     class YObject {
         objectKind kind; // Object的类型
 
