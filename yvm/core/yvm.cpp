@@ -11,7 +11,7 @@ ysto::Value vmcore::gwv(ysto::Value value) {
 
 // native
 //bif
-ysto::Value vmcore::native::BuiltInFunctionSet::println(std::vector<ysto::Value> args, ygen::byteCode code) {
+ysto::Value vmcore::native::BuiltInFunctionSet::println(std::vector<ysto::Value> args, byteCode code) {
     if(args.empty())
         throw yoexception::YoError("FunctionCallingError", "Overloaded function with no specified arguments", code.line, code.column);
     else if(args.size() != 1)
@@ -22,7 +22,7 @@ ysto::Value vmcore::native::BuiltInFunctionSet::println(std::vector<ysto::Value>
     return native::null_value; // 默认返回null
 }
 
-ysto::Value vmcore::native::BuiltInFunctionSet::input(std::vector<ysto::Value> args, ygen::byteCode code){
+ysto::Value vmcore::native::BuiltInFunctionSet::input(std::vector<ysto::Value> args, byteCode code){
     std::string promptText;
     std::string resultValue;
     if(args.empty()) promptText = "";
@@ -37,7 +37,7 @@ ysto::Value vmcore::native::BuiltInFunctionSet::input(std::vector<ysto::Value> a
     return {ytype::YString(resultValue), false, code.line, code.column};
 }
 
-ysto::Value vmcore::native::BuiltInFunctionSet::fread(std::vector<ysto::Value> args, ygen::byteCode code) {
+ysto::Value vmcore::native::BuiltInFunctionSet::fread(std::vector<ysto::Value> args, byteCode code) {
     if (args.size() != 1){
         throw yoexception::YoError("FunctionCallingError", "Overloaded function with no specified arguments", args[0].line, args[0].column);
     }
@@ -53,7 +53,7 @@ ysto::Value vmcore::native::BuiltInFunctionSet::fread(std::vector<ysto::Value> a
     return {ytype::YString(content), false, filename.line, filename.column};
 }
 
-ysto::Value vmcore::native::BuiltInFunctionSet::fwrite(std::vector<ysto::Value> args, ygen::byteCode code) {
+ysto::Value vmcore::native::BuiltInFunctionSet::fwrite(std::vector<ysto::Value> args, byteCode code) {
     if (args.size() != 3)
         throw yoexception::YoError("FunctionCallingError", "Overloaded function with no specified arguments", args[0].line, args[0].column);
     if(args[0].getBasicType() != ytype::basicType::string &&
@@ -96,7 +96,7 @@ ysto::Value vmcore::native::BuiltInFunctionSet::fwrite(std::vector<ysto::Value> 
     return native::null_value;
 }
 
-ysto::Value vmcore::native::BuiltInFunctionSet::length(std::vector<ysto::Value> args, ygen::byteCode code) {
+ysto::Value vmcore::native::BuiltInFunctionSet::length(std::vector<ysto::Value> args, byteCode code) {
     if(args.empty())
         throw yoexception::YoError("FunctionCallingError", "Overloaded function with no specified arguments", code.line, code.column);
     else if (args.size() != 1)
@@ -112,7 +112,7 @@ ysto::Value vmcore::native::BuiltInFunctionSet::length(std::vector<ysto::Value> 
         return {ytype::YInteger(value.getStringValue().get().size()), false, code.line, code.column};
 }
 
-ysto::Value vmcore::native::BuiltInFunctionSet::add_const(std::vector<ysto::Value> args, ygen::byteCode code) {
+ysto::Value vmcore::native::BuiltInFunctionSet::add_const(std::vector<ysto::Value> args, byteCode code) {
     if(args.empty())
         throw yoexception::YoError("FunctionCallingError", "Overloaded function with no specified arguments", code.line, code.column);
     else if (args.size() != 1)
@@ -123,7 +123,7 @@ ysto::Value vmcore::native::BuiltInFunctionSet::add_const(std::vector<ysto::Valu
     return {"flag:return_const:" + gwv(args[0]).getStringValue().get()};
 }
 
-ysto::Value vmcore::native::BuiltInFunctionSet::vmcode(std::vector<ysto::Value> args, ygen::byteCode code) {
+ysto::Value vmcore::native::BuiltInFunctionSet::vmcode(std::vector<ysto::Value> args, byteCode code) {
     if(args.empty())
         throw yoexception::YoError("FunctionCallingError", "Overloaded function with no specified arguments", code.line, code.column);
     else if (args.size() != 1)
@@ -134,7 +134,7 @@ ysto::Value vmcore::native::BuiltInFunctionSet::vmcode(std::vector<ysto::Value> 
     return {"flag:return_code:" + gwv(args[0]).getStringValue().get()};
 }
 
-ysto::Value vmcore::native::BuiltInFunctionSet::ref(std::vector<ysto::Value> args, ygen::byteCode code) {
+ysto::Value vmcore::native::BuiltInFunctionSet::ref(std::vector<ysto::Value> args, byteCode code) {
     if(args.empty())
         throw yoexception::YoError("FunctionCallingError", "Overloaded function with no specified arguments", code.line, code.column);
     else if (args.size() != 1)
@@ -147,7 +147,7 @@ ysto::Value vmcore::native::BuiltInFunctionSet::ref(std::vector<ysto::Value> arg
     return {"flag:return_ref:" + gwv(args[0]).getStringValue().get()};
 }
 
-ysto::Value vmcore::native::BuiltInFunctionSet::substr(std::vector<ysto::Value> args, ygen::byteCode code){
+ysto::Value vmcore::native::BuiltInFunctionSet::substr(std::vector<ysto::Value> args, byteCode code){
     if(args.empty())
         throw yoexception::YoError("FunctionCallingError", "Overloaded function with no specified arguments", code.line, code.column);
     else if (args.size() != 3)
@@ -169,7 +169,7 @@ ysto::Value vmcore::native::BuiltInFunctionSet::substr(std::vector<ysto::Value> 
     return {ytype::YString(result), false, string.line, string.column};
 }
 
-ysto::Value vmcore::native::BuiltInFunctionSet::randint(std::vector<ysto::Value> args, ygen::byteCode code) {
+ysto::Value vmcore::native::BuiltInFunctionSet::randint(std::vector<ysto::Value> args, byteCode code) {
     if(args.empty())
         throw yoexception::YoError("FunctionCallingError", "Overloaded function with no specified arguments", code.line, code.column);
     else if (args.size() != 2)
@@ -183,7 +183,7 @@ ysto::Value vmcore::native::BuiltInFunctionSet::randint(std::vector<ysto::Value>
     return {ytype::YInteger(ri(rd)), false, code.line, code.column};
 }
 
-ysto::Value vmcore::native::BuiltInFunctionSet::rand_deci(std::vector<ysto::Value> args, ygen::byteCode code) {
+ysto::Value vmcore::native::BuiltInFunctionSet::rand_deci(std::vector<ysto::Value> args, byteCode code) {
     if(args.empty())
         throw yoexception::YoError("FunctionCallingError", "Overloaded function with no specified arguments", code.line, code.column);
     else if (args.size() != 2)
@@ -197,7 +197,7 @@ ysto::Value vmcore::native::BuiltInFunctionSet::rand_deci(std::vector<ysto::Valu
     return {ytype::YDecimal(ri(rd)), false, code.line, code.column};
 }
 
-ysto::Value vmcore::native::BuiltInFunctionSet::randstr(std::vector<ysto::Value> args, ygen::byteCode code) {
+ysto::Value vmcore::native::BuiltInFunctionSet::randstr(std::vector<ysto::Value> args, byteCode code) {
     if(args.empty())
         throw yoexception::YoError("FunctionCallingError", "Overloaded function with no specified arguments", code.line, code.column);
     else if (args.size() != 1)
@@ -225,7 +225,7 @@ ysto::Value vmcore::native::BuiltInFunctionSet::randstr(std::vector<ysto::Value>
     return {ytype::YString(buffer), false, code.line, code.column};
 }
 
-ysto::Value vmcore::native::BuiltInFunctionSet::split(std::vector<ysto::Value> args, ygen::byteCode code) {
+ysto::Value vmcore::native::BuiltInFunctionSet::split(std::vector<ysto::Value> args, byteCode code) {
     if(args.empty())
         throw yoexception::YoError("FunctionCallingError", "Overloaded function with no specified arguments", code.line, code.column);
     else if (args.size() != 2)
@@ -308,12 +308,12 @@ void vmcore::YStack<Type>::push(Type value) {
 
 // VM
 
-vmcore::vm::vm(std::vector<ygen::byteCode> cs, std::vector<std::string> cp) {
+vmcore::vm::vm(std::vector<byteCode> cs, std::vector<std::string> cp) {
     mainQueue = cs;
     constPool = cp;
 }
 
-void vmcore::vm::load(std::vector<std::string> cp, std::vector<ygen::byteCode> cs) {
+void vmcore::vm::load(std::vector<std::string> cp, std::vector<byteCode> cs) {
     mainQueue = cs;
     constPool = cp;
 }
@@ -323,44 +323,44 @@ void vmcore::vm::run(int queue_id, std::string arg) {
     for(int i = 0; i < queue.size(); i ++) {
         auto& code  = queue[i];
         switch (code.code) {
-            case ygen::point_to: point_to(code); break;
-            case ygen::gmem: gmem(code); break;
-            case ygen::_new: _new(code); break;
-            case ygen::tcast: tcast(code); break;
-            case ygen::flag: flag(code); break;
-            case ygen::del_val: del_val(); break;
-            case ygen::add: add(code); break;
-            case ygen::push: push(code); break;
-            case ygen::jmp: i = jmp(code, queue, i); break;
-            case ygen::selfadd: selfadd(code); break;
-            case ygen::selfsub: selfsub(code); break;
-            case ygen::sub: sub(code); break;
-            case ygen::div: div(code); break;
-            case ygen::mul: mul(code); break;
-            case ygen::tmo: mod(code); break;
-            case ygen::idx: idx(code); break;
-            case ygen::lst: lst(code); break;
-            case ygen::logicand: logicAnd(code); break;
-            case ygen::logicor: logicOr(code); break;
-            case ygen::no: no(code); break;
-            case ygen::lt: lt(code); break;
-            case ygen::ltet: ltet(code); break;
-            case ygen::gt: gt(code); break;
-            case ygen::gtet: gtet(code); break;
-            case ygen::type_equ: tequ(code); break;
-            case ygen::equ: equ(code); break;
-            case ygen::noequ: noequ(code); break;
-            case ygen::stf: stf(code); break;
-            case ygen::listend: lstend(code); break;
-            case ygen::paraend: paraend(code); break;
-            case ygen::scopestart: scopestart(code); break;
-            case ygen::scopeend: scopeend(code); break;
-            case ygen::idenend: idenend(code); break;
-            case ygen::out: out(code); break;
-            case ygen::create: create(code, i); break;
-            case ygen::assign: assign(code); break;
-            case ygen::del: del(code); break;
-            case ygen::call: call(code, arg); break;
+            case btc::point_to: point_to(code); break;
+            case btc::gmem: gmem(code); break;
+            case btc::_new: _new(code); break;
+            case btc::tcast: tcast(code); break;
+            case btc::set_flag: flag(code); break;
+            case btc::del_val: del_val(); break;
+            case btc::add: add(code); break;
+            case btc::push: push(code); break;
+            case btc::jmp: i = jmp(code, queue, i); break;
+            case btc::selfadd: selfadd(code); break;
+            case btc::selfsub: selfsub(code); break;
+            case btc::sub: sub(code); break;
+            case btc::div: div(code); break;
+            case btc::mul: mul(code); break;
+            case btc::tmo: mod(code); break;
+            case btc::idx: idx(code); break;
+            case btc::lst: lst(code); break;
+            case btc::logicand: logicAnd(code); break;
+            case btc::logicor: logicOr(code); break;
+            case btc::no: no(code); break;
+            case btc::lt: lt(code); break;
+            case btc::ltet: ltet(code); break;
+            case btc::gt: gt(code); break;
+            case btc::gtet: gtet(code); break;
+            case btc::type_equ: tequ(code); break;
+            case btc::equ: equ(code); break;
+            case btc::noequ: noequ(code); break;
+            case btc::stf: stf(code); break;
+            case btc::listend: lstend(code); break;
+            case btc::paraend: paraend(code); break;
+            case btc::scopestart: scopestart(code); break;
+            case btc::scopeend: scopeend(code); break;
+            case btc::idenend: idenend(code); break;
+            case btc::out: out(code); break;
+            case btc::create: create(code, i); break;
+            case btc::assign: assign(code); break;
+            case btc::del: del(code); break;
+            case btc::call: call(code, arg); break;
         }
     }
 }
@@ -369,7 +369,7 @@ ysto::Value vmcore::vm::getResult() {
     return valueStack.pop();
 }
 
-void vmcore::vm::push(ygen::byteCode code) {
+void vmcore::vm::push(byteCode code) {
     switch (code.type.bt) {
         case ytype::basicType::integer: {
             valueStack.push(ysto::Value(ytype::YInteger(code.arg1), false, code.line, code.column));
@@ -397,7 +397,7 @@ void vmcore::vm::push(ygen::byteCode code) {
         }
     }
 }
-void vmcore::vm::flag(ygen::byteCode code) {
+void vmcore::vm::flag(byteCode code) {
     if(code.arg1 == ygen::paraHelper::flagt::strtExpr) {
         std::vector<ysto::Value> strt;
         while(valueStack.peek().getBasicType() != ytype::basicType::flag) {
@@ -413,7 +413,7 @@ void vmcore::vm::flag(ygen::byteCode code) {
         valueStack.push(ysto::Value(ret, false, code.line, code.column, true));
     }
 }
-void vmcore::vm::tcast(ygen::byteCode code) {
+void vmcore::vm::tcast(byteCode code) {
     auto right = valueStack.pop().getStringValue().get();
     auto left = *valueStack.pop().getRef();
     switch (left.getBasicType()) {
@@ -497,7 +497,7 @@ void vmcore::vm::tcast(ygen::byteCode code) {
         }
     }
 }
-void vmcore::vm::add(ygen::byteCode code) {
+void vmcore::vm::add(byteCode code) {
     auto right = gwv(valueStack.pop());
     auto left = gwv(valueStack.pop());
     switch (left.getBasicType()) {
@@ -542,7 +542,7 @@ void vmcore::vm::add(ygen::byteCode code) {
         default: throw yoexception::YoError("TypeError", "This operator does not support this type of operation",code.line, code.column); break;
     }
 }
-void vmcore::vm::sub(ygen::byteCode code) {
+void vmcore::vm::sub(byteCode code) {
     auto right = gwv(valueStack.pop());
     auto left = gwv(valueStack.pop());
     switch (left.getBasicType()) {
@@ -577,7 +577,7 @@ void vmcore::vm::sub(ygen::byteCode code) {
         default: throw yoexception::YoError("TypeError", "This operator does not support this type of operation",code.line, code.column); break;
     }
 }
-void vmcore::vm::mul(ygen::byteCode code) {
+void vmcore::vm::mul(byteCode code) {
     auto right = gwv(valueStack.pop());
     auto left = gwv(valueStack.pop());
     switch (left.getBasicType()) {
@@ -634,7 +634,7 @@ void vmcore::vm::mul(ygen::byteCode code) {
         default: throw yoexception::YoError("TypeError", "This operator does not support this type of operation",code.line, code.column); break;
     }
 }
-void vmcore::vm::div(ygen::byteCode code) {
+void vmcore::vm::div(byteCode code) {
     auto right = gwv(valueStack.pop());
     auto left = gwv(valueStack.pop());
     switch (left.getBasicType()) {
@@ -678,7 +678,7 @@ void vmcore::vm::div(ygen::byteCode code) {
         default: throw yoexception::YoError("TypeError", "This operator does not support this type of operation",code.line, code.column); break;
     }
 }
-void vmcore::vm::mod(ygen::byteCode code) {
+void vmcore::vm::mod(byteCode code) {
     auto right = gwv(valueStack.pop());
     auto left = gwv(valueStack.pop());
     if(left.getBasicType() == ytype::basicType::integer) {
@@ -689,14 +689,14 @@ void vmcore::vm::mod(ygen::byteCode code) {
     }
     else throw yoexception::YoError("TypeError", "This operator does not support this type of operation",code.line, code.column);
 }
-void vmcore::vm::stf(ygen::byteCode code) {
+void vmcore::vm::stf(byteCode code) {
     std::string name = constPool[code.arg1];
     if(name == "typeof") {
         auto value = gwv(valueStack.pop());
         valueStack.push(ysto::Value(ytype::YString(ytype::type2String(value.getType())), false, code.line, code.column));
     }
 }
-void vmcore::vm::lt(ygen::byteCode code) {
+void vmcore::vm::lt(byteCode code) {
     auto right = gwv(valueStack.pop());
     auto left = gwv(valueStack.pop());
     switch (left.getBasicType()) {
@@ -731,7 +731,7 @@ void vmcore::vm::lt(ygen::byteCode code) {
         default: throw yoexception::YoError("TypeError", "This operator does not support this type of operation",code.line, code.column); break;
     }
 }
-void vmcore::vm::gt(ygen::byteCode code) {
+void vmcore::vm::gt(byteCode code) {
     auto right = gwv(valueStack.pop());
     auto left = gwv(valueStack.pop());
     switch (left.getBasicType()) {
@@ -766,7 +766,7 @@ void vmcore::vm::gt(ygen::byteCode code) {
         default: throw yoexception::YoError("TypeError", "This operator does not support this type of operation",code.line, code.column); break;
     }
 }
-void vmcore::vm::ltet(ygen::byteCode code) {
+void vmcore::vm::ltet(byteCode code) {
     auto right = gwv(valueStack.pop());
     auto left = gwv(valueStack.pop());
     switch (left.getBasicType()) {
@@ -801,7 +801,7 @@ void vmcore::vm::ltet(ygen::byteCode code) {
         default: throw yoexception::YoError("TypeError", "This operator does not support this type of operation",code.line, code.column); break;
     }
 }
-void vmcore::vm::gtet(ygen::byteCode code) {
+void vmcore::vm::gtet(byteCode code) {
     auto right = gwv(valueStack.pop());
     auto left = gwv(valueStack.pop());
     switch (left.getBasicType()) {
@@ -836,32 +836,32 @@ void vmcore::vm::gtet(ygen::byteCode code) {
         default: throw yoexception::YoError("TypeError", "This operator does not support this type of operation",code.line, code.column); break;
     }
 }
-void vmcore::vm::tequ(ygen::byteCode code) {
+void vmcore::vm::tequ(byteCode code) {
     auto right = gwv(valueStack.pop());
     auto left = gwv(valueStack.pop());
     valueStack.push(ysto::Value(ytype::YBoolean(left.getType() == right.getType()), false, code.line, code.column));
 }
-void vmcore::vm::no(ygen::byteCode code) {
+void vmcore::vm::no(byteCode code) {
     auto value = gwv(valueStack.pop());
     if(value.getBasicType() == ytype::basicType::boolean)
         valueStack.push(ysto::Value(ytype::YBoolean(!value.getBooleanValue().get()), false, code.line, code.column));
     else throw yoexception::YoError("TypeError", "This operator does not support this type of operation",code.line, code.column);
 }
-void vmcore::vm::logicAnd(ygen::byteCode code) {
+void vmcore::vm::logicAnd(byteCode code) {
     auto left =gwv(valueStack.pop());
     auto right = gwv(valueStack.pop());
     if(left.getBasicType() == ytype::basicType::boolean && right.getBasicType() == ytype::basicType::boolean)
         valueStack.push(ysto::Value(ytype::YBoolean(left.getBooleanValue().get() && right.getBooleanValue().get()), false, code.line, code.column));
     else throw yoexception::YoError("TypeError", "This operator does not support this type of operation",code.line, code.column);
 }
-void vmcore::vm::logicOr(ygen::byteCode code) {
+void vmcore::vm::logicOr(byteCode code) {
     auto left = gwv(valueStack.pop());
     auto right = gwv(valueStack.pop());
     if(left.getBasicType() == ytype::basicType::boolean && right.getBasicType() == ytype::basicType::boolean)
         valueStack.push(ysto::Value(ytype::YBoolean(left.getBooleanValue().get() || right.getBooleanValue().get()), false, code.line, code.column));
     else throw yoexception::YoError("TypeError", "This operator does not support this type of operation",code.line, code.column);
 }
-void vmcore::vm::equ(ygen::byteCode code) {
+void vmcore::vm::equ(byteCode code) {
     auto right = gwv(valueStack.pop());
     auto left = gwv(valueStack.pop());
     switch (left.getBasicType()) {
@@ -906,7 +906,7 @@ void vmcore::vm::equ(ygen::byteCode code) {
         default: throw yoexception::YoError("TypeError", "This operator does not support this type of operation",code.line, code.column); break;
     }
 }
-void vmcore::vm::noequ(ygen::byteCode code) {
+void vmcore::vm::noequ(byteCode code) {
     auto right = gwv(valueStack.pop());
     auto left = gwv(valueStack.pop());
     switch (left.getBasicType()) {
@@ -951,13 +951,13 @@ void vmcore::vm::noequ(ygen::byteCode code) {
         default: throw yoexception::YoError("TypeError", "This operator does not support this type of operation",code.line, code.column); break;
     }
 }
-void vmcore::vm::lstend(ygen::byteCode code) {
+void vmcore::vm::lstend(byteCode code) {
      valueStack.push(ysto::Value("flag:list_end"));
 }
-void vmcore::vm::paraend(ygen::byteCode code) {
+void vmcore::vm::paraend(byteCode code) {
     valueStack.push(ysto::Value("flag:para_end"));
 }
-void vmcore::vm::lst(ygen::byteCode code) {
+void vmcore::vm::lst(byteCode code) {
     std::vector<ysto::Value> list;
     while(valueStack.peek().getBasicType() != ytype::basicType::flag && valueStack.peek().getStringValue().get() != "flag:list_end") {
         list.push_back(valueStack.pop());
@@ -966,11 +966,11 @@ void vmcore::vm::lst(ygen::byteCode code) {
     std::reverse(list.begin(), list.end());
     valueStack.push(ysto::Value(list, false, code.line, code.column, false));
 }
-void vmcore::vm::out(ygen::byteCode code) {
+void vmcore::vm::out(byteCode code) {
     auto result = valueStack.pop();
     ysto::printValue(result);
 }
-void vmcore::vm::create(ygen::byteCode code,  int &current) {
+void vmcore::vm::create(byteCode code,  int &current) {
     std::string name = constPool[static_cast<size_t>(code.arg1)];
     std::string state = constPool[static_cast<size_t>(code.arg2)]; // 初始化的类型，变量还是常量；或者是Dynamic还是Static
 
@@ -996,10 +996,9 @@ void vmcore::vm::create(ygen::byteCode code,  int &current) {
         while((flag != 0 || !first) && mainQueue[current].arg1 != ygen::paraHelper::flagt::fnEnd) {
             first = true;
             current ++;
-            if(mainQueue[current].code == ygen::btc::scopestart) flag ++;
-            else if(mainQueue[current].code == ygen::btc::scopeend) flag --;
-            codes.push_back({mainQueue[current].code, mainQueue[current].type, mainQueue[current].arg1, mainQueue[current].arg2, mainQueue[current].arg3,
-                                            mainQueue[current].arg4, mainQueue[current].line, mainQueue[current].column});
+            if(mainQueue[current].code == btc::scopestart) flag ++;
+            else if(mainQueue[current].code == btc::scopeend) flag --;
+            codes.push_back(mainQueue[current]);
         }
         //
         space.createValue(name, ysto::Value(ytype::YObject(codes, formalParas, retType, name), false, code.line, code.column));
@@ -1154,7 +1153,7 @@ void vmcore::vm::create(ygen::byteCode code,  int &current) {
     }
     space.getValue(name).refName(name);
 }
-void vmcore::vm::assign(ygen::byteCode code) {
+void vmcore::vm::assign(byteCode code) {
     auto value = gwv(valueStack.pop());
     auto sample = valueStack.pop();
     if(sample.getRef()->getRef() != nullptr)
@@ -1163,7 +1162,7 @@ void vmcore::vm::assign(ygen::byteCode code) {
 
     valueStack.push(value);
 }
-void vmcore::vm::point_to(ygen::byteCode code) {
+void vmcore::vm::point_to(byteCode code) {
     auto refto = valueStack.pop();
     auto sample = valueStack.pop();
     if(refto.getRef() == nullptr)
@@ -1179,7 +1178,7 @@ void vmcore::vm::point_to(ygen::byteCode code) {
 
     valueStack.push(native::null_value);
 }
-void vmcore::vm::idx(ygen::byteCode code) {
+void vmcore::vm::idx(byteCode code) {
     auto idx = valueStack.pop();
     auto value = valueStack.pop();
     if(!value.isListValue() && value.getCompType() != ytype::compType::llike_strt && value.getCompType() != ytype::compType::ref)
@@ -1191,7 +1190,7 @@ void vmcore::vm::idx(ygen::byteCode code) {
     else
         valueStack.push(ysto::Value(value.getList()[idx.getIntegerValue().get()]));
 }
-void vmcore::vm::selfadd(ygen::byteCode code) {
+void vmcore::vm::selfadd(byteCode code) {
     auto value = valueStack.pop().getRef();
 
     if(value->getBasicType() != ytype::basicType::integer)
@@ -1208,7 +1207,7 @@ void vmcore::vm::selfadd(ygen::byteCode code) {
         value->getIntegerValue().get() ++;
     }
 }
-void vmcore::vm::selfsub(ygen::byteCode code) {
+void vmcore::vm::selfsub(byteCode code) {
     auto name = valueStack.pop().getStringValue().get();
 
     if(!space.findValue(name))
@@ -1227,16 +1226,16 @@ void vmcore::vm::selfsub(ygen::byteCode code) {
         space.getValue(name).getRef()->getIntegerValue() = ytype::YInteger(space.getValue(name).getRef()->getIntegerValue().get() - 1);
     }
 }
-void vmcore::vm::scopestart(ygen::byteCode code) {
+void vmcore::vm::scopestart(byteCode code) {
     space.createScope("vm_created_scope", code.line, code.column);
 }
-void vmcore::vm::scopeend(ygen::byteCode code) {
+void vmcore::vm::scopeend(byteCode code) {
     space.deleteScope();
 }
 void vmcore::vm::del_val() {
     valueStack.pop();
 }
-int vmcore::vm::jmp(ygen::byteCode code, std::vector<ygen::byteCode>& queue, int current) {
+int vmcore::vm::jmp(byteCode code, std::vector<byteCode>& queue, int current) {
     switch ((int)code.arg1) {
         case ygen::paraHelper::jmpt::reqTrue: {
             if(valueStack.pop().getBooleanValue().get()) {
@@ -1247,8 +1246,8 @@ int vmcore::vm::jmp(ygen::byteCode code, std::vector<ygen::byteCode>& queue, int
                         while(flag != 0 || !first) {
                             first = true;
                             current ++;
-                            if(queue[current].code == ygen::btc::scopestart) flag ++;
-                            else if(queue[current].code == ygen::btc::scopeend) flag --;
+                            if(queue[current].code == btc::scopestart) flag ++;
+                            else if(queue[current].code == btc::scopeend) flag --;
                             else ;
                         }
                         valueStack.push(ysto::Value(ytype::YBoolean(false), true, code.line, code.column));
@@ -1260,8 +1259,8 @@ int vmcore::vm::jmp(ygen::byteCode code, std::vector<ygen::byteCode>& queue, int
                         while(flag != 0 || !first) {
                             first = true;
                             current --;
-                            if(queue[current].code == ygen::btc::scopestart) flag --;
-                            else if(queue[current].code == ygen::btc::scopeend) flag ++;
+                            if(queue[current].code == btc::scopestart) flag --;
+                            else if(queue[current].code == btc::scopeend) flag ++;
                             else ;
                         }
                         current --;
@@ -1282,8 +1281,8 @@ int vmcore::vm::jmp(ygen::byteCode code, std::vector<ygen::byteCode>& queue, int
                         while(flag != 0 || !first) {
                             first = true;
                             current ++;
-                            if(queue[current].code == ygen::btc::scopestart) flag ++;
-                            else if(queue[current].code == ygen::btc::scopeend) flag --;
+                            if(queue[current].code == btc::scopestart) flag ++;
+                            else if(queue[current].code == btc::scopeend) flag --;
                             else ;
                         }
                         valueStack.push(ysto::Value(ytype::YBoolean(true), true, code.line, code.column));
@@ -1295,8 +1294,8 @@ int vmcore::vm::jmp(ygen::byteCode code, std::vector<ygen::byteCode>& queue, int
                         while(flag != 0 || !first) {
                             first = true;
                             current --;
-                            if(queue[current].code == ygen::btc::scopestart) flag --;
-                            else if(queue[current].code == ygen::btc::scopeend) flag ++;
+                            if(queue[current].code == btc::scopestart) flag --;
+                            else if(queue[current].code == btc::scopeend) flag ++;
                             else ;
                         }
                         current --;
@@ -1314,8 +1313,8 @@ int vmcore::vm::jmp(ygen::byteCode code, std::vector<ygen::byteCode>& queue, int
                     int flag = 1;
                     while(flag != 0) {
                         current ++;
-                        if(queue[current].code == ygen::btc::scopestart) flag ++;
-                        else if(queue[current].code == ygen::btc::scopeend) flag --;
+                        if(queue[current].code == btc::scopestart) flag ++;
+                        else if(queue[current].code == btc::scopeend) flag --;
                         else ;
                     }
                     break;
@@ -1325,9 +1324,9 @@ int vmcore::vm::jmp(ygen::byteCode code, std::vector<ygen::byteCode>& queue, int
                     bool start = false;
                     while(queue[current].arg1 != ygen::paraHelper::flagt::loopEnd || flag != 0) {
                         current --;
-                        if(start && (queue[current].code == ygen::btc::scopestart||ygen::btc::scopeend)) {
-                            if(queue[current].code == ygen::btc::scopestart) flag --;
-                            else if(queue[current].code == ygen::btc::scopeend) flag ++;
+                        if(start && (queue[current].code == btc::scopestart||btc::scopeend)) {
+                            if(queue[current].code == btc::scopestart) flag --;
+                            else if(queue[current].code == btc::scopeend) flag ++;
                         }
                         else start = true;
                     }
@@ -1336,8 +1335,8 @@ int vmcore::vm::jmp(ygen::byteCode code, std::vector<ygen::byteCode>& queue, int
                     while(flag != 0 || !start) {
                         start = true;
                         current++;
-                        if (queue[current].code == ygen::btc::scopestart) flag++;
-                        else if (queue[current].code == ygen::btc::scopeend) flag--;
+                        if (queue[current].code == btc::scopestart) flag++;
+                        else if (queue[current].code == btc::scopeend) flag--;
                         else;
                     }
 
@@ -1348,8 +1347,8 @@ int vmcore::vm::jmp(ygen::byteCode code, std::vector<ygen::byteCode>& queue, int
                     int flag = 1;
                     while(flag != 0) {
                         current --;
-                        if(queue[current].code == ygen::btc::scopestart) flag --;
-                        else if(queue[current].code == ygen::btc::scopeend) flag ++;
+                        if(queue[current].code == btc::scopestart) flag --;
+                        else if(queue[current].code == btc::scopeend) flag ++;
                         else ;
                     }
                     break;
@@ -1362,7 +1361,7 @@ int vmcore::vm::jmp(ygen::byteCode code, std::vector<ygen::byteCode>& queue, int
     }
     return current;
 }
-void vmcore::vm::del(ygen::byteCode code) {
+void vmcore::vm::del(byteCode code) {
     if(code.arg2 == 1.0) {
         // 判断是否启用了不传入push名称的模式
         auto name = constPool[code.arg1];
@@ -1385,10 +1384,10 @@ void vmcore::vm::del(ygen::byteCode code) {
             throw yoexception::YoError("NameError", "There is no identifier named: '" + name + "'", code.line, code.column);
     }
 }
-void vmcore::vm::idenend(ygen::byteCode code) {
+void vmcore::vm::idenend(byteCode code) {
     valueStack.push(ysto::Value("flag:identifier_end"));
 }
-void vmcore::vm::call(ygen::byteCode code, std::string arg) {
+void vmcore::vm::call(byteCode code, std::string arg) {
     auto temp = valueStack.pop(); // temp值，用于检测是paraend还是正常的flag
     // 是不是无参函数: true-不是，false-是
     bool isNopara = temp.getBasicType() == ytype::basicType::flag && temp.getStringValue().get() == "flag:para_end";
@@ -1477,11 +1476,11 @@ void vmcore::vm::call(ygen::byteCode code, std::string arg) {
             }
             if(codes.size() != 7)
                 throw yoexception::YoError("VM-Runtime-Error", "It is not a valid intermediate code", code.line, code.column);
-            ygen::btc bcode = ygen::string2Code(codes[0]);
+            btc bcode = ygen::string2Code(codes[0]);
             auto basicType = ytype::string2BasicType(codes[1]);
             auto compType = ytype::string2CompType(codes[2]);
-            float a1=atof(codes[3].c_str()), a2=atof(codes[4].c_str()), a3=atof(codes[5].c_str()), a4=atof(codes[6].c_str());
-            ygen::byteCode defcode = {bcode, {basicType, compType}, a1, a2, a3, a4, code.line, code.column};
+            float a1 = atof(codes[3].c_str()), a2=atof(codes[4].c_str()), a3=atof(codes[5].c_str()), a4=atof(codes[6].c_str());
+            byteCode defcode = {bcode, {basicType, compType}, a1, a2, a3, a4, code.line, code.column};
             mainQueue.push_back(defcode);
         }
     }
@@ -1505,9 +1504,9 @@ void vmcore::vm::call(ygen::byteCode code, std::string arg) {
 
         // 将函数代码队列push到codeQueue中
         auto codes = fnTemp.getObjectValue().codes;
-        std::vector<ygen::byteCode> cs;
+        std::vector<byteCode> cs;
         for(int i = 0; i < codes.size(); i ++){
-            ygen::byteCode temp = {(ygen::btc)codes[i].code, codes[i].type, codes[i].arg1, codes[i].arg2, codes[i].arg3, codes[i].arg4, codes[i].line, codes[i].column};
+            byteCode temp = codes[i];
             cs.push_back(temp);
         }
         codeQueue.push_back(cs);
@@ -1525,7 +1524,7 @@ void vmcore::vm::call(ygen::byteCode code, std::string arg) {
         else valueStack.push(ret);
     }
 }
-void vmcore::vm::_new(ygen::byteCode code) {
+void vmcore::vm::_new(byteCode code) {
     auto name = valueStack.pop().getStringValue().get();
     if(!space.findValue(name))
         throw yoexception::YoError("NameError", "Unknown identifier: '" + name + "'", code.line, code.column);
@@ -1557,7 +1556,7 @@ void vmcore::vm::_new(ygen::byteCode code) {
         valueStack.push(ysto::Value(strt, false, code.line, code.column));
     }
 }
-void vmcore::vm::gmem(ygen::byteCode code) {
+void vmcore::vm::gmem(byteCode code) {
     auto ref = valueStack.pop().getStringValue().get();
     auto sample = valueStack.pop();
     // 内置成员判断

@@ -34,7 +34,7 @@ int main(int argc, char *argv[]){
                         auto tg = ysh.makeTokenGroup(str);
                         ysh.yparser = parser::Parser(tg);
                         auto stmts = ysh.yparser.parse();
-                        ygen::ByteCodeGenerator bcg;
+                        ygen::byteCodeGenerator bcg;
                         bcg.visit(stmts);
                         ysh.front.resetVM(bcg.getCodes(), bcg.getConstPool());
                         ysh.front.setupVM().runVM("program").clearVM().setupVM();

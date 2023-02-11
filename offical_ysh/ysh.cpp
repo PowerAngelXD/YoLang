@@ -55,14 +55,14 @@ void ysh_offical::YolangShellInsSet::repl(yvm::ins_method_para para, YolangShell
     try {
         yso->yparser = parser::Parser(tg);
         auto stmts = yso->yparser.parse(); // parse语句，如果报错八成就是表达式
-        ygen::ByteCodeGenerator bcg;
+        ygen::byteCodeGenerator bcg;
         bcg.visit(stmts);
         yso->front.resetVM(bcg.getCodes(), bcg.getConstPool()).runVM("normal");
     }
     catch(yoexception::YoError ye){
         yso->yparser = parser::Parser(tg);
         auto expr = yso->yparser.parseExpr();
-        ygen::ByteCodeGenerator bcg;
+        ygen::byteCodeGenerator bcg;
         bcg.visitExpr(expr);
         yso->front.resetVM(bcg.getCodes(), bcg.getConstPool()).runVM("repl");
         auto r = yso->front.getVM().getResult();
@@ -103,7 +103,7 @@ void ysh_offical::YolangShellInsSet::run(yvm::ins_method_para para, YolangShellO
         auto tg = yso->makeTokenGroup(str);
         yso->yparser = parser::Parser(tg);
         auto stmts = yso->yparser.parse();
-        ygen::ByteCodeGenerator bcg;
+        ygen::byteCodeGenerator bcg;
         bcg.visit(stmts);
         yso->front.resetVM(bcg.getCodes(), bcg.getConstPool());
         yso->front.setupVM().runVM("program").clearVM().setupVM();
